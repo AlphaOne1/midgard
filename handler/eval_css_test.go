@@ -11,6 +11,7 @@ import (
 func TestEvalCSSHandler(t *testing.T) {
 	tests := []struct {
 		cssMethods  []string
+		cssOrigins  []string
 		method      string
 		header      map[string]string
 		wantCode    int
@@ -19,6 +20,7 @@ func TestEvalCSSHandler(t *testing.T) {
 	}{
 		{
 			cssMethods:  []string{http.MethodGet},
+			cssOrigins:  []string{"*"},
 			method:      http.MethodGet,
 			header:      nil,
 			wantCode:    http.StatusOK,
@@ -27,6 +29,7 @@ func TestEvalCSSHandler(t *testing.T) {
 		},
 		{
 			cssMethods:  []string{http.MethodGet},
+			cssOrigins:  []string{"*"},
 			method:      http.MethodOptions,
 			header:      nil,
 			wantCode:    http.StatusOK,
@@ -35,6 +38,7 @@ func TestEvalCSSHandler(t *testing.T) {
 		},
 		{
 			cssMethods:  []string{http.MethodGet},
+			cssOrigins:  []string{"*"},
 			method:      http.MethodGet,
 			header:      map[string]string{"Origin": "localhost"},
 			wantCode:    http.StatusOK,
@@ -52,7 +56,7 @@ func TestEvalCSSHandler(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 
-		mw := NewEvalCSSHandler(v.cssMethods)(http.HandlerFunc(dummyHandler))
+		mw := NewEvalCSSHandler(v.cssMethods, v.cssOrigins)(http.HandlerFunc(dummyHandler))
 
 		mw.ServeHTTP(rec, req)
 

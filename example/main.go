@@ -23,6 +23,8 @@ func main() {
 	finalHandler := midgard.StackMiddlewareHandler(
 		[]midgard.Middleware{
 			handler.Correlation,
+			handler.AccessLogging,
+			handler.NewEvalCSSHandler([]string{"GET"}, []string{"*"}),
 			handler.NewMethodsFilter([]string{"GET"}),
 		},
 		http.HandlerFunc(HelloHandler),
