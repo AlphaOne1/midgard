@@ -1,4 +1,4 @@
-package handler
+package correlation
 
 import (
 	"net/http"

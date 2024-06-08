@@ -41,20 +41,20 @@ It generates a new middleware:
 ```go
 newMiddleware := midgard.StackMiddleware(
     []midgard.Middleware{
-        handler.Correlation,
-        handler.AccessLogging,
-        handler.NewEvalCSSHandler([]string{"GET"}, []string{"*"}),
-        handler.NewMethodsFilter([]string{"GET"}),
+        correlation.New(),
+        accessLogging.New(),
+        cors.New([]string{"GET"}, []string{"*"}),
+        method_filter.New([]string{"GET"}),
     })
 ```
 
 The native solution for this would be to nest the calls to the middleware like this:
 
 ```go
-finalHandler := handler.Correlation(
-                    handler.AccessLogging(
-                        handler.NewEvalCSSHandler([]string{"GET"}, []string{"*"})(
-                            handler.NewMethodsFilter([]string{"GET"})(
+finalHandler := correlation.New()(
+                    accessLogging.New()(
+                        cors.New([]string{"GET"}, []string{"*"})(
+                            methods_filter.New([]string{"GET"})(
                                 http.HandlerFunc(HelloHandler)))))
 ```
 

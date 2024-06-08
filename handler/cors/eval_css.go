@@ -1,6 +1,6 @@
 // vim: set ts=8 sw=8 smartindent:
 
-package handler
+package cors
 
 import (
 	"net/http"
@@ -67,7 +67,7 @@ func (e EvalCSSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 // GenerateEvalCSSHandler sets up the cross site scripting circumvention disable headers.
-func NewEvalCSSHandler(methods []string, origins []string) midgard.Middleware {
+func New(methods []string, origins []string) midgard.Middleware {
 	if len(origins) == 0 || slices.Contains(origins, "*") {
 		origins = []string{"*"}
 	}

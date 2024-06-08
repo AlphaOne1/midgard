@@ -1,6 +1,7 @@
-package handler
+package cors
 
 import (
+	"github.com/AlphaOne1/midgard/handler"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -70,7 +71,7 @@ func TestEvalCSSHandler(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 
-		mw := NewEvalCSSHandler(v.cssMethods, v.cssOrigins)(http.HandlerFunc(dummyHandler))
+		mw := NewEvalCSSHandler(v.cssMethods, v.cssOrigins)(http.HandlerFunc(handler.dummyHandler))
 
 		mw.ServeHTTP(rec, req)
 

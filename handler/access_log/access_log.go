@@ -1,11 +1,16 @@
-package handler
+package access_log
 
 import (
+	"github.com/AlphaOne1/midgard"
 	"log/slog"
 	"net/http"
 )
 
-func AccessLogging(next http.Handler) http.Handler {
+func New() midgard.Middleware {
+	return accessLogging
+}
+
+func accessLogging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		correlationID := r.Header.Get("X-Correlation-ID")
 

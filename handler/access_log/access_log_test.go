@@ -1,4 +1,4 @@
-package handler
+package access_log
 
 import (
 	"bytes"

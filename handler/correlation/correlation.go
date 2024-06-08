@@ -1,11 +1,16 @@
-package handler
+package correlation
 
 import (
+	"github.com/AlphaOne1/midgard"
 	"log/slog"
 	"net/http"
 
 	"github.com/google/uuid"
 )
+
+func New() midgard.Middleware {
+	return correlation
+}
 
 func getOrCreateID(id string) string {
 	if len(id) > 0 {
@@ -21,7 +26,7 @@ func getOrCreateID(id string) string {
 	return newID
 }
 
-func Correlation(next http.Handler) http.Handler {
+func correlation(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		correlationID := r.Header.Get("X-Correlation-ID")
 

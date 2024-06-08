@@ -1,6 +1,6 @@
 // vim: set ts=8 sw=8 smartindent:
 
-package handler
+package method_filter
 
 import (
 	"net/http"
@@ -28,7 +28,7 @@ func (m MethodsFilter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // NewMethodsFilter sets up the method filter middlware. Its methods parameter contains
 // the whitelist of allowed methods.
-func NewMethodsFilter(methods []string) midgard.Middleware {
+func New(methods []string) midgard.Middleware {
 	return func(next http.Handler) http.Handler {
 		return MethodsFilter{
 			Methods: func() map[string]bool {
