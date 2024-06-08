@@ -18,7 +18,7 @@ func TestEvalCSSHandler(t *testing.T) {
 		wantHeader  map[string]string
 		wantContent string
 	}{
-		{
+		{ // 0
 			cssMethods:  []string{http.MethodGet},
 			cssOrigins:  []string{"*"},
 			method:      http.MethodGet,
@@ -26,17 +26,15 @@ func TestEvalCSSHandler(t *testing.T) {
 			wantCode:    http.StatusOK,
 			wantHeader:  nil,
 			wantContent: "dummy",
-		},
-		{
+		}, { // 1
 			cssMethods:  []string{http.MethodGet},
 			cssOrigins:  []string{"*"},
 			method:      http.MethodOptions,
 			header:      nil,
 			wantCode:    http.StatusOK,
-			wantHeader:  nil,
+			wantHeader:  map[string]string{"Access-Control-Allow-Origin": "*"},
 			wantContent: "",
-		},
-		{
+		}, { // 2
 			cssMethods:  []string{http.MethodGet},
 			cssOrigins:  []string{"*"},
 			method:      http.MethodGet,
@@ -44,11 +42,27 @@ func TestEvalCSSHandler(t *testing.T) {
 			wantCode:    http.StatusOK,
 			wantHeader:  map[string]string{"Access-Control-Allow-Origin": "*"},
 			wantContent: "dummy",
+		}, { // 3
+			cssMethods:  []string{http.MethodGet},
+			cssOrigins:  []string{"dummy.com", "dummy1.com"},
+			method:      http.MethodGet,
+			header:      map[string]string{"Origin": "dummy.com"},
+			wantCode:    http.StatusOK,
+			wantHeader:  map[string]string{"Access-Control-Allow-Origin": "dummy.com"},
+			wantContent: "dummy",
+		}, { // 4
+			cssMethods:  []string{http.MethodGet},
+			cssOrigins:  []string{"dummy0.com", "dummy1.com"},
+			method:      http.MethodGet,
+			header:      map[string]string{"Origin": "dummy.com"},
+			wantCode:    http.StatusForbidden,
+			wantHeader:  nil,
+			wantContent: "",
 		},
 	}
 
 	for k, v := range tests {
-		req, _ := http.NewRequest(v.method, "", strings.NewReader(""))
+		req, _ := http.NewRequest(v.method, "http://dummy.com:8080", strings.NewReader(""))
 
 		for hk, hv := range v.header {
 			req.Header.Set(hk, hv)
@@ -61,7 +75,7 @@ func TestEvalCSSHandler(t *testing.T) {
 		mw.ServeHTTP(rec, req)
 
 		if rec.Code != v.wantCode {
-			t.Errorf("%v: method filter did not work as expected, wanted %v but got %v", k, v.wantCode, rec.Code)
+			t.Errorf("%v: css filter did not work as expected, wanted %v but got %v", k, v.wantCode, rec.Code)
 		}
 
 		if rec.Body.String() != v.wantContent {
@@ -70,7 +84,7 @@ func TestEvalCSSHandler(t *testing.T) {
 
 		for wk, wv := range v.wantHeader {
 			if val, found := rec.Result().Header[wk]; !found || !slices.Contains(val, wv) {
-				t.Errorf("%v", k)
+				t.Errorf("%v: wanted [%v:%v] but did not find it", k, wk, wv)
 			}
 		}
 	}

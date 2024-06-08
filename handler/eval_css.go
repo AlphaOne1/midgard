@@ -22,25 +22,29 @@ type EvalCSSHandler struct {
 
 // ServeHTTP sets up the client with the appropriate headers.
 func (e EvalCSSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	_, originFound := r.Header["Origin"]
+	origin, originFound := r.Header["Origin"]
 
-	if r.Method == "OPTIONS" || originFound {
-		relevantOrigin := e.Origins[0]
+	originFound = originFound && len(origin) > 0 && len(origin[0]) > 0
+	relevantOrigin := e.Origins[0]
 
-		if relevantOrigin != "*" && len(e.Origins) > 1 {
-			requestHost := r.URL.Host
+	if relevantOrigin != "*" && len(e.Origins) > 1 {
+		requestHost := r.URL.Host
 
-			if portIdx := strings.LastIndex(requestHost, ":"); portIdx != -1 {
-				requestHost = requestHost[:portIdx]
-			}
-
-			if slices.Contains(e.Origins, requestHost) {
-				relevantOrigin = requestHost
-			}
+		if portIdx := strings.LastIndex(requestHost, ":"); portIdx != -1 {
+			requestHost = requestHost[:portIdx]
 		}
 
-		w.Header().Set("Access-Control-Allow-Origin", relevantOrigin)
+		if slices.Contains(e.Origins, requestHost) {
+			relevantOrigin = requestHost
+		}
 	}
+
+	if relevantOrigin != "*" && relevantOrigin != origin[0] {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	w.Header().Set("Access-Control-Allow-Origin", relevantOrigin)
 
 	if r.Method == "OPTIONS" {
 		w.Header().Set("Access-Control-Allow-Methods", e.Methods)
@@ -55,6 +59,7 @@ func (e EvalCSSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			},
 			", "))
 
+		w.WriteHeader(http.StatusOK)
 		return
 	}
 
