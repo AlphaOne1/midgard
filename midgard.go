@@ -8,19 +8,19 @@ import (
 
 // Middleware represents the common type of http middleware.
 // The idea is to have a common interface for all types of middlewares, that is, they get an
-// input handler and return an output handler, that is extended by the middlewares functinality.
+// input handler and return an output handler, that is extended by the middlewares functionality.
 // Customization is done in generator functions, that take parameters to modify the behaviour of
 // the final http.Handler, e.g. methods to allow.
 type Middleware func(http.Handler) http.Handler
 
 // ToStandard converts a Middleware to the standard interface.
-// As the Middlware type just exists to improve readability, this conversion is without losses.
+// As the Middleware type just exists to improve readability, this conversion is without losses.
 func ToStandard(mw Middleware) func(http.Handler) http.Handler {
 	return (func(http.Handler) http.Handler)(mw)
 }
 
 // FromStandard converts a standard middleware to the Middleware type.
-// As the Middlware type just exists to improve readability, this conversion is without losses.
+// As the Middleware type just exists to improve readability, this conversion is without losses.
 func FromStandard(s func(http.Handler) http.Handler) Middleware {
 	return Middleware(s)
 }
@@ -41,7 +41,7 @@ func StackMiddleware(mw []Middleware) Middleware {
 	}
 }
 
-// StackMiddlewareHandler calls StackMiddlware on mw and applies it to the handler final.
+// StackMiddlewareHandler calls StackMiddleware on mw and applies it to the handler final.
 func StackMiddlewareHandler(mw []Middleware, final http.Handler) http.Handler {
 	if len(mw) == 0 {
 		return final

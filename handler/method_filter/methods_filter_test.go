@@ -1,11 +1,12 @@
 package method_filter
 
 import (
-	"github.com/AlphaOne1/midgard/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/AlphaOne1/midgard/util"
 )
 
 func TestMethodFilter(t *testing.T) {
@@ -35,7 +36,7 @@ func TestMethodFilter(t *testing.T) {
 		req, _ := http.NewRequest(v.method, "", strings.NewReader(""))
 		rec := httptest.NewRecorder()
 
-		mw := NewMethodsFilter(v.filter)(http.HandlerFunc(handler.dummyHandler))
+		mw := util.Must(New(WithMethods(v.filter)))(http.HandlerFunc(util.DummyHandler))
 
 		mw.ServeHTTP(rec, req)
 

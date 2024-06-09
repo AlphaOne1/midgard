@@ -11,6 +11,7 @@ import (
 	"github.com/AlphaOne1/midgard/handler/correlation"
 	"github.com/AlphaOne1/midgard/handler/cors"
 	"github.com/AlphaOne1/midgard/handler/method_filter"
+	"github.com/AlphaOne1/midgard/util"
 )
 
 //go:embed hello.html
@@ -28,7 +29,7 @@ func main() {
 			correlation.New(),
 			access_log.New(),
 			cors.New([]string{"GET"}, []string{"*"}),
-			method_filter.New([]string{"GET"}),
+			util.Must(method_filter.New(method_filter.WithMethods([]string{"GET"}))),
 		},
 		http.HandlerFunc(HelloHandler),
 	)

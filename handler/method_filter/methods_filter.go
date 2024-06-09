@@ -3,6 +3,7 @@
 package method_filter
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/AlphaOne1/midgard"
@@ -21,20 +22,45 @@ func (m MethodsFilter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if m.Methods[r.Method] {
 		m.Next.ServeHTTP(w, r)
 	} else {
+		w.Header().Set("Content-Type", "text/plain")
 		w.WriteHeader(http.StatusMethodNotAllowed)
-		w.Write([]byte("method not allowed"))
+
+		if _, err := w.Write([]byte("method not allowed")); err != nil {
+			slog.Error("could not write response",
+				slog.String("error", err.Error()))
+		}
 	}
 }
 
-// NewMethodsFilter sets up the method filter middlware. Its methods parameter contains
-// the whitelist of allowed methods.
-func New(methods []string) midgard.Middleware {
+type Config struct {
+	methods []string
+}
+
+// WithMethods sets the methods_filter configuration to allow the given methods to pass. If used multiple times,
+// the allowed methods of the different calls are all enabled.
+func WithMethods(methods []string) func(c *Config) error {
+	return func(c *Config) error {
+		c.methods = append(c.methods, methods...)
+		return nil
+	}
+}
+
+// New sets up the method filter middleware. Its parameters are functions manipulating an internal Config variable.
+func New(configs ...func(c *Config) error) (midgard.Middleware, error) {
+	cfg := Config{}
+
+	for _, c := range configs {
+		if err := c(&cfg); err != nil {
+			return nil, err
+		}
+	}
+
 	return func(next http.Handler) http.Handler {
 		return MethodsFilter{
 			Methods: func() map[string]bool {
-				result := make(map[string]bool, len(methods))
+				result := make(map[string]bool, len(cfg.methods))
 
-				for _, v := range methods {
+				for _, v := range cfg.methods {
 					result[v] = true
 				}
 
@@ -42,5 +68,5 @@ func New(methods []string) midgard.Middleware {
 			}(),
 			Next: next,
 		}
-	}
+	}, nil
 }
