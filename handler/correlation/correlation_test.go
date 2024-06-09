@@ -43,7 +43,7 @@ func TestCorrelationNewID(t *testing.T) {
 		}
 	}
 
-	handler := Correlation(http.HandlerFunc(insideHandler))
+	handler := correlation(http.HandlerFunc(insideHandler))
 
 	req := httptest.NewRequest("GET", "/", nil)
 	rec := httptest.NewRecorder()
@@ -68,7 +68,7 @@ func TestCorrelationSuppliedID(t *testing.T) {
 		}
 	}
 
-	handler := Correlation(http.HandlerFunc(insideHandler))
+	handler := correlation(http.HandlerFunc(insideHandler))
 
 	req := httptest.NewRequest("GET", "/", nil)
 	req.Header.Add("X-Correlation-ID", "setOutside")

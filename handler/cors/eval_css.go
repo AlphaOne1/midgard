@@ -46,7 +46,7 @@ func (e EvalCSSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", relevantOrigin)
 
-	if r.Method == "OPTIONS" {
+	if r.Method == http.MethodOptions {
 		w.Header().Set("Access-Control-Allow-Methods", e.Methods)
 		w.Header().Set("Access-Control-Allow-Headers", strings.Join(
 			[]string{
