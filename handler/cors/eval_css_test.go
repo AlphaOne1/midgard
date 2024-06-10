@@ -59,7 +59,7 @@ func TestEvalCSSHandler(t *testing.T) {
 			header:      map[string]string{"Origin": "dummy.com"},
 			wantCode:    http.StatusForbidden,
 			wantHeader:  nil,
-			wantContent: "",
+			wantContent: "origin [dummy.com] not allowed",
 		},
 	}
 
@@ -72,7 +72,10 @@ func TestEvalCSSHandler(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 
-		mw := New(v.cssMethods, v.cssOrigins)(http.HandlerFunc(util.DummyHandler))
+		mw := util.Must(New(
+			WithMethods(v.cssMethods),
+			WithHeaders(DefaultAllowHeaders),
+			WithOrigins(v.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
 
 		mw.ServeHTTP(rec, req)
 

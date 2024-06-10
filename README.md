@@ -24,27 +24,33 @@ on top of each other and finally calls the given handler. It generates a new han
 that has all the given middlewares prepended:
 
 ```go
-finalHandler := midgard.StackMiddlewareHandler(
-    []midgard.Middleware{
-        handler.Correlation,
-        handler.AccessLogging,
-        handler.NewEvalCSSHandler([]string{"GET"}, []string{"*"}),
-        handler.NewMethodsFilter([]string{"GET"}),
-    },
-    http.HandlerFunc(HelloHandler),
-)
+	finalHandler := midgard.StackMiddlewareHandler(
+        []midgard.Middleware{
+            correlation.New(),
+            access_log.New(),
+            util.Must(cors.New(
+                cors.WithMethods([]string{http.MethodGet}),
+				cors.WithOrigins([]string{"*"}))),
+            util.Must(method_filter.New(
+                method_filter.WithMethods([]string{http.MethodGet}))),
+        },
+        http.HandlerFunc(HelloHandler),
+    )
 ```
 
 `StackMiddleware` does basically the same, but without having given a handler.
 It generates a new middleware:
 
 ```go
-newMiddleware := midgard.StackMiddleware(
+newMiddleware:= midgard.StackMiddleware(
     []midgard.Middleware{
         correlation.New(),
-        accessLogging.New(),
-        cors.New([]string{"GET"}, []string{"*"}),
-        method_filter.New([]string{"GET"}),
+        access_log.New(),
+        util.Must(cors.New(
+            cors.WithMethods([]string{http.MethodGet}),
+            cors.WithOrigins([]string{"*"}))),
+        util.Must(method_filter.New(
+            method_filter.WithMethods([]string{http.MethodGet}))),
     })
 ```
 
@@ -53,9 +59,11 @@ The native solution for this would be to nest the calls to the middleware like t
 ```go
 finalHandler := correlation.New()(
                     accessLogging.New()(
-                        cors.New([]string{"GET"}, []string{"*"})(
-                            methods_filter.New([]string{"GET"})(
-                                http.HandlerFunc(HelloHandler)))))
+                        util.Must(cors.New(
+                            cors.WithMethods([]string{http.MethodGet}),
+                            cors.WithOrigins([]string{"*"})))(
+                            util.Must(method_filter.New(
+                                method_filter.WithMethods([]string{http.MethodGet}))))))
 ```
 
 As you see, depending on the number of middlewares, that can be quite confusing.

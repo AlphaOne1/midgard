@@ -28,8 +28,11 @@ func main() {
 		[]midgard.Middleware{
 			correlation.New(),
 			access_log.New(),
-			cors.New([]string{http.MethodGet}, []string{"*"}),
-			util.Must(method_filter.New(method_filter.WithMethods([]string{http.MethodGet}))),
+			util.Must(cors.New(
+				cors.WithMethods([]string{http.MethodGet}),
+				cors.WithOrigins([]string{"*"}))),
+			util.Must(method_filter.New(
+				method_filter.WithMethods([]string{http.MethodGet}))),
 		},
 		http.HandlerFunc(HelloHandler),
 	)

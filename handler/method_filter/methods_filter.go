@@ -49,11 +49,11 @@ func WithMethods(methods []string) func(m *MethodsFilter) error {
 }
 
 // New sets up the method filter middleware. Its parameters are functions manipulating an internal Config variable.
-func New(configs ...func(m *MethodsFilter) error) (midgard.Middleware, error) {
+func New(options ...func(m *MethodsFilter) error) (midgard.Middleware, error) {
 	m := MethodsFilter{}
 
-	for _, c := range configs {
-		if err := c(&m); err != nil {
+	for _, opt := range options {
+		if err := opt(&m); err != nil {
 			return nil, err
 		}
 	}
