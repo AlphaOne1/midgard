@@ -21,11 +21,11 @@ Example
 -------
 
 ```go
-	finalHandler := midgard.StackMiddlewareHandler(
-		[]midgard.Middleware{
-			util.Must(method_filter.New(
-                method_filter.WithMethods([]string{http.MethodGet}))),
-		},
-		http.HandlerFunc(HelloHandler),
-	)
+finalHandler := midgard.StackMiddlewareHandler(
+    []midgard.Middleware{
+        util.Must(method_filter.New(
+            method_filter.WithMethods([]string{http.MethodGet}))),
+    },
+    http.HandlerFunc(HelloHandler),
+)
 ```

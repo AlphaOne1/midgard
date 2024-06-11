@@ -11,9 +11,9 @@ Example
 
 ```go
 finalHandler := midgard.StackMiddlewareHandler(
-	[]midgard.Middleware{
-		correlation.New(),
-	},
-	http.HandlerFunc(HelloHandler),
+    []midgard.Middleware{
+        correlation.New(),
+    },
+    http.HandlerFunc(HelloHandler),
 )
 ```

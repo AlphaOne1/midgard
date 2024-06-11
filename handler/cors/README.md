@@ -18,14 +18,15 @@ Example
 -------
 
 ```go
-	finalHandler := midgard.StackMiddlewareHandler(
-		[]midgard.Middleware{
-			util.Must(cors.New(
-                cors.WithHeaders(cors.MinimumAllowHeaders()),
-				cors.WithMethods([]string{http.MethodGet}),
-				cors.WithOrigins([]string{"*"}))),
-		},
-		http.HandlerFunc(HelloHandler),
+finalHandler := midgard.StackMiddlewareHandler(
+    []midgard.Middleware{
+        util.Must(cors.New(
+            cors.WithHeaders(cors.MinimumAllowHeaders()),
+            cors.WithMethods([]string{http.MethodGet}),
+            cors.WithOrigins([]string{"*"}))),
+    },
+    http.HandlerFunc(HelloHandler),
+)
 ```
 
 If no headers are specified, all headers are allowed. A minimal set of headers
