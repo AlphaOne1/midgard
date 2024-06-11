@@ -6,10 +6,13 @@ import (
 	"net/http"
 )
 
+// New generates a new access logging middleware.
 func New() midgard.Middleware {
 	return accessLogging
 }
 
+// accessLogging is the access logging middleware. It logs every request with its
+// correlationID, the clients address, http method and accessed path.
 func accessLogging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		correlationID := r.Header.Get("X-Correlation-ID")

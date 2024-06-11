@@ -17,6 +17,7 @@ import (
 //go:embed hello.html
 var helloPage []byte
 
+// HelloHandler is an intentionally simple http handler.
 func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(helloPage)
 }
@@ -24,11 +25,13 @@ func HelloHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	fmt.Println("Example for midgard usage")
 
+	// generate a handler that is prepended with the given middlewares
 	finalHandler := midgard.StackMiddlewareHandler(
 		[]midgard.Middleware{
 			correlation.New(),
 			access_log.New(),
 			util.Must(cors.New(
+				cors.WithHeaders(cors.MinimumAllowHeaders()),
 				cors.WithMethods([]string{http.MethodGet}),
 				cors.WithOrigins([]string{"*"}))),
 			util.Must(method_filter.New(
@@ -37,13 +40,16 @@ func main() {
 		http.HandlerFunc(HelloHandler),
 	)
 
+	// register the newly generated handler for the / endpoint
 	http.Handle("/", finalHandler)
 
+	// start the server
 	if listenErr := http.ListenAndServe(":8080", nil); listenErr != nil {
 		fmt.Println("got error listening:", listenErr)
 		os.Exit(1)
 	}
 
+	// normally the execution flow cannot reach these lines
 	fmt.Println("finished")
 	os.Exit(0)
 }

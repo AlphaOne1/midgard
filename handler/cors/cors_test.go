@@ -74,7 +74,7 @@ func TestEvalCSSHandler(t *testing.T) {
 
 		mw := util.Must(New(
 			WithMethods(v.cssMethods),
-			WithHeaders(DefaultAllowHeaders),
+			WithHeaders(MinimumAllowHeaders()),
 			WithOrigins(v.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
 
 		mw.ServeHTTP(rec, req)

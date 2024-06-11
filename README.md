@@ -24,18 +24,19 @@ on top of each other and finally calls the given handler. It generates a new han
 that has all the given middlewares prepended:
 
 ```go
-	finalHandler := midgard.StackMiddlewareHandler(
-        []midgard.Middleware{
-            correlation.New(),
-            access_log.New(),
-            util.Must(cors.New(
-                cors.WithMethods([]string{http.MethodGet}),
-				cors.WithOrigins([]string{"*"}))),
-            util.Must(method_filter.New(
-                method_filter.WithMethods([]string{http.MethodGet}))),
+finalHandler := midgard.StackMiddlewareHandler(
+    []midgard.Middleware{
+        correlation.New(),
+        access_log.New(),
+        util.Must(cors.New(
+            cors.WithHeaders(cors.MinimumAllowedHeaders()),
+            cors.WithMethods([]string{http.MethodGet}),
+            cors.WithOrigins([]string{"*"}))),
+        util.Must(method_filter.New(
+            method_filter.WithMethods([]string{http.MethodGet}))),
         },
-        http.HandlerFunc(HelloHandler),
-    )
+    http.HandlerFunc(HelloHandler),
+)
 ```
 
 `StackMiddleware` does basically the same, but without having given a handler.
@@ -47,6 +48,7 @@ newMiddleware:= midgard.StackMiddleware(
         correlation.New(),
         access_log.New(),
         util.Must(cors.New(
+            cors.WithHeaders(cors.MinimumAllowedHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),
         util.Must(method_filter.New(
@@ -60,6 +62,7 @@ The native solution for this would be to nest the calls to the middleware like t
 finalHandler := correlation.New()(
                     accessLogging.New()(
                         util.Must(cors.New(
+                            cors.WithHeaders(cors.MinimumAllowedHeaders()),
                             cors.WithMethods([]string{http.MethodGet}),
                             cors.WithOrigins([]string{"*"})))(
                             util.Must(method_filter.New(

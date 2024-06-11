@@ -8,10 +8,12 @@ import (
 	"github.com/google/uuid"
 )
 
+// New generates a new correlation id enriching middleware.
 func New() midgard.Middleware {
 	return correlation
 }
 
+// getOrCreateID generates a new uuid, if the given id is empty, otherwise the given id is returned.
 func getOrCreateID(id string) string {
 	if len(id) > 0 {
 		return id
@@ -26,6 +28,8 @@ func getOrCreateID(id string) string {
 	return newID
 }
 
+// correlation is correlation id enriching middleware. It adds an X-Correlation-ID header if none was
+// present.
 func correlation(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		correlationID := r.Header.Get("X-Correlation-ID")

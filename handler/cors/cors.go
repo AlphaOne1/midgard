@@ -12,8 +12,8 @@ import (
 	"github.com/AlphaOne1/midgard"
 )
 
-// EvalCSSHandler is a middleware that sets up the cross site scripting circumvention headers.
-type EvalCSSHandler struct {
+// CORSHandler is a middleware that sets up the cross site scripting circumvention headers.
+type CORSHandler struct {
 	// Headers contains the allowed headers
 	Headers map[string]bool
 	// HeadersReturn contains the comma-concatenated allowed headers
@@ -30,7 +30,7 @@ type EvalCSSHandler struct {
 	Next http.Handler
 }
 
-var DefaultAllowHeaders = []string{
+var minimumAllowHeaders = []string{
 	"Accept",
 	"Accept-Encoding",
 	"Authorization",
@@ -40,6 +40,14 @@ var DefaultAllowHeaders = []string{
 	"X-CSRF-Token",
 }
 
+// MinimumAllowHeaders returns a minimal list of headers, that should not do
+// harm. It can be used to limit the allowed headers to a reasonable small set.
+func MinimumAllowHeaders() []string {
+	return append(make([]string, 0, len(minimumAllowHeaders)), minimumAllowHeaders...)
+}
+
+// relevantOrigin gets the origin that the client matches with the allowed origins.
+// If there is no match or there are no origins set, an error is returned.
 func relevantOrigin(origin []string, allowed []string) (string, error) {
 	if len(allowed) == 1 && allowed[0] == "*" {
 		return "*", nil
@@ -63,7 +71,7 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 }
 
 // ServeHTTP sets up the client with the appropriate headers.
-func (e EvalCSSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (e CORSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	origin, _ := r.Header["Origin"]
 
 	relevantOrigin, roErr := relevantOrigin(origin, e.Origins)
@@ -86,7 +94,7 @@ func (e EvalCSSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !e.Methods[r.Method] {
+	if len(e.Methods) > 0 && !e.Methods[r.Method] {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		if _, err := fmt.Fprintf(w, "method %s not allowed", r.Method); err != nil {
 			slog.Error("could not write", slog.String("error", err.Error()))
@@ -94,21 +102,25 @@ func (e EvalCSSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for h := range r.Header {
-		if !e.Headers[h] {
-			w.WriteHeader(http.StatusForbidden)
-			if _, err := fmt.Fprintf(w, "header %s not allowed", h); err != nil {
-				slog.Error("could not write", slog.String("error", err.Error()))
+	if len(e.Headers) > 0 {
+		for h := range r.Header {
+			if !e.Headers[h] {
+				w.WriteHeader(http.StatusForbidden)
+				if _, err := fmt.Fprintf(w, "header %s not allowed", h); err != nil {
+					slog.Error("could not write", slog.String("error", err.Error()))
+				}
+				return
 			}
-			return
 		}
 	}
 
 	e.Next.ServeHTTP(w, r)
 }
 
-func WithHeaders(headers []string) func(handler *EvalCSSHandler) error {
-	return func(handler *EvalCSSHandler) error {
+// WithHeaders sets the allowed headers. If later a request contains headers that are not
+// contained in this list, it will be denied the service.
+func WithHeaders(headers []string) func(handler *CORSHandler) error {
+	return func(handler *CORSHandler) error {
 		headersMap := make(map[string]bool, len(headers))
 
 		for _, h := range headers {
@@ -122,8 +134,10 @@ func WithHeaders(headers []string) func(handler *EvalCSSHandler) error {
 	}
 }
 
-func WithMethods(methods []string) func(handler *EvalCSSHandler) error {
-	return func(handler *EvalCSSHandler) error {
+// WithMethods sets the allowed methods. If later a request uses a method that are not
+// contained in this list, it will be denied the service.
+func WithMethods(methods []string) func(handler *CORSHandler) error {
+	return func(handler *CORSHandler) error {
 		methodsMap := make(map[string]bool, len(methods))
 
 		for _, m := range methods {
@@ -136,8 +150,12 @@ func WithMethods(methods []string) func(handler *EvalCSSHandler) error {
 		return nil
 	}
 }
-func WithOrigins(origins []string) func(handler *EvalCSSHandler) error {
-	return func(handler *EvalCSSHandler) error {
+
+// WithHeaders sets the allowed origins. If later a comes from and origin that are not
+// contained in this list, it will be denied the service. A special origin is "*", that
+// is the wildcard for "all" origins.
+func WithOrigins(origins []string) func(handler *CORSHandler) error {
+	return func(handler *CORSHandler) error {
 		handler.Origins = origins
 
 		return nil
@@ -145,8 +163,11 @@ func WithOrigins(origins []string) func(handler *EvalCSSHandler) error {
 }
 
 // New sets up the cross site scripting circumvention disable headers.
-func New(options ...func(handler *EvalCSSHandler) error) (midgard.Middleware, error) {
-	handler := EvalCSSHandler{}
+// If no methods are specified, all methods are allowed.
+// If no headers are specified, all headers are allowed.
+// If origin contains "*" or is empty, the allowed origins are set to *.
+func New(options ...func(handler *CORSHandler) error) (midgard.Middleware, error) {
+	handler := CORSHandler{}
 
 	for _, opt := range options {
 		if err := opt(&handler); err != nil {
@@ -154,14 +175,10 @@ func New(options ...func(handler *EvalCSSHandler) error) (midgard.Middleware, er
 		}
 	}
 
+	// if no origins are specified or one of the specified allowed origins is *
+	// just set the origins to *
 	if len(handler.Origins) == 0 || slices.Contains(handler.Origins, "*") {
 		if err := WithOrigins([]string{"*"})(&handler); err != nil {
-			return nil, err
-		}
-	}
-
-	if len(handler.Headers) == 0 {
-		if err := WithHeaders(DefaultAllowHeaders)(&handler); err != nil {
 			return nil, err
 		}
 	}
