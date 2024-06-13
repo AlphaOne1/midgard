@@ -1,9 +1,10 @@
 package correlation
 
 import (
-	"github.com/AlphaOne1/midgard"
 	"log/slog"
 	"net/http"
+
+	"github.com/AlphaOne1/midgard"
 
 	"github.com/google/uuid"
 )

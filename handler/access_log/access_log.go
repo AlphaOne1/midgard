@@ -1,9 +1,10 @@
 package access_log
 
 import (
-	"github.com/AlphaOne1/midgard"
 	"log/slog"
 	"net/http"
+
+	"github.com/AlphaOne1/midgard"
 )
 
 // New generates a new access logging middleware.
