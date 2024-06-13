@@ -7,11 +7,9 @@ import (
 	"net/http/httptest"
 	"regexp"
 	"testing"
-)
 
-func DummyHandler(w http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-}
+	"github.com/AlphaOne1/midgard/util"
+)
 
 func TestAccessLogging(t *testing.T) {
 	oldLog := slog.Default()
@@ -20,7 +18,7 @@ func TestAccessLogging(t *testing.T) {
 	logBuf := bytes.Buffer{}
 	slog.SetDefault(slog.New(slog.NewTextHandler(&logBuf, &slog.HandlerOptions{})))
 
-	handler := accessLogging(http.HandlerFunc(DummyHandler))
+	handler := accessLogging(http.HandlerFunc(util.DummyHandler))
 
 	req := httptest.NewRequest("GET", "/", nil)
 	req.Header.Add("X-Correlation-ID", "setOutside")

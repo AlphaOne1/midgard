@@ -25,5 +25,10 @@ func Must[T any](val T, err error) T {
 // DummyHandler is a handler used for internal testing.
 // It simply writes the text "dummy" to the given http.ResponseWriter.
 func DummyHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("dummy"))
+	if _, err := w.Write([]byte("dummy")); err != nil {
+		slog.Error("could not write dummy", slog.String("error", err.Error()))
+	}
+	if err := r.Body.Close(); err != nil {
+		slog.Error("could not close request body", slog.String("error", err.Error()))
+	}
 }

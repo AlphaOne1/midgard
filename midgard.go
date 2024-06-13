@@ -13,18 +13,6 @@ import (
 // the final http.Handler, e.g. methods to allow.
 type Middleware func(http.Handler) http.Handler
 
-// ToStandard converts a Middleware to the standard interface.
-// As the Middleware type just exists to improve readability, this conversion is without losses.
-func ToStandard(mw Middleware) func(http.Handler) http.Handler {
-	return (func(http.Handler) http.Handler)(mw)
-}
-
-// FromStandard converts a standard middleware to the Middleware type.
-// As the Middleware type just exists to improve readability, this conversion is without losses.
-func FromStandard(s func(http.Handler) http.Handler) Middleware {
-	return Middleware(s)
-}
-
 // StackMiddleware stacks the given middleware slice to generate a single combined middleware.
 // The middleware at index 0 is the outermost, going step by step to the innermost,
 // e. g. mw[0](mw[1](mw[2]())).

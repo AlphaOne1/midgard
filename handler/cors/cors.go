@@ -12,8 +12,8 @@ import (
 	"github.com/AlphaOne1/midgard"
 )
 
-// CORSHandler is a middleware that sets up the cross site scripting circumvention headers.
-type CORSHandler struct {
+// Handler is a middleware that sets up the cross site scripting circumvention headers.
+type Handler struct {
 	// Headers contains the allowed headers
 	Headers map[string]bool
 	// HeadersReturn contains the comma-concatenated allowed headers
@@ -71,7 +71,7 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 }
 
 // ServeHTTP sets up the client with the appropriate headers.
-func (e CORSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (e Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	origin, _ := r.Header["Origin"]
 
 	relevantOrigin, roErr := relevantOrigin(origin, e.Origins)
@@ -119,8 +119,8 @@ func (e CORSHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // WithHeaders sets the allowed headers. If later a request contains headers that are not
 // contained in this list, it will be denied the service.
-func WithHeaders(headers []string) func(handler *CORSHandler) error {
-	return func(handler *CORSHandler) error {
+func WithHeaders(headers []string) func(handler *Handler) error {
+	return func(handler *Handler) error {
 		headersMap := make(map[string]bool, len(headers))
 
 		for _, h := range headers {
@@ -136,8 +136,8 @@ func WithHeaders(headers []string) func(handler *CORSHandler) error {
 
 // WithMethods sets the allowed methods. If later a request uses a method that are not
 // contained in this list, it will be denied the service.
-func WithMethods(methods []string) func(handler *CORSHandler) error {
-	return func(handler *CORSHandler) error {
+func WithMethods(methods []string) func(handler *Handler) error {
+	return func(handler *Handler) error {
 		methodsMap := make(map[string]bool, len(methods))
 
 		for _, m := range methods {
@@ -151,11 +151,11 @@ func WithMethods(methods []string) func(handler *CORSHandler) error {
 	}
 }
 
-// WithHeaders sets the allowed origins. If later a comes from and origin that are not
+// WithOrigins sets the allowed origins. If later a comes from and origin that are not
 // contained in this list, it will be denied the service. A special origin is "*", that
 // is the wildcard for "all" origins.
-func WithOrigins(origins []string) func(handler *CORSHandler) error {
-	return func(handler *CORSHandler) error {
+func WithOrigins(origins []string) func(handler *Handler) error {
+	return func(handler *Handler) error {
 		handler.Origins = origins
 
 		return nil
@@ -166,8 +166,8 @@ func WithOrigins(origins []string) func(handler *CORSHandler) error {
 // If no methods are specified, all methods are allowed.
 // If no headers are specified, all headers are allowed.
 // If origin contains "*" or is empty, the allowed origins are set to *.
-func New(options ...func(handler *CORSHandler) error) (midgard.Middleware, error) {
-	handler := CORSHandler{}
+func New(options ...func(handler *Handler) error) (midgard.Middleware, error) {
+	handler := Handler{}
 
 	for _, opt := range options {
 		if err := opt(&handler); err != nil {

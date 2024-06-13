@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -18,8 +19,10 @@ import (
 var helloPage []byte
 
 // HelloHandler is an intentionally simple http handler.
-func HelloHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write(helloPage)
+func HelloHandler(w http.ResponseWriter, _ *http.Request) {
+	if _, err := w.Write(helloPage); err != nil {
+		slog.Error("could not write hello page", slog.String("error", err.Error()))
+	}
 }
 
 func main() {
