@@ -4,11 +4,11 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/AlphaOne1/midgard"
+	"github.com/AlphaOne1/midgard/defs"
 )
 
 // New generates a new access logging middleware.
-func New() midgard.Middleware {
+func New() defs.Middleware {
 	return accessLogging
 }
 

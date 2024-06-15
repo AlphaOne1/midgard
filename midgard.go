@@ -4,19 +4,14 @@ package midgard
 
 import (
 	"net/http"
-)
 
-// Middleware represents the common type of http middleware.
-// The idea is to have a common interface for all types of middlewares, that is, they get an
-// input handler and return an output handler, that is extended by the middlewares functionality.
-// Customization is done in generator functions, that take parameters to modify the behaviour of
-// the final http.Handler, e.g. methods to allow.
-type Middleware func(http.Handler) http.Handler
+	"github.com/AlphaOne1/midgard/defs"
+)
 
 // StackMiddleware stacks the given middleware slice to generate a single combined middleware.
 // The middleware at index 0 is the outermost, going step by step to the innermost,
 // e. g. mw[0](mw[1](mw[2]())).
-func StackMiddleware(mw []Middleware) Middleware {
+func StackMiddleware(mw []defs.Middleware) defs.Middleware {
 	switch l := len(mw); {
 	case l < 1:
 		return nil
@@ -30,7 +25,7 @@ func StackMiddleware(mw []Middleware) Middleware {
 }
 
 // StackMiddlewareHandler calls StackMiddleware on mw and applies it to the handler final.
-func StackMiddlewareHandler(mw []Middleware, final http.Handler) http.Handler {
+func StackMiddlewareHandler(mw []defs.Middleware, final http.Handler) http.Handler {
 	if len(mw) == 0 {
 		return final
 	}

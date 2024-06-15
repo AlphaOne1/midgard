@@ -9,7 +9,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/AlphaOne1/midgard"
+	"github.com/AlphaOne1/midgard/defs"
 )
 
 // Handler is a middleware that sets up the cross site scripting circumvention headers.
@@ -166,7 +166,7 @@ func WithOrigins(origins []string) func(handler *Handler) error {
 // If no methods are specified, all methods are allowed.
 // If no headers are specified, all headers are allowed.
 // If origin contains "*" or is empty, the allowed origins are set to *.
-func New(options ...func(handler *Handler) error) (midgard.Middleware, error) {
+func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 	handler := Handler{}
 
 	for _, opt := range options {

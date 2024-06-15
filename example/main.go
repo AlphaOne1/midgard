@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/AlphaOne1/midgard"
+	"github.com/AlphaOne1/midgard/defs"
 	"github.com/AlphaOne1/midgard/handler/access_log"
 	"github.com/AlphaOne1/midgard/handler/correlation"
 	"github.com/AlphaOne1/midgard/handler/cors"
@@ -30,7 +31,7 @@ func main() {
 
 	// generate a handler that is prepended with the given middlewares
 	finalHandler := midgard.StackMiddlewareHandler(
-		[]midgard.Middleware{
+		[]defs.Middleware{
 			correlation.New(),
 			access_log.New(),
 			util.Must(cors.New(

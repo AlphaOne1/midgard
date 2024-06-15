@@ -4,13 +4,13 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/AlphaOne1/midgard"
-
 	"github.com/google/uuid"
+
+	"github.com/AlphaOne1/midgard/defs"
 )
 
 // New generates a new correlation id enriching middleware.
-func New() midgard.Middleware {
+func New() defs.Middleware {
 	return correlation
 }
 

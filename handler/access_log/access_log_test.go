@@ -18,7 +18,7 @@ func TestAccessLogging(t *testing.T) {
 	logBuf := bytes.Buffer{}
 	slog.SetDefault(slog.New(slog.NewTextHandler(&logBuf, &slog.HandlerOptions{})))
 
-	handler := accessLogging(http.HandlerFunc(util.DummyHandler))
+	handler := New()(http.HandlerFunc(util.DummyHandler))
 
 	req := httptest.NewRequest("GET", "/", nil)
 	req.Header.Add("X-Correlation-ID", "setOutside")

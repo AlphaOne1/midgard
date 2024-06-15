@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/AlphaOne1/midgard"
+	"github.com/AlphaOne1/midgard/defs"
 )
 
 // MethodsFilter only lets configured HTTP methods pass.
@@ -49,7 +49,7 @@ func WithMethods(methods []string) func(m *MethodsFilter) error {
 }
 
 // New sets up the method filter middleware. Its parameters are functions manipulating an internal Config variable.
-func New(options ...func(m *MethodsFilter) error) (midgard.Middleware, error) {
+func New(options ...func(m *MethodsFilter) error) (defs.Middleware, error) {
 	m := MethodsFilter{}
 
 	for _, opt := range options {
