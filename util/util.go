@@ -28,7 +28,9 @@ func DummyHandler(w http.ResponseWriter, r *http.Request) {
 	if _, err := w.Write([]byte("dummy")); err != nil {
 		slog.Error("could not write dummy", slog.String("error", err.Error()))
 	}
-	if err := r.Body.Close(); err != nil {
-		slog.Error("could not close request body", slog.String("error", err.Error()))
+	if r.Body != nil {
+		if err := r.Body.Close(); err != nil {
+			slog.Error("could not close request body", slog.String("error", err.Error()))
+		}
 	}
 }

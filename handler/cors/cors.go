@@ -106,6 +106,7 @@ func (e Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		for h := range r.Header {
 			if !e.Headers[h] {
 				w.WriteHeader(http.StatusForbidden)
+
 				if _, err := fmt.Fprintf(w, "header %s not allowed", h); err != nil {
 					slog.Error("could not write", slog.String("error", err.Error()))
 				}
