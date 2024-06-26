@@ -1,7 +1,9 @@
-package basic_auth
+package map_auth
 
 import (
 	"testing"
+
+	"github.com/AlphaOne1/midgard/util"
 )
 
 func TestMapAuthenticator(t *testing.T) {
@@ -36,9 +38,7 @@ func TestMapAuthenticator(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		auth := MapAuthenticator{
-			Auths: v.Auths,
-		}
+		auth := util.Must(New(WithAuths(v.Auths)))
 
 		gotAuth, gotErr := auth.Authorize(v.User, v.Pass)
 

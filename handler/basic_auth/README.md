@@ -20,11 +20,11 @@ finalHandler := midgard.StackMiddlewareHandler(
         util.Must(basic_auth.New(
             basic_auth.WithRealm("example realm"),
             basic_auth.WithAuthenticator(
-                &basic_auth.MapAuthenticator{
-                    Auths: map[string]string{
+                &map_auth.MapAuthenticator{
+                    map_auth.WithAuths(map[string]string{
                         "user0": "pass0",
                         "user1": "pass1",
-                    },
+                    }),
                 },
             ),
         )),
