@@ -1,56 +1,72 @@
 package htpasswd_auth
 
 import (
-	"bufio"
 	"errors"
+	"io"
 	"os"
-	"strconv"
-	"strings"
+
+	"github.com/tg123/go-htpasswd"
 )
 
 type HTPassWDAuth struct {
-	Auths    map[string]string
-	HTpassWD string
+	input io.Reader
+	auth  *htpasswd.File
 }
 
-func (h *HTPassWDAuth) ReadFile(fileName string) error {
-	file, openErr := os.Open(fileName)
-
-	if openErr != nil {
-		return openErr
+func (a *HTPassWDAuth) Authorize(username, password string) (bool, error) {
+	if a.auth == nil {
+		return false, errors.New("htpasswd: not initialized")
 	}
 
-	scanner := bufio.NewScanner(file)
-	line := 1
+	return a.auth.Match(username, password), nil
+}
 
-	for scanner.Scan() {
-		parts := strings.Split(scanner.Text(), ":")
-
-		if len(parts) != 2 || len(parts[0]) == 0 || len(parts[1]) == 0 {
-			return errors.New("invalid htpasswd file, line " + strconv.Itoa(line))
+func WithAuthInput(in io.Reader) func(a *HTPassWDAuth) error {
+	return func(a *HTPassWDAuth) error {
+		if in == nil {
+			return errors.New("input is nil")
 		}
 
-		line++
-
-		h.Auths[parts[0]] = parts[1]
+		a.input = in
+		return nil
 	}
 }
 
-func (h *HTPassWDAuth) Authorize(username, password string) (bool, error) {
-	entry, entryFound := h.Auths[username]
+func WithAuthFile(fileName string) func(a *HTPassWDAuth) error {
+	return func(a *HTPassWDAuth) error {
+		if len(fileName) == 0 {
+			return errors.New("input file name is necessary")
+		}
 
-	if !entryFound {
-		return false, nil
+		var err error
+		a.input, err = os.Open(fileName)
+
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}
+}
+
+func New(options ...func(*HTPassWDAuth) error) (*HTPassWDAuth, error) {
+	a := HTPassWDAuth{}
+
+	for _, opt := range options {
+		if err := opt(&a); err != nil {
+			return nil, err
+		}
 	}
 
-	if strings.HasPrefix(entry, "$2y$") {
-		/* bcrypt */
-	} else if strings.HasPrefix(entry, "$apr1$") {
-		/* md5 */
-	} else if strings.HasPrefix(entry, "{SHA}") {
-		/* sha1 */
-	} else {
-		/* crypt */
+	if a.input == nil {
+		return nil, errors.New("htpasswd input is required")
 	}
 
+	var err error
+
+	if a.auth, err = htpasswd.NewFromReader(a.input, htpasswd.DefaultSystems, nil); err != nil {
+		return nil, err
+	}
+
+	return &a, nil
 }
