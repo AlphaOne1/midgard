@@ -26,6 +26,8 @@ func WithAuths(auths map[string]string) func(a *MapAuthenticator) error {
 		for k, v := range auths {
 			a.auths[k] = v
 		}
+
+		return nil
 	}
 }
 
