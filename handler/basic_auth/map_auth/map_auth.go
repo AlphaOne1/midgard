@@ -8,6 +8,10 @@ type MapAuthenticator struct {
 
 func (a *MapAuthenticator) Authorize(username, password string) (bool, error) {
 
+	if a == nil {
+		return false, errors.New("map auth not initialized")
+	}
+
 	if len(a.auths) == 0 {
 		return false, errors.New("no auths configured")
 	}
@@ -21,6 +25,10 @@ func WithAuths(auths map[string]string) func(a *MapAuthenticator) error {
 	return func(a *MapAuthenticator) error {
 		if len(auths) == 0 {
 			return errors.New("no authorizations configured")
+		}
+
+		if len(a.auths) == 0 {
+			a.auths = make(map[string]string, len(auths))
 		}
 
 		for k, v := range auths {

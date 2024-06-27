@@ -16,6 +16,8 @@ func Must[T any](val T, err error) T {
 
 		if !testing.Testing() {
 			os.Exit(1)
+		} else {
+			slog.Info("not exiting due to test-mode")
 		}
 	}
 

@@ -9,11 +9,14 @@ import (
 )
 
 type HTPassWDAuth struct {
-	input io.Reader
-	auth  *htpasswd.File
+	auth *htpasswd.File
 }
 
 func (a *HTPassWDAuth) Authorize(username, password string) (bool, error) {
+	if a == nil {
+		return false, errors.New("htpasswd auth not initialized")
+	}
+
 	if a.auth == nil {
 		return false, errors.New("htpasswd: not initialized")
 	}
@@ -27,8 +30,10 @@ func WithAuthInput(in io.Reader) func(a *HTPassWDAuth) error {
 			return errors.New("input is nil")
 		}
 
-		a.input = in
-		return nil
+		var err error
+
+		a.auth, err = htpasswd.NewFromReader(in, htpasswd.DefaultSystems, nil)
+		return err
 	}
 }
 
@@ -38,14 +43,15 @@ func WithAuthFile(fileName string) func(a *HTPassWDAuth) error {
 			return errors.New("input file name is necessary")
 		}
 
-		var err error
-		a.input, err = os.Open(fileName)
+		input, err := os.Open(fileName)
 
 		if err != nil {
 			return err
 		}
 
-		return nil
+		defer func() { _ = input.Close() }()
+
+		return WithAuthInput(input)(a)
 	}
 }
 
@@ -58,14 +64,8 @@ func New(options ...func(*HTPassWDAuth) error) (*HTPassWDAuth, error) {
 		}
 	}
 
-	if a.input == nil {
+	if a.auth == nil {
 		return nil, errors.New("htpasswd input is required")
-	}
-
-	var err error
-
-	if a.auth, err = htpasswd.NewFromReader(a.input, htpasswd.DefaultSystems, nil); err != nil {
-		return nil, err
 	}
 
 	return &a, nil
