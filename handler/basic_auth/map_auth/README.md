@@ -12,10 +12,11 @@ Example
 handler := midgard.StackMiddlewareHandler(
 	[]defs.Middleware{
 		util.Must(New(
-			WithAuthenticator(map_auth.New(map_auth.WithAuths(map[string]string{
-                "user0": "pass0",
-                "user1": "pass1",
-            }))),
+			WithAuthenticator(util.Must(
+                map_auth.New(map_auth.WithAuths(map[string]string{
+                    "user0": "pass0",
+                    "user1": "pass1",
+                })))),
 			WithRealm("testrealm"))),
 	},
 	http.HandlerFunc(util.DummyHandler),

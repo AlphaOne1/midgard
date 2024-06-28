@@ -11,7 +11,8 @@ Example
 handler := midgard.StackMiddlewareHandler(
 	[]defs.Middleware{
 		util.Must(New(
-			WithAuthenticator(htpasswd_auth.New(htpasswd_auth.WithAuthFile('./testwd'))),
+			WithAuthenticator(util.Must(
+                htpasswd_auth.New(htpasswd_auth.WithAuthFile('./testwd')))),
 			WithRealm("testrealm"))),
 	},
 	http.HandlerFunc(util.DummyHandler),

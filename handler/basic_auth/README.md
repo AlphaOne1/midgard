@@ -19,14 +19,14 @@ finalHandler := midgard.StackMiddlewareHandler(
     []midgard.Middleware{
         util.Must(basic_auth.New(
             basic_auth.WithRealm("example realm"),
-            basic_auth.WithAuthenticator(
-                &map_auth.MapAuthenticator{
+            basic_auth.WithAuthenticator(util.Must(
+                map_auth.New(
                     map_auth.WithAuths(map[string]string{
                         "user0": "pass0",
                         "user1": "pass1",
                     }),
-                },
-            ),
+                ),
+            )),
         )),
     },
     http.HandlerFunc(HelloHandler),
