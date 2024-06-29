@@ -8,6 +8,8 @@ require (
 )
 
 require (
-	github.com/GehirnInc/crypt v0.0.0-20200316065508-bb7000b8a962 // indirect
-	golang.org/x/crypto v0.17.0 // indirect
+	github.com/GehirnInc/crypt v0.0.0-20230320061759-8cc1b52080c5 // indirect
+	golang.org/x/crypto v0.24.0 // indirect
 )
+
+replace golang.org/x/crypto => golang.org/x/crypto v0.24.0
