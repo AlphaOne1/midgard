@@ -71,7 +71,16 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 }
 
 // ServeHTTP sets up the client with the appropriate headers.
-func (e Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (e *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if e == nil {
+		slog.Error("cors not initialized")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		if _, err := w.Write([]byte("service not available")); err != nil {
+			slog.Error("failed to write response", slog.String("error", err.Error()))
+		}
+		return
+	}
+
 	origin, _ := r.Header["Origin"]
 
 	relevantOrigin, roErr := relevantOrigin(origin, e.Origins)
@@ -186,6 +195,6 @@ func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 
 	return func(next http.Handler) http.Handler {
 		handler.Next = next
-		return handler
+		return &handler
 	}, nil
 }

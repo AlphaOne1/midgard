@@ -32,6 +32,15 @@ func (h *Handler) sendNoAuth(w http.ResponseWriter) {
 }
 
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h == nil {
+		slog.Error("basic auth not initialized")
+		w.WriteHeader(http.StatusServiceUnavailable)
+		if _, err := w.Write([]byte("service not available")); err != nil {
+			slog.Error("failed to write response", slog.String("error", err.Error()))
+		}
+		return
+	}
+
 	authInfo, headerPrefixOK := strings.CutPrefix(
 		r.Header.Get("Authorization"),
 		"Basic ")
