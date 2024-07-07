@@ -117,7 +117,6 @@ func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 
 	return func(next http.Handler) http.Handler {
 		handler.next = next
-
 		return &handler
 	}, nil
 }
