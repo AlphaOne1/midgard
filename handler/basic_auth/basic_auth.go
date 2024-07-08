@@ -11,17 +11,23 @@ import (
 	"github.com/AlphaOne1/midgard/defs"
 )
 
+// Authenticator is an interface the basic auth handler uses to check if the
+// given credentials match an allowed entry.
 type Authenticator interface {
+	// Authenticate checks, if a given username and password are allowed
+	// credentials
 	Authenticate(username, password string) (bool, error)
 }
 
+// Handler holds the internal data of the basic authentication middleware.
 type Handler struct {
-	auth          Authenticator
-	realm         string
-	authRealmInfo string
-	next          http.Handler
+	auth          Authenticator // auth holds the Authenticator used
+	realm         string        // realm to report to the client
+	authRealmInfo string        // authRealmInfo holds the response header
+	next          http.Handler  // next handler in the middleware stack
 }
 
+// sendNoAuth sends the client that his credentials are not allowed
 func (h *Handler) sendNoAuth(w http.ResponseWriter) {
 	w.Header().Add("WWW-Authenticate", h.authRealmInfo)
 	w.WriteHeader(http.StatusUnauthorized)
@@ -31,6 +37,7 @@ func (h *Handler) sendNoAuth(w http.ResponseWriter) {
 	}
 }
 
+// ServeHTTP implements the basic auth functionality.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h == nil {
 		slog.Error("basic auth not initialized")
@@ -89,6 +96,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.next.ServeHTTP(w, r)
 }
 
+// WithAuthenticator sets the Authenticator to use.
 func WithAuthenticator(auth Authenticator) func(h *Handler) error {
 	return func(h *Handler) error {
 		h.auth = auth
@@ -97,6 +105,7 @@ func WithAuthenticator(auth Authenticator) func(h *Handler) error {
 	}
 }
 
+// WithRealm sets the realm to use
 func WithRealm(realm string) func(h *Handler) error {
 	return func(h *Handler) error {
 		h.realm = realm
@@ -105,6 +114,7 @@ func WithRealm(realm string) func(h *Handler) error {
 	}
 }
 
+// New generates a new basic authentication middleware.
 func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 	handler := Handler{}
 

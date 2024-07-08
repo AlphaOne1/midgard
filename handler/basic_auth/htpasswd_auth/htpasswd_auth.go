@@ -8,10 +8,13 @@ import (
 	"github.com/tg123/go-htpasswd"
 )
 
+// HTPassWDAuth holds the htpasswd relevant data
 type HTPassWDAuth struct {
 	auth *htpasswd.File
 }
 
+// Authorize checks if for a given username the password hash matches the
+// one stored in the used htpasswd file.
 func (a *HTPassWDAuth) Authorize(username, password string) (bool, error) {
 	if a == nil {
 		return false, errors.New("htpasswd auth not initialized")
@@ -24,6 +27,8 @@ func (a *HTPassWDAuth) Authorize(username, password string) (bool, error) {
 	return a.auth.Match(username, password), nil
 }
 
+// WithAuthInput configures the htpasswd file to be read from the
+// given io.Reader.
 func WithAuthInput(in io.Reader) func(a *HTPassWDAuth) error {
 	return func(a *HTPassWDAuth) error {
 		if in == nil {
@@ -37,6 +42,8 @@ func WithAuthInput(in io.Reader) func(a *HTPassWDAuth) error {
 	}
 }
 
+// WithAuthFile configures the htpasswd file to be read from the
+// filesystem with the given name.
 func WithAuthFile(fileName string) func(a *HTPassWDAuth) error {
 	return func(a *HTPassWDAuth) error {
 		if len(fileName) == 0 {
@@ -55,6 +62,7 @@ func WithAuthFile(fileName string) func(a *HTPassWDAuth) error {
 	}
 }
 
+// New creates a new htpasswd authenticator.
 func New(options ...func(*HTPassWDAuth) error) (*HTPassWDAuth, error) {
 	a := HTPassWDAuth{}
 

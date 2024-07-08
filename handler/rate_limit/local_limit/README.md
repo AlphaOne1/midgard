@@ -6,11 +6,11 @@ to limit the global request rate to numerous instances of a service. This can be
 achieved using a somehow synchronized rate limiting algorithm, e.g. via a redis.
 
 _Local Limit_ allows a certain number of requests (called drops here) per second
-to pass. Inside it uses a dripping like algorithm to add possible requests to a
+to pass. Inside, it uses a dripping like algorithm to add possible requests to a
 queue. Drops are added in certain intervals. Drop rates less than one per second
 are possible, as fractional drops are stored for the next iteration.
 
-Every incoming requests takes one (whole) drop out of the queue of drops, until
+Every incoming request takes one (whole) drop out of the queue of drops, until
 it is empty. If there a no drops available, a request waits for an arbitrary
 time for a new drop. If none arrives, the request is rejected.
 

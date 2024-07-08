@@ -8,15 +8,19 @@ import (
 	"github.com/AlphaOne1/midgard/defs"
 )
 
+// Limiter is the interface a limiter has to implement to be used in the rate
+// limiter middleware.
 type Limiter interface {
 	Limit() bool
 }
 
+// Handler holds the internal rate limiter information.
 type Handler struct {
 	Limit Limiter
 	Next  http.Handler
 }
 
+// ServeHTTP limits the requests using the internal Limiter.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h == nil {
 		slog.Error("rate limiter not initialized")
@@ -38,6 +42,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.Next.ServeHTTP(w, r)
 }
 
+// WithLimiter sets the Limiter to use.
 func WithLimiter(l Limiter) func(h *Handler) error {
 	return func(h *Handler) error {
 		if l == nil {
@@ -50,6 +55,7 @@ func WithLimiter(l Limiter) func(h *Handler) error {
 	}
 }
 
+// New creates a new rate limiter middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
 	h := Handler{}
 

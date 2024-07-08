@@ -19,7 +19,7 @@ func TestRateLimit(t *testing.T) {
 			util.Must(New(WithLimiter(
 				util.Must(local_limit.New(
 					local_limit.WithTargetRate(20),
-					local_limit.WithDDropTimeout(15*time.Millisecond),
+					local_limit.WithDropTimeout(15*time.Millisecond),
 					local_limit.WithSleepInterval(100*time.Millisecond)))))),
 		},
 		http.HandlerFunc(util.DummyHandler))
