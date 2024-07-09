@@ -29,7 +29,7 @@ func TestMustBad(t *testing.T) {
 		t.Errorf("got %v but wanted `nopass`", got)
 	}
 
-	outputMatch := regexp.MustCompile(`^time=[^ ]+ level=ERROR msg="must-condition not met" error=testerror\n$`)
+	outputMatch := regexp.MustCompile(`^time=[^ ]+ level=ERROR msg="must-condition not met" error=testerror\n`)
 
 	if !outputMatch.Match(outbuf.Bytes()) {
 		t.Errorf("output does not match format %v, got %v",

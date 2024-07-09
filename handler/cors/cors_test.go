@@ -1,6 +1,7 @@
 package cors
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -92,5 +93,17 @@ func TestEvalCSSHandler(t *testing.T) {
 				t.Errorf("%v: wanted [%v:%v] but did not find it", k, wk, wv)
 			}
 		}
+	}
+}
+
+func TestOptionError(t *testing.T) {
+	errOpt := func(h *Handler) error {
+		return errors.New("testerror")
+	}
+
+	_, err := New(errOpt)
+
+	if err == nil {
+		t.Errorf("expected middleware creation to fail")
 	}
 }

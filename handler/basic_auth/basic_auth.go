@@ -37,6 +37,38 @@ func (h *Handler) sendNoAuth(w http.ResponseWriter) {
 	}
 }
 
+// ExtractUserPass extracts the username and the password out of the given header
+// value for Authorization. It signalizes if the desired information exists or en
+// error, when the auth string is unprocessable.
+func ExtractUserPass(auth string) (user, pass string, found bool, err error) {
+
+	authInfo, headerPrefixOK := strings.CutPrefix(auth, "Basic ")
+
+	if !headerPrefixOK || len(authInfo) < 6 {
+		return "", "", false, nil
+	}
+
+	decode, decodeErr := base64.StdEncoding.DecodeString(authInfo)
+
+	if decodeErr != nil {
+		slog.Debug("could not decode auth info",
+			slog.String("error", decodeErr.Error()),
+			slog.String("authInfo", authInfo))
+
+		return "", "", false, errors.New("could not decode auth info")
+	}
+
+	credentials := bytes.Split(decode, []byte(":"))
+
+	if len(credentials) != 2 ||
+		len(credentials[0]) == 0 ||
+		len(credentials[1]) == 0 {
+		return "", "", false, nil
+	}
+
+	return string(credentials[0]), string(credentials[1]), true, nil
+}
+
 // ServeHTTP implements the basic auth functionality.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h == nil {
@@ -48,37 +80,19 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authInfo, headerPrefixOK := strings.CutPrefix(
-		r.Header.Get("Authorization"),
-		"Basic ")
+	authInfo := r.Header.Get("Authorization")
+	username, password, authFound, authErr := ExtractUserPass(authInfo)
 
-	if !headerPrefixOK || len(authInfo) < 6 {
-		h.sendNoAuth(w)
-		return
-	}
-
-	decode, decodeErr := base64.StdEncoding.DecodeString(authInfo)
-
-	if decodeErr != nil {
-		slog.Debug("could not decode auth info",
-			slog.String("error", decodeErr.Error()),
+	if authErr != nil {
+		slog.Debug("could not process auth info",
+			slog.String("error", authErr.Error()),
 			slog.String("authInfo", authInfo))
+	}
 
+	if !authFound {
 		h.sendNoAuth(w)
 		return
 	}
-
-	credentials := bytes.Split(decode, []byte(":"))
-
-	if len(credentials) != 2 ||
-		len(credentials[0]) == 0 ||
-		len(credentials[1]) == 0 {
-		h.sendNoAuth(w)
-		return
-	}
-
-	username := string(credentials[0])
-	password := string(credentials[1])
 
 	hasAuth, authErr := h.auth.Authenticate(username, password)
 

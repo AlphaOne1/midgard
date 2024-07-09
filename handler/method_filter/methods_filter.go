@@ -9,8 +9,8 @@ import (
 	"github.com/AlphaOne1/midgard/defs"
 )
 
-// MethodsFilter only lets configured HTTP methods pass.
-type MethodsFilter struct {
+// Handler only lets configured HTTP methods pass.
+type Handler struct {
 	// Methods contains methods whitelist for the endpoint.
 	Methods map[string]bool
 	// Next contains the next handler in the handler chain.
@@ -18,7 +18,7 @@ type MethodsFilter struct {
 }
 
 // ServeHTTP denies access (405) if the method is not in the whitelist.
-func (m *MethodsFilter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (m *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if m == nil {
 		slog.Error("method filter not initialized")
 		w.WriteHeader(http.StatusServiceUnavailable)
@@ -43,8 +43,8 @@ func (m *MethodsFilter) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 // WithMethods sets the methods_filter configuration to allow the given methods to pass. If used multiple times,
 // the allowed methods of the different calls are all enabled.
-func WithMethods(methods []string) func(m *MethodsFilter) error {
-	return func(m *MethodsFilter) error {
+func WithMethods(methods []string) func(m *Handler) error {
+	return func(m *Handler) error {
 		if m.Methods == nil {
 			m.Methods = make(map[string]bool, len(methods))
 		}
@@ -58,17 +58,17 @@ func WithMethods(methods []string) func(m *MethodsFilter) error {
 }
 
 // New sets up the method filter middleware. Its parameters are functions manipulating an internal Config variable.
-func New(options ...func(m *MethodsFilter) error) (defs.Middleware, error) {
-	m := MethodsFilter{}
+func New(options ...func(m *Handler) error) (defs.Middleware, error) {
+	h := Handler{}
 
 	for _, opt := range options {
-		if err := opt(&m); err != nil {
+		if err := opt(&h); err != nil {
 			return nil, err
 		}
 	}
 
 	return func(next http.Handler) http.Handler {
-		m.Next = next
-		return &m
+		h.Next = next
+		return &h
 	}, nil
 }

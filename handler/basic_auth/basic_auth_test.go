@@ -149,3 +149,15 @@ func TestBasicAuthDefaultRealm(t *testing.T) {
 		t.Errorf("default realm not set correctly: %v", authHeader)
 	}
 }
+
+func TestOptionError(t *testing.T) {
+	errOpt := func(h *Handler) error {
+		return errors.New("testerror")
+	}
+
+	_, err := New(errOpt)
+
+	if err == nil {
+		t.Errorf("expected middleware creation to fail")
+	}
+}

@@ -21,7 +21,7 @@ func (a *HTPassWDAuth) Authorize(username, password string) (bool, error) {
 	}
 
 	if a.auth == nil {
-		return false, errors.New("htpasswd: not initialized")
+		return false, errors.New("htpasswd not initialized")
 	}
 
 	return a.auth.Match(username, password), nil

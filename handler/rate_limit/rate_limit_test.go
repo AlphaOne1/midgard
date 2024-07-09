@@ -1,6 +1,7 @@
 package rate_limit
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -39,5 +40,17 @@ func TestRateLimit(t *testing.T) {
 
 	if got != 6 {
 		t.Errorf("got %d, want %d", got, 6)
+	}
+}
+
+func TestOptionError(t *testing.T) {
+	errOpt := func(h *Handler) error {
+		return errors.New("testerror")
+	}
+
+	_, err := New(errOpt)
+
+	if err == nil {
+		t.Errorf("expected middleware creation to fail")
 	}
 }
