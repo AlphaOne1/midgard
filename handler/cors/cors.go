@@ -81,7 +81,7 @@ func (e *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	origin, _ := r.Header["Origin"]
+	origin := r.Header["Origin"]
 
 	relevantOrigin, roErr := relevantOrigin(origin, e.Origins)
 
