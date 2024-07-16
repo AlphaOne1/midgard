@@ -160,6 +160,7 @@ func WithTargetRate(r float64) func(l *LocalLimit) error {
 // New creates a new local rate limiter.
 func New(options ...func(*LocalLimit) error) (*LocalLimit, error) {
 	l := LocalLimit{
+		TargetRate:    1,
 		SleepInterval: 100 * time.Millisecond,
 		DropTimeout:   150 * time.Millisecond,
 		drops:         make(chan drop),
