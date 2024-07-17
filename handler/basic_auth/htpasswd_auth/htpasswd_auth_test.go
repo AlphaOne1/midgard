@@ -43,3 +43,19 @@ func TestHtpasswdAuth(t *testing.T) {
 		}
 	}
 }
+
+func TestHtpasswdNil(t *testing.T) {
+	var subject *HTPassWDAuth = nil
+
+	if _, err := subject.Authorize("u", "p"); err == nil {
+		t.Errorf("authorize on nil authorizer should give error")
+	}
+}
+
+func TestHtpasswdNoFile(t *testing.T) {
+	_, err := New(WithAuthFile("IDoNotExistNowhereInThisWorldForgetIt"))
+
+	if err == nil {
+		t.Errorf("authorizer initialization with non-existent file should give error")
+	}
+}
