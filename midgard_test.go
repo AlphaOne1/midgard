@@ -50,7 +50,7 @@ func TestStackMiddleware(t *testing.T) {
 	_ = req.Body.Close()
 }
 
-func TestEmptyMiddleware(t *testing.T) {
+func TestEmptyMiddlewareHandler(t *testing.T) {
 	newMWHandler := StackMiddlewareHandler(
 		[]defs.Middleware{},
 		http.HandlerFunc(util.DummyHandler))
@@ -75,4 +75,12 @@ func TestEmptyMiddleware(t *testing.T) {
 	}
 
 	_ = req.Body.Close()
+}
+
+func TestEmptyMiddleware(t *testing.T) {
+	got := StackMiddleware([]defs.Middleware{})
+
+	if got != nil {
+		t.Errorf("expected nil on empty middleware stack")
+	}
 }
