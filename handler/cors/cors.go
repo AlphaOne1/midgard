@@ -71,8 +71,8 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 }
 
 // ServeHTTP sets up the client with the appropriate headers.
-func (e *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if e == nil {
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if h == nil {
 		slog.Error("cors not initialized")
 		w.WriteHeader(http.StatusServiceUnavailable)
 		if _, err := w.Write([]byte("service not available")); err != nil {
@@ -83,8 +83,9 @@ func (e *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	origin := r.Header["Origin"]
 
-	relevantOrigin, roErr := relevantOrigin(origin, e.Origins)
+	relevantOrigin, roErr := relevantOrigin(origin, h.Origins)
 
+	// no relevant origin found in request
 	if roErr != nil {
 		w.WriteHeader(http.StatusForbidden)
 		if _, err := fmt.Fprintf(w, "origin %v not allowed", origin); err != nil {
@@ -95,15 +96,17 @@ func (e *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", relevantOrigin)
 
+	// on OPTIONS request, just give the possible methods and headers
 	if r.Method == http.MethodOptions {
-		w.Header().Set("Access-Control-Allow-Methods", e.MethodsReturn)
-		w.Header().Set("Access-Control-Allow-Headers", e.HeadersReturn)
+		w.Header().Set("Access-Control-Allow-Methods", h.MethodsReturn)
+		w.Header().Set("Access-Control-Allow-Headers", h.HeadersReturn)
 
 		w.WriteHeader(http.StatusOK)
 		return
 	}
 
-	if len(e.Methods) > 0 && !e.Methods[r.Method] {
+	// we have methods configured, but the request does not match any of them
+	if len(h.Methods) > 0 && !h.Methods[r.Method] {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		if _, err := fmt.Fprintf(w, "method %s not allowed", r.Method); err != nil {
 			slog.Error("could not write", slog.String("error", err.Error()))
@@ -111,12 +114,14 @@ func (e *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(e.Headers) > 0 {
-		for h := range r.Header {
-			if !e.Headers[h] {
+	// if there are headers configured, check the headers of the request and
+	// disallow in case there are non-configured ones
+	if len(h.Headers) > 0 {
+		for hdr := range r.Header {
+			if !h.Headers[hdr] {
 				w.WriteHeader(http.StatusForbidden)
 
-				if _, err := fmt.Fprintf(w, "header %s not allowed", h); err != nil {
+				if _, err := fmt.Fprintf(w, "header %s not allowed", hdr); err != nil {
 					slog.Error("could not write", slog.String("error", err.Error()))
 				}
 				return
@@ -124,7 +129,7 @@ func (e *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	e.Next.ServeHTTP(w, r)
+	h.Next.ServeHTTP(w, r)
 }
 
 // WithHeaders sets the allowed headers. If later a request contains headers that are not

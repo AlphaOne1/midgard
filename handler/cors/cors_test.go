@@ -18,7 +18,7 @@ func TestEvalCSSHandler(t *testing.T) {
 		cssMethods  []string
 		cssOrigins  []string
 		method      string
-		header      map[string]string
+		header      map[string][]string
 		wantCode    int
 		wantHeader  map[string]string
 		wantContent string
@@ -43,7 +43,7 @@ func TestEvalCSSHandler(t *testing.T) {
 			cssMethods:  []string{http.MethodGet},
 			cssOrigins:  []string{"*"},
 			method:      http.MethodGet,
-			header:      map[string]string{"Origin": "localhost"},
+			header:      map[string][]string{"Origin": {"localhost"}},
 			wantCode:    http.StatusOK,
 			wantHeader:  map[string]string{"Access-Control-Allow-Origin": "*"},
 			wantContent: "dummy",
@@ -51,7 +51,7 @@ func TestEvalCSSHandler(t *testing.T) {
 			cssMethods:  []string{http.MethodGet},
 			cssOrigins:  []string{"dummy.com", "dummy1.com"},
 			method:      http.MethodGet,
-			header:      map[string]string{"Origin": "dummy.com"},
+			header:      map[string][]string{"Origin": {"dummy.com"}},
 			wantCode:    http.StatusOK,
 			wantHeader:  map[string]string{"Access-Control-Allow-Origin": "dummy.com"},
 			wantContent: "dummy",
@@ -59,10 +59,59 @@ func TestEvalCSSHandler(t *testing.T) {
 			cssMethods:  []string{http.MethodGet},
 			cssOrigins:  []string{"dummy0.com", "dummy1.com"},
 			method:      http.MethodGet,
-			header:      map[string]string{"Origin": "dummy.com"},
+			header:      map[string][]string{"Origin": {"dummy.com"}},
 			wantCode:    http.StatusForbidden,
 			wantHeader:  nil,
 			wantContent: "origin [dummy.com] not allowed",
+		}, { // 5
+			cssMethods:  []string{http.MethodGet},
+			cssOrigins:  []string{"dummy0.com", "dummy1.com"},
+			method:      http.MethodPost,
+			header:      map[string][]string{"Origin": {"dummy0.com"}},
+			wantCode:    http.StatusMethodNotAllowed,
+			wantHeader:  nil,
+			wantContent: "method POST not allowed",
+		}, { // 6
+			cssMethods: []string{http.MethodGet},
+			cssOrigins: []string{"dummy0.com", "dummy1.com"},
+			method:     http.MethodGet,
+			header: map[string][]string{
+				"Origin":      {"dummy0.com"},
+				"X-Forbidden": {"forbidden"},
+			},
+			wantCode:    http.StatusForbidden,
+			wantHeader:  nil,
+			wantContent: "header X-Forbidden not allowed",
+		}, { // 7
+			cssMethods: []string{http.MethodGet},
+			cssOrigins: []string{"dummy0.com", "dummy1.com"},
+			method:     http.MethodGet,
+			header: map[string][]string{
+				"Origin": {"dummy0.com", "dummy1.com"},
+			},
+			wantCode:    http.StatusOK,
+			wantHeader:  nil,
+			wantContent: "dummy",
+		}, { // 8
+			cssMethods: []string{http.MethodGet},
+			cssOrigins: []string{"dummy0.com", "dummy1.com"},
+			method:     http.MethodGet,
+			header: map[string][]string{
+				"Origin": {"", "dummy0.com"},
+			},
+			wantCode:    http.StatusOK,
+			wantHeader:  nil,
+			wantContent: "dummy",
+		}, { // 9
+			cssMethods: []string{http.MethodGet},
+			cssOrigins: []string{"dummy0.com", "dummy1.com"},
+			method:     http.MethodGet,
+			header: map[string][]string{
+				"Origin": {},
+			},
+			wantCode:    http.StatusForbidden,
+			wantHeader:  nil,
+			wantContent: "",
 		},
 	}
 
@@ -70,7 +119,9 @@ func TestEvalCSSHandler(t *testing.T) {
 		req, _ := http.NewRequest(v.method, "http://dummy.com:8080", strings.NewReader(""))
 
 		for hk, hv := range v.header {
-			req.Header.Set(hk, hv)
+			for _, hvi := range hv {
+				req.Header.Add(hk, hvi)
+			}
 		}
 
 		rec := httptest.NewRecorder()
