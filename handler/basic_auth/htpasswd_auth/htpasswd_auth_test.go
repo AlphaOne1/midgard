@@ -52,10 +52,34 @@ func TestHtpasswdNil(t *testing.T) {
 	}
 }
 
-func TestHtpasswdNoFile(t *testing.T) {
+func TestHtpasswdNonExistingFile(t *testing.T) {
 	_, err := New(WithAuthFile("IDoNotExistNowhereInThisWorldForgetIt"))
 
 	if err == nil {
 		t.Errorf("authorizer initialization with non-existent file should give error")
+	}
+}
+
+func TestHtpasswdNoOptions(t *testing.T) {
+	_, err := New()
+
+	if err == nil {
+		t.Errorf("authorizer initialization without options should give error")
+	}
+}
+
+func TestHtpasswdWrongReader(t *testing.T) {
+	_, err := New(WithAuthInput(nil))
+
+	if err == nil {
+		t.Errorf("authorizer initialization nil reader should give error")
+	}
+}
+
+func TestHtpasswdEmptyFilename(t *testing.T) {
+	_, err := New(WithAuthFile(""))
+
+	if err == nil {
+		t.Errorf("authorizer initialization with empty filename should give error")
 	}
 }

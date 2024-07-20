@@ -76,3 +76,19 @@ func TestOptionError(t *testing.T) {
 		t.Errorf("expected middleware creation to fail")
 	}
 }
+
+func TestNoOptions(t *testing.T) {
+	_, err := New()
+
+	if err == nil {
+		t.Errorf("expected middleware creation to fail")
+	}
+}
+
+func TestNilLimiter(t *testing.T) {
+	_, err := New(WithLimiter(nil))
+
+	if err == nil {
+		t.Errorf("expected middleware creation to fail")
+	}
+}

@@ -111,7 +111,7 @@ func TestEvalCSSHandler(t *testing.T) {
 			},
 			wantCode:    http.StatusForbidden,
 			wantHeader:  nil,
-			wantContent: "",
+			wantContent: "origin [] not allowed",
 		},
 	}
 
