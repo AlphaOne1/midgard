@@ -1,6 +1,8 @@
 package access_log
 
 import (
+	"context"
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -8,36 +10,76 @@ import (
 	"github.com/AlphaOne1/midgard/handler/basic_auth"
 )
 
-// New generates a new access logging middleware.
-func New() defs.Middleware {
-	return accessLogging
+// Handler holds the information necessary for the log
+type Handler struct {
+	log   *slog.Logger
+	level slog.Level
+	next  http.Handler
 }
 
 // accessLogging is the access logging middleware. It logs every request with its
 // correlationID, the clients address, http method and accessed path.
-func accessLogging(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	entries := []any{
+		slog.String("client", r.RemoteAddr),
+		slog.String("method", r.Method),
+		slog.String("target", r.URL.Path),
+	}
 
-		entries := []any{
-			slog.String("client", r.RemoteAddr),
-			slog.String("method", r.Method),
-			slog.String("target", r.URL.Path),
+	if correlationID := r.Header.Get("X-Correlation-ID"); correlationID != "" {
+		entries = append(entries, slog.String("correlation_id", correlationID))
+	}
+
+	if authLine := r.Header.Get("Authorization"); authLine != "" {
+		username, _, userFound, _ := basic_auth.ExtractUserPass(authLine)
+
+		if userFound {
+			entries = append(entries, slog.String("user", username))
+		}
+	}
+
+	slog.Log(context.Background(), h.level, "access", entries...)
+
+	h.next.ServeHTTP(w, r)
+}
+
+// WithLogger configures the logger to use.
+func WithLogger(log *slog.Logger) func(h *Handler) error {
+	return func(h *Handler) error {
+		if log == nil {
+			return errors.New("cannot configure with nil logger")
 		}
 
-		if correlationID := r.Header.Get("X-Correlation-ID"); correlationID != "" {
-			entries = append(entries, slog.String("correlation_id", correlationID))
+		h.log = log
+
+		return nil
+	}
+}
+
+// WithLogLevel configures the log level to use with the logger.
+func WithLogLevel(level slog.Level) func(h *Handler) error {
+	return func(h *Handler) error {
+		h.level = level
+
+		return nil
+	}
+}
+
+// New generates a new access logging middleware.
+func New(options ...func(*Handler) error) (defs.Middleware, error) {
+	h := &Handler{
+		log:   slog.Default(),
+		level: slog.LevelInfo,
+	}
+
+	for _, opt := range options {
+		if err := opt(h); err != nil {
+			return nil, err
 		}
+	}
 
-		if authLine := r.Header.Get("Authorization"); authLine != "" {
-			username, _, userFound, _ := basic_auth.ExtractUserPass(authLine)
-
-			if userFound {
-				entries = append(entries, slog.String("user", username))
-			}
-		}
-
-		slog.Info("access", entries...)
-
-		next.ServeHTTP(w, r)
-	})
+	return func(next http.Handler) http.Handler {
+		h.next = next
+		return h
+	}, nil
 }

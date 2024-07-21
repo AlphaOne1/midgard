@@ -27,7 +27,8 @@ that has all the given middlewares prepended:
 finalHandler := midgard.StackMiddlewareHandler(
     []midgard.Middleware{
         correlation.New(),
-        access_log.New(),
+        util.Must(access_log.New(
+            access_log.WithLogLevel(slog.LevelDebug))),
         util.Must(cors.New(
             cors.WithHeaders(cors.MinimumAllowedHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
@@ -46,7 +47,8 @@ It generates a new middleware:
 newMiddleware:= midgard.StackMiddleware(
     []midgard.Middleware{
         correlation.New(),
-        access_log.New(),
+        util.Must(access_log.New(
+            access_log.WithLogLevel(slog.LevelDebug))),
         util.Must(cors.New(
             cors.WithHeaders(cors.MinimumAllowedHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
@@ -60,7 +62,8 @@ The native solution for this would be to nest the calls to the middleware like t
 
 ```go
 finalHandler := correlation.New()(
-                    accessLogging.New()(
+                    util.Must(access_log.New(
+                        access_log.WithLogLevel(slog.LevelDebug)))(
                         util.Must(cors.New(
                             cors.WithHeaders(cors.MinimumAllowedHeaders()),
                             cors.WithMethods([]string{http.MethodGet}),

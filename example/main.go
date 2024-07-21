@@ -33,7 +33,8 @@ func main() {
 	finalHandler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
 			correlation.New(),
-			access_log.New(),
+			util.Must(access_log.New(
+				access_log.WithLogLevel(slog.LevelDebug))),
 			util.Must(cors.New(
 				cors.WithHeaders(cors.MinimumAllowHeaders()),
 				cors.WithMethods([]string{http.MethodGet}),
