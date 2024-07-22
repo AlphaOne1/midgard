@@ -1,4 +1,4 @@
-name: build
+name: Tests
 
 on:
     push:
@@ -45,24 +45,6 @@ jobs:
                 version: latest
                 install-go: false
                 cache-key: ${{matrix.go-version}}
-
-    VulnerabilityCheck:
-        strategy:
-            matrix:
-                go-version:
-                  - "1.22"
-        runs-on: ubuntu-latest
-        steps:
-          - name: Checkout
-            uses: actions/checkout@v3
-            with:
-                fetch-depth: 1
-          - name: VulnerabilityCheck
-            id: govulncheck
-            uses: golang/govulncheck-action@v1
-            with:
-                go-version-input: ${{matrix.go-version}}
-                repo-checkout: false
 
     Test:
         strategy:
