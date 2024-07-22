@@ -34,14 +34,24 @@ jobs:
                 go-version:
                   - "1.22"
         runs-on: ubuntu-latest
+        permissions:
+            security-events: write
         steps:
           - name: Checkout
             uses: actions/checkout@v4
             with:
                 fetch-depth: 1
+
           - name: VulnerabilityCheck
             id: govulncheck
             uses: golang/govulncheck-action@v1
             with:
                 go-version-input: ${{matrix.go-version}}
-                repo-checkout: false
+                output-format: sarif
+                output-file: govulncheck-results.sarif
+                repo-checkout: true
+
+          - name: Upload govolncheck results to GitHub Security tab
+            uses: github/codeql-action/upload-sarif@v3
+            with:
+                sarif_file: govulncheck-results.sarif

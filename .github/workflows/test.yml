@@ -17,10 +17,12 @@ jobs:
             uses: actions/setup-go@v4
             with:
                 go-version: ${{matrix.go-version}}
+
           - name: Checkout
             uses: actions/checkout@v4
             with:
                 fetch-depth: 1
+
           - name: FormatCheck
             run: if [ `go fmt ./... | wc -l` -gt 0 ] ; then echo "Found unformatted code" ; exit 1 ; else exit 0 ; fi
 
@@ -35,12 +37,14 @@ jobs:
             uses: actions/setup-go@v4
             with:
                 go-version: ${{matrix.go-version}}
+
           - name: Checkout
             uses: actions/checkout@v4
             with:
                 fetch-depth: 1
+
           - name: StaticCheck
-            uses: dominikh/staticcheck-action@v1.3.0
+            uses: dominikh/staticcheck-action@v1.3.1
             with:
                 version: latest
                 install-go: false
@@ -61,11 +65,14 @@ jobs:
             uses: actions/setup-go@v4
             with:
                 go-version: ${{matrix.go-version}}
+
           - name: Checkout
             uses: actions/checkout@v4
             with:
                 fetch-depth: 1
+
           - name: Test
             run: go test -v `go list ./... | grep -v example` --coverprofile=cover.out
+
           - name: Coverage
             run: go tool cover -func=cover.out
