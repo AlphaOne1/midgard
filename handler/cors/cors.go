@@ -37,6 +37,7 @@ var minimumAllowHeaders = []string{
 	"Content-Length",
 	"Content-Type",
 	"Origin",
+	"User-Agent",
 	"X-CSRF-Token",
 }
 
