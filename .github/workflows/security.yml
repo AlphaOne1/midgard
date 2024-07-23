@@ -55,6 +55,9 @@ jobs:
                 output-file: govulncheck-results.sarif
                 repo-checkout: true
 
+          - name: PrintSarif
+            run:  cat govulncheck-results.sarif
+
           - name: Upload govolncheck results to GitHub Security tab
             uses: github/codeql-action/upload-sarif@v3
             with:
