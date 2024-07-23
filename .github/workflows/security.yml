@@ -42,12 +42,7 @@ jobs:
             with:
                 fetch-depth: 1
 
-          #- name: VulnerabilityCheck
-          #  uses: golang/govulncheck-action@v1
-          #  with:
-          #      go-version-input: ${{matrix.go-version}}
-
-          - name: VulnerabilityCheckSarif
+          - name: VulnerabilityCheck
             uses: golang/govulncheck-action@v1
             with:
                 go-version-input: ${{matrix.go-version}}
@@ -55,9 +50,17 @@ jobs:
                 output-file: govulncheck-results.sarif
 
           - name: PrintSarif
-            run:  cat govulncheck-results.sarif
+            run:  |
+                cat govulncheck-results.sarif
+                if [ grep results govulncheck-results.serif ]
+                then
+                    echo "hasResults=true" >> $GITHUB_OUTPUT
+                else
+                    echo "hasResults=false" >> $GITHUB_OUTPUT
+                fi
 
           - name: Upload govolncheck results to GitHub Security tab
+            if: ${{ steps.PrintSarif.outputs.hasResults == 'true' }}
             uses: github/codeql-action/upload-sarif@v3
             with:
                 sarif_file: govulncheck-results.sarif
