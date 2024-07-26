@@ -1,5 +1,7 @@
 <p align="center">
-    <img src="midgard_logo.svg" width="25%" alt="Logo">
+    <img src="midgard_logo.svg" width="25%" alt="Logo"><br>
+    <img src="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml/badge.svg" alt="Pipeline Result">
+    <img src="https://goreportcard.com/badge/github.com/AlphaOne1/midgard" alt="Go Report Card">
 </p>
 
 midgard
