@@ -1,7 +1,17 @@
 <p align="center">
     <img src="midgard_logo.svg" width="25%" alt="Logo"><br>
-    <img src="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml/badge.svg" alt="Pipeline Result">
-    <img src="https://goreportcard.com/badge/github.com/AlphaOne1/midgard" alt="Go Report Card">
+    <a href="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml">
+        <img src="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml/badge.svg"
+             alt="Pipeline Result">
+    </a>
+    <a href="https://goreportcard.com/report/github.com/AlphaOne1/midgard">
+        <img src="https://goreportcard.com/badge/github.com/AlphaOne1/midgard"
+             alt="Go Report Card">
+    </a>
+    <a href="https://scorecard.dev/viewer/?uri=github.com/AlphaOne1/midgard">
+        <img src="https://api.scorecard.dev/projects/github.com/AlphaOne1/midgard/badge"
+             alt="OpenSSF Scorecard">
+    </a>
 </p>
 
 midgard
