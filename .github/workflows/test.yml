@@ -93,7 +93,12 @@ jobs:
                 fetch-depth: 1
 
           - name: Test
-            run: go test -v `go list ./... | grep -v example` --coverprofile=cover.out
+            run: go test -v `go list ./... | grep -v example` --coverprofile=coverage.txt
 
           - name: Coverage
-            run: go tool cover -func=cover.out
+            run: go tool cover -func=coverage.txt
+
+          - name: Upload coverage to Codecov
+            uses: codecov/codecov-action@v4
+            with:
+                token: ${{ secrets.CODECOV_TOKEN }}
