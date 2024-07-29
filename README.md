@@ -8,6 +8,10 @@
         <img src="https://goreportcard.com/badge/github.com/AlphaOne1/midgard"
              alt="Go Report Card">
     </a>
+    <a href="https://codecov.io/github/AlphaOne1/midgard">
+        <img src="https://codecov.io/github/AlphaOne1/midgard/graph/badge.svg?token=X58EXDA6I9"
+             alt="Code Coverage">
+    </a>
     <a href="https://scorecard.dev/viewer/?uri=github.com/AlphaOne1/midgard">
         <img src="https://api.scorecard.dev/projects/github.com/AlphaOne1/midgard/badge"
              alt="OpenSSF Scorecard">
