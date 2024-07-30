@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"regexp"
+	"slices"
+	"strings"
 	"testing"
 )
 
@@ -47,5 +49,43 @@ func TestDummyHandler(t *testing.T) {
 	if rec.Body.String() != "dummy" {
 		t.Errorf("wanted Dummy but got %v",
 			slog.String("body", rec.Body.String()))
+	}
+}
+
+func TestMapKeys(t *testing.T) {
+	tests := []struct {
+		in   map[string]int
+		want []string
+	}{
+		{
+			in:   map[string]int{"1": 1, "2": 2, "3": 3},
+			want: []string{"1", "2", "3"},
+		},
+		{
+			in:   nil,
+			want: nil,
+		},
+		{
+			in:   map[string]int{},
+			want: []string{},
+		},
+	}
+
+	for k, v := range tests {
+		got := MapKeys(v.in)
+		slices.Sort(got)
+		slices.Sort(v.want)
+
+		if v.in == nil && got != nil {
+			t.Errorf("%v: got non-nil result %v but wanted nil", k, got)
+		}
+
+		if len(v.in) == 0 && v.in != nil && (len(got) != 0 || got == nil) {
+			t.Errorf("%v: got %v but wanted zero length non-nil result", k, got)
+		}
+
+		if len(v.in) > 0 && strings.Join(got, ",") != strings.Join(v.want, ",") {
+			t.Errorf("%v: got %v but wanted %v", k, got, v.want)
+		}
 	}
 }
