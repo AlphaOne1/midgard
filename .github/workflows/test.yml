@@ -129,6 +129,6 @@ jobs:
             with:
                 fetch-depth: 1
 
-          - uses: jidicula/go-fuzz-action@v1.2.0
+          - uses: shogo82148/actions-go-fuzz/run@v1
             with:
-                fuzz-time: 30s
+                fuzz-time: "30s"
