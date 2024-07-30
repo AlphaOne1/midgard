@@ -38,7 +38,7 @@ func MapKeys[T comparable, S any](m map[T]S) []T {
 
 	result := make([]T, 0, len(m))
 
-	for k, _ := range m {
+	for k := range m {
 		result = append(result, k)
 	}
 
