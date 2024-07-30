@@ -113,6 +113,8 @@ jobs:
                   #- macos-latest
                   - ubuntu-latest
                   #- windows-latest
+                packages:
+                  - ./handler/method_filter
         runs-on: ${{ matrix.platform }}
         steps:
           - name: Harden Runner
@@ -132,7 +134,7 @@ jobs:
 
           - name: Run Fuzz Test
             shell: bash
-            run: go test ./handler/method_filter -fuzz="Fuzz" -fuzztime="30s" -fuzzminimizetime="10s"
+            run: go test ${{ matrix.packages }} -fuzz="Fuzz" -fuzztime="30s" -fuzzminimizetime="10s"
 
           - name: Upload fuzz failure seed corpus as run artifact
             if: failure()
