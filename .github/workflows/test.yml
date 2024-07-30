@@ -114,7 +114,21 @@ jobs:
                   #- windows-latest
         runs-on: ${{ matrix.platform }}
         steps:
+          - name: Harden Runner
+            uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c # v2.9.0
+            with:
+              egress-policy: audit
+
+          - name: Install Go
+            uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+            with:
+                go-version: ${{matrix.go-version}}
+
+          - name: Checkout
+            uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+            with:
+                fetch-depth: 1
+
           - uses: jidicula/go-fuzz-action@v1.2.0
             with:
                 fuzz-time: 30s
-                go-version: ${{matrix.go-version}}
