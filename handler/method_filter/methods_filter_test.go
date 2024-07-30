@@ -33,6 +33,11 @@ func TestMethodFilter(t *testing.T) {
 			method:   http.MethodPost,
 			wantCode: http.StatusMethodNotAllowed,
 		},
+		{
+			filter:   []string{http.MethodGet},
+			method:   " ",
+			wantCode: http.StatusMethodNotAllowed,
+		},
 	}
 
 	for k, v := range tests {
@@ -79,4 +84,28 @@ func TestOptionError(t *testing.T) {
 	if err == nil {
 		t.Errorf("expected middleware creation to fail")
 	}
+}
+
+func FuzzMethodFilter(f *testing.F) {
+
+	f.Add(http.MethodDelete)
+	f.Add(http.MethodGet)
+	f.Add(http.MethodOptions)
+	f.Add(http.MethodPost)
+	f.Add(http.MethodPut)
+
+	activeFilter := map[string]bool{http.MethodOptions: true, http.MethodGet: true}
+	mw := util.Must(New(WithMethods(util.MapKeys(activeFilter))))(http.HandlerFunc(util.DummyHandler))
+
+	f.Fuzz(func(t *testing.T, method string) {
+		req, _ := http.NewRequest(method, "", strings.NewReader(""))
+		rec := httptest.NewRecorder()
+
+		mw.ServeHTTP(rec, req)
+
+		if activeFilter[method] && rec.Code != http.StatusOK ||
+			!activeFilter[method] && rec.Code != http.StatusMethodNotAllowed {
+			t.Errorf("method filter did not work as expected, method %v got %v", method, rec.Code)
+		}
+	})
 }

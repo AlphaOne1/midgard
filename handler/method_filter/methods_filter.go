@@ -19,7 +19,7 @@ type Handler struct {
 
 // ServeHTTP denies access (405) if the method is not in the whitelist.
 func (m *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if m == nil {
+	if m == nil || m.Methods == nil {
 		slog.Error("method filter not initialized")
 		w.WriteHeader(http.StatusServiceUnavailable)
 		if _, err := w.Write([]byte("service not available")); err != nil {
@@ -28,7 +28,7 @@ func (m *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if m.Methods[r.Method] {
+	if r != nil && m.Methods[r.Method] {
 		m.Next.ServeHTTP(w, r)
 	} else {
 		w.Header().Set("Content-Type", "text/plain")
