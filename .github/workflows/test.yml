@@ -114,6 +114,7 @@ jobs:
                   #- windows-latest
         runs-on: ${{ matrix.platform }}
         steps:
-          - uses: jidicula/go-fuzz-action@v1.1.0
+          - uses: jidicula/go-fuzz-action@v1.2.0
             with:
                 fuzz-time: 30s
+                go-version: ${{matrix.go-version}}
