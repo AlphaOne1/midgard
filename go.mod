@@ -1,6 +1,6 @@
 module github.com/AlphaOne1/midgard
 
-go 1.22.1
+go 1.22
 
 require (
 	github.com/google/uuid v1.6.0
@@ -9,7 +9,7 @@ require (
 
 require (
 	github.com/GehirnInc/crypt v0.0.0-20230320061759-8cc1b52080c5 // indirect
-	golang.org/x/crypto v0.24.0 // indirect
+	golang.org/x/crypto v0.25.0 // indirect
 )
 
-replace golang.org/x/crypto v0.17.0 => golang.org/x/crypto v0.24.0
+replace golang.org/x/crypto v0.17.0 => golang.org/x/crypto v0.25.0
