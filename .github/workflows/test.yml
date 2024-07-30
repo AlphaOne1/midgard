@@ -103,6 +103,7 @@ jobs:
             with:
                 token: ${{ secrets.CODECOV_TOKEN }}
 
+    # This action is mainly composed of snippets of github.com/jidicula/go-fuzz-action
     FuzzTest:
         strategy:
             matrix:
@@ -112,8 +113,57 @@ jobs:
                   #- macos-latest
                   - ubuntu-latest
                   #- windows-latest
+                packages:
+                  - ./handler/method_filter
         runs-on: ${{ matrix.platform }}
         steps:
-          - uses: jidicula/go-fuzz-action@v1.1.0
+          - name: Harden Runner
+            uses: step-security/harden-runner@0d381219ddf674d61a7572ddd19d7941e271515c # v2.9.0
             with:
-                fuzz-time: 30s
+              egress-policy: audit
+
+          - name: Install Go
+            uses: actions/setup-go@0a12ed9d6a96ab950c8f026ed9f722fe0da7ef32 # v5.0.2
+            with:
+                go-version: ${{matrix.go-version}}
+
+          - name: Checkout
+            uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+            with:
+                fetch-depth: 1
+
+          - name: Run Fuzz Test
+            shell: bash
+            run: go test ${{ matrix.packages }} -fuzz="Fuzz" -fuzztime="30s" -fuzzminimizetime="10s"
+
+          - name: Upload fuzz failure seed corpus as run artifact
+            if: failure()
+            uses: actions/upload-artifact@v4
+            with:
+                name: testdata
+                path: testdata
+
+          - run: echo "EVENT NAME IS ${{ github.event_name }}"
+            if: failure()
+            shell: bash
+
+          - name: Save PR head commit SHA
+            if: failure() && github.event_name == 'pull_request'
+            shell: bash
+            run: |
+                SHA="${{ github.event.pull_request.head.sha }}"
+                echo "SHA=$SHA" >> $GITHUB_ENV
+
+          - name: Save latest commit SHA if not PR
+            if: failure() && github.event_name != 'pull_request'
+            shell: bash
+            run: echo "SHA=${{ github.sha }}" >> $GITHUB_ENV
+
+          - name: Output message
+            if: failure()
+            shell: bash
+            run: |
+                MESSAGE='Fuzz test failed on commit ${{ env.SHA }}. To troubleshoot locally, use the [GitHub CLI](https://cli.github.com) to download the seed corpus with\n```\ngh run download ${{ github.run_id }} -n testdata\n```'
+                DEEPLINK="https://github.com/${{ github.repository }}/commit/${{ env.SHA }}"
+                echo -e "${MESSAGE/${{ env.SHA }}/$DEEPLINK}"
+                echo -e "${MESSAGE/${{ env.SHA }}/[${GITHUB_SHA:0:8}]($DEEPLINK)}" >> $GITHUB_STEP_SUMMARY

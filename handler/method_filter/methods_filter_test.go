@@ -38,6 +38,12 @@ func TestMethodFilter(t *testing.T) {
 			method:   " ",
 			wantCode: http.StatusMethodNotAllowed,
 		},
+		{
+			// specialty of go, that treats "" as GET
+			filter:   []string{http.MethodGet},
+			method:   "",
+			wantCode: http.StatusOK,
+		},
 	}
 
 	for k, v := range tests {
@@ -98,6 +104,11 @@ func FuzzMethodFilter(f *testing.F) {
 	mw := util.Must(New(WithMethods(util.MapKeys(activeFilter))))(http.HandlerFunc(util.DummyHandler))
 
 	f.Fuzz(func(t *testing.T, method string) {
+		if method == "" {
+			// compensate Go NewRequest specialty, that treats "" as GET
+			method = http.MethodGet
+		}
+
 		req, _ := http.NewRequest(method, "", strings.NewReader(""))
 		rec := httptest.NewRecorder()
 
