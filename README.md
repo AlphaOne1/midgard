@@ -1,18 +1,26 @@
 <p align="center">
     <img src="midgard_logo.svg" width="25%" alt="Logo"><br>
-    <a href="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml">
+    <a href="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml"
+       rel="external"
+       target="_blank">
         <img src="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml/badge.svg"
              alt="Pipeline Result">
     </a>
-    <a href="https://goreportcard.com/report/github.com/AlphaOne1/midgard">
+    <a href="https://goreportcard.com/report/github.com/AlphaOne1/midgard"
+       rel="external"
+       target="_blank">
         <img src="https://goreportcard.com/badge/github.com/AlphaOne1/midgard"
              alt="Go Report Card">
     </a>
-    <a href="https://codecov.io/github/AlphaOne1/midgard">
+    <a href="https://codecov.io/github/AlphaOne1/midgard"
+       rel="external"
+       target="_blank">
         <img src="https://codecov.io/github/AlphaOne1/midgard/graph/badge.svg?token=X58EXDA6I9"
              alt="Code Coverage">
     </a>
-    <a href="https://scorecard.dev/viewer/?uri=github.com/AlphaOne1/midgard">
+    <a href="https://scorecard.dev/viewer/?uri=github.com/AlphaOne1/midgard"
+       rel="external"
+       target="_blank">
         <img src="https://api.scorecard.dev/projects/github.com/AlphaOne1/midgard/badge"
              alt="OpenSSF Scorecard">
     </a>
