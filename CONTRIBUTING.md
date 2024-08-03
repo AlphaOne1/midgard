@@ -4,7 +4,6 @@ Contributing
 Thanks for your interest in contributing to *midgard*. Please take a moment to
 review this document __before submitting a pull request__.
 
-
 Pull requests
 -------------
 
@@ -18,7 +17,6 @@ to first discuss any new ideas. Your ideas and suggestions are welcome!
 
 Please ensure that the tests are passing when submitting a pull request. If
 you're adding new features to ActiveAdmin, please include tests.
-
 
 Where do I go from here?
 ------------------------
@@ -56,8 +54,11 @@ go fmt ./...
 At this point, if your changes look good and tests are passing, you are ready to
 create a pull request.
 
-Github Actions will run the test suite against the latest Go version.
-
+Github Actions will run the test suite against the latest Go version. There are
+tests that most likey did not run in the developers machine (CodeQL, Trivy). These
+tests may produce warnings. Take those warnings serious even if they seem harmless.
+Too many harmless warnings could possibly overlay really serious ones, so all
+warnings are to be resolved.
 
 Merging a PR (maintainers only)
 -------------------------------
