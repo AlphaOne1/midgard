@@ -88,8 +88,8 @@ Merging a PR (maintainers only)
 
 A Pull Request can only be merged into master by a maintainer if:
 
-* CI is passing,
-* approved by another maintainer
-* and is up to date with the default branch.
+- CI is passing,
+- approved by another maintainer
+- and is up to date with the default branch.
 
 Any maintainer is allowed to merge a PR if all of these conditions ae met.

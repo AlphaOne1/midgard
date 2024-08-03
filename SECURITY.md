@@ -1,13 +1,16 @@
-# Security Policy
+Security Policy
+===============
 
-## Supported Versions
+Supported Versions
+------------------
 
 | Version        | Supported          |
 | -------------- | ------------------ |
 | master         | :white_check_mark: |
 | other branches | :x:                |
 
-## Reporting a Vulnerability
+Reporting a Vulnerability
+-------------------------
 
 In case of a vulnerability contact the maintainer of the project.
 

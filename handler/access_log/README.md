@@ -3,10 +3,10 @@ Access Logging Middleware
 
 The access logging middleware logs each request with the following information:
 
-  - correlationID
-  - client address
-  - HTTP method
-  - path
+- correlationID
+- client address
+- HTTP method
+- path
 
 Example
 -------
