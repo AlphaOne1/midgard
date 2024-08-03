@@ -103,4 +103,4 @@ finalHandler := correlation.New()(
 ```
 
 As you see, depending on the number of middlewares, that can be quite confusing.
-Further one cannot _easily_ dynamially add or remove middlewares.
+Further one cannot *easily* dynamially add or remove middlewares.
