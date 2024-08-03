@@ -8,8 +8,9 @@
 
 ### New Feature Submissions:
 
-1. [ ] Does your submission pass tests?
-2. [ ] Have you lint your code locally before submission?
+1. [ ] Did you add tests for the new features that cover all major code paths?
+2. [ ] Does your submission pass tests?
+3. [ ] Have you lint your code locally before submission?
 
 **What is the new behavior (if this is a feature change)?**
 
