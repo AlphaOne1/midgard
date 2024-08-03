@@ -1,3 +1,5 @@
+// Copyright the midgard contributors.
+// SPDX-License-Identifier: MPL-2.0
 package main
 
 import (
@@ -5,11 +7,12 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"github.com/AlphaOne1/midgard/handler/correlation"
 	"log/slog"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/AlphaOne1/midgard/handler/correlation"
 
 	"github.com/AlphaOne1/midgard"
 	"github.com/AlphaOne1/midgard/defs"

@@ -1,3 +1,5 @@
+// Copyright the midgard contributors.
+// SPDX-License-Identifier: MPL-2.0
 package map_auth
 
 import "errors"

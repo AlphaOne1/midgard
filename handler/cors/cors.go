@@ -1,5 +1,5 @@
-// vim: set ts=8 sw=8 smartindent:
-
+// Copyright the midgard contributors.
+// SPDX-License-Identifier: MPL-2.0
 package cors
 
 import (
