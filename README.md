@@ -18,6 +18,12 @@
         <img src="https://codecov.io/github/AlphaOne1/midgard/graph/badge.svg?token=X58EXDA6I9"
              alt="Code Coverage">
     </a>
+    <a href="https://www.bestpractices.dev/projects/9251"
+       rel="external"
+       target="_blank">
+        <img src="https://www.bestpractices.dev/projects/9251/badge"
+             alt="OpenSSF Best Practises">
+    </a>
     <a href="https://scorecard.dev/viewer/?uri=github.com/AlphaOne1/midgard"
        rel="external"
        target="_blank">

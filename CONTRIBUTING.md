@@ -49,6 +49,12 @@ Be sure to have run the go fmt tool, to have a unified code style:
 go fmt ./...
 ```
 
+After you implemented your feature, add tests that cover all major code paths. A
+test coverage of 100% is not always possible. We acknowledge, that there are hard
+to trigger conditions, that you might check for, but are not producible in a test
+suite, but aim for the best. At least every code path of normal, input triggered
+use, should be covered.
+
 ### Create a Pull Request
 
 At this point, if your changes look good and tests are passing, you are ready to
