@@ -49,11 +49,28 @@ Be sure to have run the go fmt tool, to have a unified code style:
 go fmt ./...
 ```
 
+### Test your feature
+
 After you implemented your feature, add tests that cover all major code paths. A
 test coverage of 100% is not always possible. We acknowledge, that there are hard
 to trigger conditions, that you might check for, but are not producible in a test
 suite, but aim for the best. At least every code path of normal, input triggered
 use, should be covered.
+
+### Document your feature
+
+All the good intentions go to waste, if nobody can enjoy the fruits of this labor
+due to non-existent (or bad, or wrong) documentation. Please take care that you
+include:
+
+- a corse description of your nea feature
+- generate new or update (in case) the existing examnples
+- update the CHANGELOG.md
+
+The CHANGELOG document contains the changes of the next major contains all the
+changes of the current major version since x.0.0. On major release, the CHANGELOG
+can be emptied as the older changes are still visible in the history of the version
+control system.
 
 ### Create a Pull Request
 
