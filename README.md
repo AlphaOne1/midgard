@@ -12,6 +12,7 @@
         <img src="https://goreportcard.com/badge/github.com/AlphaOne1/midgard"
              alt="Go Report Card">
     </a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard.svg?type=shield"/></a>
     <a href="https://codecov.io/github/AlphaOne1/midgard"
        rel="external"
        target="_blank">
@@ -104,3 +105,7 @@ finalHandler := correlation.New()(
 
 As you see, depending on the number of middlewares, that can be quite confusing.
 Further one cannot *easily* dynamially add or remove middlewares.
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard?ref=badge_large)
