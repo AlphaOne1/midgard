@@ -4,7 +4,19 @@
        rel="external"
        target="_blank">
         <img src="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml/badge.svg"
-             alt="Pipeline Result">
+             alt="Test Pipeline Result">
+    </a>
+    <a href="https://github.com/AlphaOne1/midgard/actions/workflows/codeql.yml"
+       rel="external"
+       target="_blank">
+        <img src="https://github.com/AlphaOne1/midgard/actions/workflows/codeql.yml/badge.svg"
+             alt="CodeQL Pipeline Result">
+    </a>
+    <a href="https://github.com/AlphaOne1/midgard/actions/workflows/security.yml"
+       rel="external"
+       target="_blank">
+        <img src="https://github.com/AlphaOne1/midgard/actions/workflows/security.yml/badge.svg"
+             alt="Security Pipeline Result">
     </a>
     <a href="https://goreportcard.com/report/github.com/AlphaOne1/midgard"
        rel="external"
@@ -30,6 +42,24 @@
        target="_blank">
         <img src="https://api.scorecard.dev/projects/github.com/AlphaOne1/midgard/badge"
              alt="OpenSSF Scorecard">
+    </a>
+    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard?ref=badge_shield&issueType=license"
+       rel="external"
+       target="_blank">
+        <img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard.svg?type=shield&issueType=license"
+            alt="FOSSA Status">
+    </a>
+    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard?ref=badge_shield&issueType=security" 
+       rel="external"
+       target="_blank">
+        <img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard.svg?type=shield&issueType=security"
+             alt="FOSSA Status">
+    </a>
+    <a href="http://godoc.org/github.com/AlphaOne1/midgard"
+       rel="external"
+       target="_blank">
+        <img src="https://godoc.org/github.com/AlphaOne1/midgard?status.svg"
+             alt="GoDoc Reference">
     </a>
 </p>
 
