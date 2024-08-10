@@ -6,7 +6,10 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"reflect"
 	"testing"
+
+	"github.com/AlphaOne1/midgard/defs"
 )
 
 // Must exits the program if the given pair of function return and error contains an non-nil error value,
@@ -45,6 +48,39 @@ func MapKeys[T comparable, S any](m map[T]S) []T {
 	}
 
 	return result
+}
+
+// WriteState sets the specified HTTP response code and writes the code specific text as body.
+// If an error occurs on writing to the client, it is logged to the specified logging instance.
+// It is intended to give error feedback to clients.
+func WriteState(w http.ResponseWriter, log *slog.Logger, httpState int) {
+	w.WriteHeader(httpState)
+
+	if _, err := w.Write([]byte(http.StatusText(httpState))); err != nil {
+		log.Error("failed to write response", slog.String("error", err.Error()))
+	}
+}
+
+// Introcheck is used to facilitate the introductory check in each handler for the basic requirements.
+// It manages the corresponding logging operations and can be used as follows:
+//
+//	if !util.IntroCheck(h, w, r) {
+//	    return
+//	}
+func IntroCheck(h defs.MWBaser, w http.ResponseWriter, r *http.Request) bool {
+	if reflect.ValueOf(h).IsNil() {
+		slog.Error("handler nil")
+		WriteState(w, slog.Default(), http.StatusInternalServerError)
+		return false
+	}
+
+	if r == nil {
+		slog.Debug("request nil")
+		WriteState(w, h.GetMWBase().Log(), http.StatusBadRequest)
+		return false
+	}
+
+	return true
 }
 
 // DummyHandler is a handler used for internal testing.
