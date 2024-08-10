@@ -96,7 +96,7 @@ jobs:
                 fetch-depth: 1
 
           - name: Test
-            run: go test -v `go list ./... | grep -v example` --coverprofile=coverage.txt
+            run: go test -v `go list ./... | grep -v example` --coverpkg=./... --coverprofile=coverage.txt
 
           - name: Coverage
             run: go tool cover -func=coverage.txt
