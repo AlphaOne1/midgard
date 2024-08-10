@@ -7,10 +7,13 @@ import (
 	"net/http"
 	"os"
 	"reflect"
-	"testing"
 
 	"github.com/AlphaOne1/midgard/defs"
 )
+
+// exitFunc is used to exit the program. For testing purposes it can be set to another function suitable
+// for non-exiting tests. Do not touch, if insecure!
+var exitFunc = os.Exit
 
 // Must exits the program if the given pair of function return and error contains an non-nil error value,
 // otherwise the function return value val is returned.
@@ -19,11 +22,7 @@ func Must[T any](val T, err error) T {
 		slog.Error("must-condition not met",
 			slog.String("error", err.Error()))
 
-		if !testing.Testing() {
-			os.Exit(1)
-		} else {
-			slog.Info("not exiting due to test-mode")
-		}
+		exitFunc(1)
 	}
 
 	return val
