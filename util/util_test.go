@@ -47,6 +47,34 @@ func TestMustBad(t *testing.T) {
 	}
 }
 
+func TestGetOrCreateID(t *testing.T) {
+	tests := []struct {
+		in      string
+		wantNew bool
+	}{
+		{
+			in:      "",
+			wantNew: true,
+		},
+		{
+			in:      "nonsense",
+			wantNew: false,
+		},
+	}
+
+	for k, v := range tests {
+		got := GetOrCreateID(v.in)
+
+		if v.wantNew == true && got == v.in {
+			t.Errorf("%v: wanted new UUID but got old one", k)
+		}
+
+		if !v.wantNew == true && got != v.in {
+			t.Errorf("%v: wanted old UUID but got new one", k)
+		}
+	}
+}
+
 func TestDummyHandler(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()

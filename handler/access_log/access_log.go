@@ -19,6 +19,10 @@ type Handler struct {
 }
 
 func (h *Handler) GetMWBase() *defs.MWBase {
+	if h == nil {
+		return nil
+	}
+
 	return &h.MWBase
 }
 

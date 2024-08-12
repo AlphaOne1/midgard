@@ -9,6 +9,7 @@ import (
 	"reflect"
 
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/google/uuid"
 )
 
 // exitFunc is used to exit the program. For testing purposes it can be set to another function suitable
@@ -47,6 +48,21 @@ func MapKeys[T comparable, S any](m map[T]S) []T {
 	}
 
 	return result
+}
+
+// GetOrCreateID generates a new uuid, if the given id is empty, otherwise the given id is returned.
+func GetOrCreateID(id string) string {
+	if len(id) > 0 {
+		return id
+	}
+
+	newID := "n/a"
+
+	if newUuid, err := uuid.NewRandom(); err == nil {
+		newID = newUuid.String()
+	}
+
+	return newID
 }
 
 // WriteState sets the specified HTTP response code and writes the code specific text as body.
