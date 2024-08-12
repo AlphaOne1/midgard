@@ -18,7 +18,7 @@ func TestStackMiddleware(t *testing.T) {
 		[]defs.Middleware{
 			util.Must(method_filter.New(
 				method_filter.WithMethods([]string{http.MethodGet}))),
-			correlation.New(),
+			util.Must(correlation.New()),
 		},
 		http.HandlerFunc(util.DummyHandler),
 	)

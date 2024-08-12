@@ -8,8 +8,8 @@ import (
 func TestLogNil(t *testing.T) {
 	var m *MWBase
 
-	if m.Log() != nil {
-		t.Errorf("expected nil logger on nil MWBase")
+	if m.Log() != slog.Default() {
+		t.Errorf("expected default logger on nil MWBase")
 	}
 }
 

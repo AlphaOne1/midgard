@@ -28,7 +28,7 @@ func (mw *MWBase) Log() *slog.Logger {
 		return mw.log
 	}
 
-	return nil
+	return slog.Default()
 }
 
 // SetLog sets a new slog.Logger to use for logging.

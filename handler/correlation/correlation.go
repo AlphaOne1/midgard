@@ -3,6 +3,7 @@
 package correlation
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
@@ -45,14 +46,36 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	h.Next().ServeHTTP(w, r)
 }
 
+// WithLogger configures the logger to use.
+func WithLogger(log *slog.Logger) func(h *Handler) error {
+	return defs.WithLogger[*Handler](log)
+}
+
+// WithLogLevel configures the log level to use with the logger.
+func WithLogLevel(level slog.Level) func(h *Handler) error {
+	return defs.WithLogLevel[*Handler](level)
+}
+
 // New generates a new correlation id enriching middleware.
-func New() defs.Middleware {
+func New(options ...func(*Handler) error) (defs.Middleware, error) {
 	h := &Handler{}
+
+	h.SetLog(slog.Default())
+
+	for _, opt := range options {
+		if opt == nil {
+			return nil, errors.New("options cannot be nil")
+		}
+
+		if err := opt(h); err != nil {
+			return nil, err
+		}
+	}
 
 	return func(next http.Handler) http.Handler {
 		if err := h.SetNext(next); err != nil {
 			return nil
 		}
 		return h
-	}
+	}, nil
 }
