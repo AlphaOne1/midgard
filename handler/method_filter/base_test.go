@@ -1,6 +1,6 @@
 // Copyright the midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
-package access_log
+package method_filter
 
 import (
 	"errors"

@@ -1,6 +1,6 @@
 // Copyright the midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
-package access_log
+package rate_limit
 
 import (
 	"errors"
@@ -10,6 +10,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/AlphaOne1/midgard/handler/rate_limit/local_limit"
 	"github.com/AlphaOne1/midgard/util"
 )
 
@@ -59,7 +60,10 @@ func TestOptionNil(t *testing.T) {
 }
 
 func TestHandlerNextNil(t *testing.T) {
-	h := util.Must(New(WithLogLevel(slog.LevelDebug)))(nil)
+	h := util.Must(New(
+		WithLogLevel(slog.LevelDebug),
+		WithLimiter(util.Must(local_limit.New()))))(
+		nil)
 
 	if h != nil {
 		t.Errorf("expected handler to be nil")
@@ -71,7 +75,10 @@ func TestHandlerNextNil(t *testing.T) {
 //
 
 func TestOptionWithLevel(t *testing.T) {
-	h := util.Must(New(WithLogLevel(slog.LevelDebug)))(http.HandlerFunc(util.DummyHandler))
+	h := util.Must(New(
+		WithLogLevel(slog.LevelDebug),
+		WithLimiter(util.Must(local_limit.New()))))(
+		http.HandlerFunc(util.DummyHandler))
 
 	if h.(*Handler).LogLevel() != slog.LevelDebug {
 		t.Errorf("wanted loglevel debug not set")
@@ -92,7 +99,10 @@ func TestOptionWithLevelOnNil(t *testing.T) {
 
 func TestOptionWithLogger(t *testing.T) {
 	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	h := util.Must(New(WithLogger(l)))(http.HandlerFunc(util.DummyHandler))
+	h := util.Must(New(
+		WithLogger(l),
+		WithLimiter(util.Must(local_limit.New()))))(
+		http.HandlerFunc(util.DummyHandler))
 
 	if h.(*Handler).Log() != l {
 		t.Errorf("logger not set correctly")

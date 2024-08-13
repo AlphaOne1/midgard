@@ -3,10 +3,8 @@
 package basic_auth
 
 import (
-	"bytes"
 	"encoding/base64"
 	"errors"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -151,37 +149,5 @@ func TestBasicAuthDefaultRealm(t *testing.T) {
 
 	if !strings.Contains(authHeader, `Basic realm="Restricted"`) {
 		t.Errorf("default realm not set correctly: %v", authHeader)
-	}
-}
-
-func TestHandlerNil(t *testing.T) {
-	var subject *Handler = nil
-
-	rec := httptest.NewRecorder()
-
-	subject.ServeHTTP(rec, nil)
-
-	if rec.Result().StatusCode != http.StatusServiceUnavailable {
-		t.Errorf("ServeHTTP on nil handler should give error state")
-	}
-
-	body := bytes.Buffer{}
-
-	_, _ = io.Copy(&body, rec.Body)
-
-	if body.String() != "service not available" {
-		t.Errorf("expected 'service not available' but got '%s'", body.String())
-	}
-}
-
-func TestOptionError(t *testing.T) {
-	errOpt := func(h *Handler) error {
-		return errors.New("testerror")
-	}
-
-	_, err := New(errOpt)
-
-	if err == nil {
-		t.Errorf("expected middleware creation to fail")
 	}
 }

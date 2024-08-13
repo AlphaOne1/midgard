@@ -72,7 +72,6 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 // New generates a new access logging middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
 	h := &Handler{}
-	h.SetLog(slog.Default())
 
 	for _, opt := range options {
 		if opt == nil {

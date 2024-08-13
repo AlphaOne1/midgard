@@ -42,7 +42,7 @@ func main() {
 			util.Must(access_log.New(
 				access_log.WithLogLevel(slog.LevelDebug))),
 			util.Must(cors.New(
-				cors.WithHeaders(append(cors.MinimumAllowHeaders(), "X-Correlation-Id")),
+				cors.WithHeaders(append(cors.MinimumAllowHeaders(), "X-Correlation-ID")),
 				cors.WithMethods([]string{http.MethodGet}),
 				cors.WithOrigins([]string{"*"}))),
 			util.Must(method_filter.New(

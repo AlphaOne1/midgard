@@ -6,11 +6,13 @@ import (
 	"bytes"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/AlphaOne1/midgard/util"
 )
 
 // Authenticator is an interface the basic auth handler uses to check if the
@@ -23,20 +25,24 @@ type Authenticator interface {
 
 // Handler holds the internal data of the basic authentication middleware.
 type Handler struct {
+	defs.MWBase
 	auth          Authenticator // auth holds the Authenticator used
 	realm         string        // realm to report to the client
 	authRealmInfo string        // authRealmInfo holds the response header
-	next          http.Handler  // next handler in the middleware stack
+}
+
+func (h *Handler) GetMWBase() *defs.MWBase {
+	if h == nil {
+		return nil
+	}
+
+	return &h.MWBase
 }
 
 // sendNoAuth sends the client that his credentials are not allowed
 func (h *Handler) sendNoAuth(w http.ResponseWriter) {
 	w.Header().Add("WWW-Authenticate", h.authRealmInfo)
-	w.WriteHeader(http.StatusUnauthorized)
-
-	if _, err := w.Write([]byte("unauthorized")); err != nil {
-		slog.Error("could not write", slog.String("error", err.Error()))
-	}
+	util.WriteState(w, h.Log(), http.StatusUnauthorized)
 }
 
 // ExtractUserPass extracts the username and the password out of the given header
@@ -53,11 +59,7 @@ func ExtractUserPass(auth string) (user, pass string, found bool, err error) {
 	decode, decodeErr := base64.StdEncoding.DecodeString(authInfo)
 
 	if decodeErr != nil {
-		slog.Debug("could not decode auth info",
-			slog.String("error", decodeErr.Error()),
-			slog.String("authInfo", authInfo))
-
-		return "", "", false, errors.New("could not decode auth info")
+		return "", "", false, fmt.Errorf("could not decode auth info: %w", decodeErr)
 	}
 
 	credentials := bytes.Split(decode, []byte(":"))
@@ -73,12 +75,7 @@ func ExtractUserPass(auth string) (user, pass string, found bool, err error) {
 
 // ServeHTTP implements the basic auth functionality.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if h == nil {
-		slog.Error("basic auth not initialized")
-		w.WriteHeader(http.StatusServiceUnavailable)
-		if _, err := w.Write([]byte("service not available")); err != nil {
-			slog.Error("failed to write response", slog.String("error", err.Error()))
-		}
+	if !util.IntroCheck(h, w, r) {
 		return
 	}
 
@@ -86,7 +83,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	username, password, authFound, authErr := ExtractUserPass(authInfo)
 
 	if authErr != nil {
-		slog.Debug("could not process auth info",
+		h.Log().Debug("could not process auth info",
 			slog.String("error", authErr.Error()),
 			slog.String("authInfo", authInfo))
 	}
@@ -99,7 +96,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	hasAuth, authErr := h.auth.Authenticate(username, password)
 
 	if authErr != nil {
-		slog.Error("authentication error",
+		h.Log().Error("authentication error",
 			slog.String("error", authErr.Error()),
 			slog.String("user", username))
 	}
@@ -109,7 +106,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.next.ServeHTTP(w, r)
+	h.Next().ServeHTTP(w, r)
 }
 
 // WithAuthenticator sets the Authenticator to use.
@@ -130,11 +127,25 @@ func WithRealm(realm string) func(h *Handler) error {
 	}
 }
 
+// WithLogger configures the logger to use.
+func WithLogger(log *slog.Logger) func(h *Handler) error {
+	return defs.WithLogger[*Handler](log)
+}
+
+// WithLogLevel configures the log level to use with the logger.
+func WithLogLevel(level slog.Level) func(h *Handler) error {
+	return defs.WithLogLevel[*Handler](level)
+}
+
 // New generates a new basic authentication middleware.
 func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 	handler := Handler{}
 
 	for _, opt := range options {
+		if opt == nil {
+			return nil, errors.New("options cannot be nil")
+		}
+
 		if err := opt(&handler); err != nil {
 			return nil, err
 		}
@@ -151,7 +162,9 @@ func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 	handler.authRealmInfo = `Basic realm="` + handler.realm + `", charset="UTF-8"`
 
 	return func(next http.Handler) http.Handler {
-		handler.next = next
+		if err := handler.SetNext(next); err != nil {
+			return nil
+		}
 		return &handler
 	}, nil
 }

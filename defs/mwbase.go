@@ -13,7 +13,7 @@ import (
 type MWBase struct {
 	log      *slog.Logger // logger
 	logLevel slog.Level   // logLevel
-	next     http.Handler // next handler
+	next     http.Handler // next contains the next handler in the handler chain.
 }
 
 // MWBaser is the interface used to get the basic middleware information as defined in MWBase.
@@ -24,7 +24,7 @@ type MWBaser interface {
 
 // Log gets the configured slog.Logger.
 func (mw *MWBase) Log() *slog.Logger {
-	if mw != nil {
+	if mw != nil && mw.log != nil {
 		return mw.log
 	}
 

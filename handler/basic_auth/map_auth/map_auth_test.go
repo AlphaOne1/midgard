@@ -56,7 +56,7 @@ func TestMapAuthenticator(t *testing.T) {
 			}
 		}
 
-		gotAuth, gotErr := auth.Authorize(v.User, v.Pass)
+		gotAuth, gotErr := auth.Authenticate(v.User, v.Pass)
 
 		if gotErr != nil {
 			if !v.WantError {

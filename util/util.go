@@ -69,6 +69,7 @@ func GetOrCreateID(id string) string {
 // If an error occurs on writing to the client, it is logged to the specified logging instance.
 // It is intended to give error feedback to clients.
 func WriteState(w http.ResponseWriter, log *slog.Logger, httpState int) {
+	w.Header().Set("Content-Type", "text/plain")
 	w.WriteHeader(httpState)
 
 	if _, err := w.Write([]byte(http.StatusText(httpState))); err != nil {

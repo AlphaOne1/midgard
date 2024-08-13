@@ -38,7 +38,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		r.Header.Set("X-Correlation-ID", tmp)
 		w.Header().Set("X-Correlation-ID", tmp)
 
-		slog.Debug("created new correlation id", slog.String("correlation_id", tmp))
+		h.Log().Debug("created new correlation id", slog.String("correlation_id", tmp))
 	} else {
 		w.Header().Set("X-Correlation-ID", correlationID)
 	}

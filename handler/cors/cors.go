@@ -3,6 +3,7 @@
 package cors
 
 import (
+	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -10,10 +11,12 @@ import (
 	"strings"
 
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/AlphaOne1/midgard/util"
 )
 
 // Handler is a middleware that sets up the cross site scripting circumvention headers.
 type Handler struct {
+	defs.MWBase
 	// Headers contains the allowed headers
 	Headers map[string]bool
 	// HeadersReturn contains the comma-concatenated allowed headers
@@ -26,8 +29,14 @@ type Handler struct {
 	MethodsReturn string
 	// Origins contains the allowed origins
 	Origins []string
-	// Next contains the next handler in the handler chain.
-	Next http.Handler
+}
+
+func (h *Handler) GetMWBase() *defs.MWBase {
+	if h == nil {
+		return nil
+	}
+
+	return &h.MWBase
 }
 
 var minimumAllowHeaders = []string{
@@ -73,12 +82,7 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 
 // ServeHTTP sets up the client with the appropriate headers.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if h == nil {
-		slog.Error("cors not initialized")
-		w.WriteHeader(http.StatusServiceUnavailable)
-		if _, err := w.Write([]byte("service not available")); err != nil {
-			slog.Error("failed to write response", slog.String("error", err.Error()))
-		}
+	if !util.IntroCheck(h, w, r) {
 		return
 	}
 
@@ -88,10 +92,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// no relevant origin found in request
 	if roErr != nil {
-		w.WriteHeader(http.StatusForbidden)
-		if _, err := fmt.Fprintf(w, "origin %v not allowed", origin); err != nil {
-			slog.Error("could not write", slog.String("error", err.Error()))
-		}
+		util.WriteState(w, h.Log(), http.StatusForbidden)
 		return
 	}
 
@@ -108,10 +109,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// we have methods configured, but the request does not match any of them
 	if len(h.Methods) > 0 && !h.Methods[r.Method] {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		if _, err := fmt.Fprintf(w, "method %s not allowed", r.Method); err != nil {
-			slog.Error("could not write", slog.String("error", err.Error()))
-		}
+		util.WriteState(w, h.Log(), http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -119,18 +117,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// disallow in case there are non-configured ones
 	if len(h.Headers) > 0 {
 		for hdr := range r.Header {
-			if !h.Headers[hdr] {
-				w.WriteHeader(http.StatusForbidden)
-
-				if _, err := fmt.Fprintf(w, "header %s not allowed", hdr); err != nil {
-					slog.Error("could not write", slog.String("error", err.Error()))
-				}
+			if !h.Headers[strings.ToLower(hdr)] {
+				util.WriteState(w, h.Log(), http.StatusForbidden)
 				return
 			}
 		}
 	}
 
-	h.Next.ServeHTTP(w, r)
+	h.Next().ServeHTTP(w, r)
 }
 
 // WithHeaders sets the allowed headers. If later a request contains headers that are not
@@ -140,7 +134,7 @@ func WithHeaders(headers []string) func(handler *Handler) error {
 		headersMap := make(map[string]bool, len(headers))
 
 		for _, h := range headers {
-			headersMap[h] = true
+			headersMap[strings.ToLower(h)] = true
 		}
 
 		handler.Headers = headersMap
@@ -178,6 +172,16 @@ func WithOrigins(origins []string) func(handler *Handler) error {
 	}
 }
 
+// WithLogger configures the logger to use.
+func WithLogger(log *slog.Logger) func(h *Handler) error {
+	return defs.WithLogger[*Handler](log)
+}
+
+// WithLogLevel configures the log level to use with the logger.
+func WithLogLevel(level slog.Level) func(h *Handler) error {
+	return defs.WithLogLevel[*Handler](level)
+}
+
 // New sets up the cross site scripting circumvention disable headers.
 // If no methods are specified, all methods are allowed.
 // If no headers are specified, all headers are allowed.
@@ -186,6 +190,10 @@ func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 	handler := Handler{}
 
 	for _, opt := range options {
+		if opt == nil {
+			return nil, errors.New("options cannot be nil")
+		}
+
 		if err := opt(&handler); err != nil {
 			return nil, err
 		}
@@ -194,13 +202,13 @@ func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 	// if no origins are specified or one of the specified allowed origins is *
 	// just set the origins to *
 	if len(handler.Origins) == 0 || slices.Contains(handler.Origins, "*") {
-		if err := WithOrigins([]string{"*"})(&handler); err != nil {
-			return nil, err
-		}
+		_ = WithOrigins([]string{"*"})(&handler)
 	}
 
 	return func(next http.Handler) http.Handler {
-		handler.Next = next
+		if err := handler.SetNext(next); err != nil {
+			return nil
+		}
 		return &handler
 	}, nil
 }

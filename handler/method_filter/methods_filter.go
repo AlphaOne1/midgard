@@ -3,42 +3,46 @@
 package method_filter
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/AlphaOne1/midgard/util"
 )
 
 // Handler only lets configured HTTP methods pass.
 type Handler struct {
+	defs.MWBase
 	// Methods contains methods whitelist for the endpoint.
 	Methods map[string]bool
-	// Next contains the next handler in the handler chain.
-	Next http.Handler
+}
+
+func (h *Handler) GetMWBase() *defs.MWBase {
+	if h == nil {
+		return nil
+	}
+
+	return &h.MWBase
 }
 
 // ServeHTTP denies access (405) if the method is not in the whitelist.
 func (m *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if m == nil || m.Methods == nil {
-		slog.Error("method filter not initialized")
-		w.WriteHeader(http.StatusServiceUnavailable)
-		if _, err := w.Write([]byte("service not available")); err != nil {
-			slog.Error("failed to write response", slog.String("error", err.Error()))
-		}
+	if !util.IntroCheck(m, w, r) {
 		return
 	}
 
-	if r != nil && m.Methods[r.Method] {
-		m.Next.ServeHTTP(w, r)
-	} else {
-		w.Header().Set("Content-Type", "text/plain")
-		w.WriteHeader(http.StatusMethodNotAllowed)
-
-		if _, err := w.Write([]byte("method not allowed")); err != nil {
-			slog.Error("could not write response",
-				slog.String("error", err.Error()))
-		}
+	if m.Methods == nil {
+		m.Log().Error("method filter not initialized")
+		util.WriteState(w, m.Log(), http.StatusServiceUnavailable)
+		return
 	}
+
+	if m.Methods[r.Method] {
+		m.Next().ServeHTTP(w, r)
+	}
+
+	util.WriteState(w, m.Log(), http.StatusMethodNotAllowed)
 }
 
 // WithMethods sets the methods_filter configuration to allow the given methods to pass. If used multiple times,
@@ -57,18 +61,34 @@ func WithMethods(methods []string) func(m *Handler) error {
 	}
 }
 
+// WithLogger configures the logger to use.
+func WithLogger(log *slog.Logger) func(h *Handler) error {
+	return defs.WithLogger[*Handler](log)
+}
+
+// WithLogLevel configures the log level to use with the logger.
+func WithLogLevel(level slog.Level) func(h *Handler) error {
+	return defs.WithLogLevel[*Handler](level)
+}
+
 // New sets up the method filter middleware. Its parameters are functions manipulating an internal Config variable.
 func New(options ...func(m *Handler) error) (defs.Middleware, error) {
 	h := Handler{}
 
 	for _, opt := range options {
+		if opt == nil {
+			return nil, errors.New("options cannot be nil")
+		}
+
 		if err := opt(&h); err != nil {
 			return nil, err
 		}
 	}
 
 	return func(next http.Handler) http.Handler {
-		h.Next = next
+		if err := h.SetNext(next); err != nil {
+			return nil
+		}
 		return &h
 	}, nil
 }

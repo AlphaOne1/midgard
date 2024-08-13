@@ -3,9 +3,6 @@
 package method_filter
 
 import (
-	"bytes"
-	"errors"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -20,36 +17,37 @@ func TestMethodFilter(t *testing.T) {
 		method   string
 		wantCode int
 	}{
-		{
+		{ // 0
 			filter:   []string{http.MethodGet},
 			method:   http.MethodGet,
 			wantCode: http.StatusOK,
 		},
-		{
+		{ // 1
 			filter:   []string{http.MethodOptions, http.MethodGet},
 			method:   http.MethodGet,
 			wantCode: http.StatusOK,
 		},
-		{
+		{ // 2
 			filter:   []string{http.MethodGet},
 			method:   http.MethodPost,
 			wantCode: http.StatusMethodNotAllowed,
 		},
-		{
+		{ // 3
 			filter:   []string{http.MethodGet},
 			method:   " ",
 			wantCode: http.StatusMethodNotAllowed,
 		},
-		{
-			// specialty of go, that treats "" as GET
+		{ // 4
 			filter:   []string{http.MethodGet},
 			method:   "",
-			wantCode: http.StatusOK,
+			wantCode: http.StatusMethodNotAllowed,
 		},
 	}
 
 	for k, v := range tests {
-		req, _ := http.NewRequest(v.method, "", strings.NewReader(""))
+		req, _ := http.NewRequest(http.MethodGet, "", strings.NewReader(""))
+		// set method after, as Go could change it
+		req.Method = v.method
 		rec := httptest.NewRecorder()
 
 		mw := util.Must(New(WithMethods(v.filter)))(http.HandlerFunc(util.DummyHandler))
@@ -59,38 +57,6 @@ func TestMethodFilter(t *testing.T) {
 		if rec.Code != v.wantCode {
 			t.Errorf("%v: method filter did not work as expected, wanted %v but got %v", k, v.wantCode, rec.Code)
 		}
-	}
-}
-
-func TestHandlerNil(t *testing.T) {
-	var subject *Handler = nil
-
-	rec := httptest.NewRecorder()
-
-	subject.ServeHTTP(rec, nil)
-
-	if rec.Result().StatusCode != http.StatusServiceUnavailable {
-		t.Errorf("ServeHTTP on nil handler should give error state")
-	}
-
-	body := bytes.Buffer{}
-
-	_, _ = io.Copy(&body, rec.Body)
-
-	if body.String() != "service not available" {
-		t.Errorf("expected 'service not available' but got '%s'", body.String())
-	}
-}
-
-func TestOptionError(t *testing.T) {
-	errOpt := func(h *Handler) error {
-		return errors.New("testerror")
-	}
-
-	_, err := New(errOpt)
-
-	if err == nil {
-		t.Errorf("expected middleware creation to fail")
 	}
 }
 

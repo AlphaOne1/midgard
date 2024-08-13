@@ -20,6 +20,10 @@ import (
 func TestHandlerNil(t *testing.T) {
 	var handler *Handler
 
+	if got := handler.GetMWBase(); got != nil {
+		t.Errorf("MWBase of nil must be nil, but got non-nil")
+	}
+
 	req := httptest.NewRequest("GET", "/", nil)
 	rec := httptest.NewRecorder()
 
