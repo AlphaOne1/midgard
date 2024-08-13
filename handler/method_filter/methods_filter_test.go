@@ -72,12 +72,8 @@ func FuzzMethodFilter(f *testing.F) {
 	mw := util.Must(New(WithMethods(util.MapKeys(activeFilter))))(http.HandlerFunc(util.DummyHandler))
 
 	f.Fuzz(func(t *testing.T, method string) {
-		if method == "" {
-			// compensate Go NewRequest specialty, that treats "" as GET
-			method = http.MethodGet
-		}
-
-		req, _ := http.NewRequest(method, "", strings.NewReader(""))
+		req, _ := http.NewRequest(http.MethodGet, "", strings.NewReader(""))
+		req.Method = method
 		rec := httptest.NewRecorder()
 
 		mw.ServeHTTP(rec, req)
