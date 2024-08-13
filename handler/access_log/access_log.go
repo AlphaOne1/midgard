@@ -10,22 +10,36 @@ import (
 
 	"github.com/AlphaOne1/midgard/defs"
 	"github.com/AlphaOne1/midgard/handler/basic_auth"
+	"github.com/AlphaOne1/midgard/util"
 )
 
 // Handler holds the information necessary for the log
 type Handler struct {
-	log   *slog.Logger
-	level slog.Level
-	next  http.Handler
+	defs.MWBase
+}
+
+func (h *Handler) GetMWBase() *defs.MWBase {
+	if h == nil {
+		return nil
+	}
+
+	return &h.MWBase
 }
 
 // accessLogging is the access logging middleware. It logs every request with its
 // correlationID, the clients address, http method and accessed path.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if !util.IntroCheck(h, w, r) {
+		return
+	}
+
 	entries := []any{
 		slog.String("client", r.RemoteAddr),
 		slog.String("method", r.Method),
-		slog.String("target", r.URL.Path),
+	}
+
+	if r.URL != nil {
+		entries = append(entries, slog.String("target", r.URL.Path))
 	}
 
 	if correlationID := r.Header.Get("X-Correlation-ID"); correlationID != "" {
@@ -40,48 +54,39 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	slog.Log(context.Background(), h.level, "access", entries...)
+	h.Log().Log(context.Background(), h.LogLevel(), "access", entries...)
 
-	h.next.ServeHTTP(w, r)
+	h.Next().ServeHTTP(w, r)
 }
 
 // WithLogger configures the logger to use.
 func WithLogger(log *slog.Logger) func(h *Handler) error {
-	return func(h *Handler) error {
-		if log == nil {
-			return errors.New("cannot configure with nil logger")
-		}
-
-		h.log = log
-
-		return nil
-	}
+	return defs.WithLogger[*Handler](log)
 }
 
 // WithLogLevel configures the log level to use with the logger.
 func WithLogLevel(level slog.Level) func(h *Handler) error {
-	return func(h *Handler) error {
-		h.level = level
-
-		return nil
-	}
+	return defs.WithLogLevel[*Handler](level)
 }
 
 // New generates a new access logging middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
-	h := &Handler{
-		log:   slog.Default(),
-		level: slog.LevelInfo,
-	}
+	h := &Handler{}
 
 	for _, opt := range options {
+		if opt == nil {
+			return nil, errors.New("options cannot be nil")
+		}
+
 		if err := opt(h); err != nil {
 			return nil, err
 		}
 	}
 
 	return func(next http.Handler) http.Handler {
-		h.next = next
+		if err := h.SetNext(next); err != nil {
+			return nil
+		}
 		return h
 	}, nil
 }

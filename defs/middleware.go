@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: MPL-2.0
 package defs
 
-import "net/http"
+import (
+	"net/http"
+)
 
 // Middleware represents the common type of http middleware.
 // The idea is to have a common interface for all types of middlewares, that is, they get an

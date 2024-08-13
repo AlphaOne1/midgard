@@ -5,11 +5,9 @@ package access_log
 import (
 	"bytes"
 	"encoding/base64"
-	"errors"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"regexp"
 	"testing"
 
@@ -104,43 +102,5 @@ func TestAccessLoggingUser(t *testing.T) {
 
 	if !userMatch.Match(logBuf.Bytes()) {
 		t.Errorf("user not logged correctly: %v", logBuf.String())
-	}
-}
-
-func TestOptionError(t *testing.T) {
-	errOpt := func(h *Handler) error {
-		return errors.New("testerror")
-	}
-
-	_, err := New(errOpt)
-
-	if err == nil {
-		t.Errorf("expected middleware creation to fail")
-	}
-}
-
-func TestOptionWithLevel(t *testing.T) {
-	h := util.Must(New(WithLogLevel(slog.LevelDebug)))(nil)
-
-	if h.(*Handler).level != slog.LevelDebug {
-		t.Errorf("wanted loglevel debug not set")
-	}
-}
-
-func TestOptionWithLogger(t *testing.T) {
-	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	h := util.Must(New(WithLogger(l)))(nil)
-
-	if h.(*Handler).log != l {
-		t.Errorf("logger not set correctly")
-	}
-}
-
-func TestOptionWithNilLogger(t *testing.T) {
-	var l *slog.Logger = nil
-	_, hErr := New(WithLogger(l))
-
-	if hErr == nil {
-		t.Errorf("expected error on configuration with nil logger")
 	}
 }

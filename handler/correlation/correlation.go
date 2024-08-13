@@ -3,51 +3,79 @@
 package correlation
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 
-	"github.com/google/uuid"
-
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/AlphaOne1/midgard/util"
 )
 
+type Handler struct {
+	defs.MWBase
+}
+
+func (h *Handler) GetMWBase() *defs.MWBase {
+	if h == nil {
+		return nil
+	}
+
+	return &h.MWBase
+}
+
+// ServeHTTP is implements the correlation id enriching middleware.
+// It adds an X-Correlation-ID header if none was present.
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if !util.IntroCheck(h, w, r) {
+		return
+	}
+
+	correlationID := r.Header.Get("X-Correlation-ID")
+
+	if correlationID == "" {
+		tmp := util.GetOrCreateID("")
+
+		r.Header.Set("X-Correlation-ID", tmp)
+		w.Header().Set("X-Correlation-ID", tmp)
+
+		h.Log().Debug("created new correlation id", slog.String("correlation_id", tmp))
+	} else {
+		w.Header().Set("X-Correlation-ID", correlationID)
+	}
+
+	h.Next().ServeHTTP(w, r)
+}
+
+// WithLogger configures the logger to use.
+func WithLogger(log *slog.Logger) func(h *Handler) error {
+	return defs.WithLogger[*Handler](log)
+}
+
+// WithLogLevel configures the log level to use with the logger.
+func WithLogLevel(level slog.Level) func(h *Handler) error {
+	return defs.WithLogLevel[*Handler](level)
+}
+
 // New generates a new correlation id enriching middleware.
-func New() defs.Middleware {
-	return correlation
-}
+func New(options ...func(*Handler) error) (defs.Middleware, error) {
+	h := &Handler{}
 
-// getOrCreateID generates a new uuid, if the given id is empty, otherwise the given id is returned.
-func getOrCreateID(id string) string {
-	if len(id) > 0 {
-		return id
-	}
+	h.SetLog(slog.Default())
 
-	newID := "n/a"
-
-	if newUuid, err := uuid.NewRandom(); err == nil {
-		newID = newUuid.String()
-	}
-
-	return newID
-}
-
-// correlation is correlation id enriching middleware. It adds an X-Correlation-ID header if none was
-// present.
-func correlation(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		correlationID := r.Header.Get("X-Correlation-ID")
-
-		if correlationID == "" {
-			tmp := getOrCreateID("")
-
-			r.Header.Set("X-Correlation-ID", tmp)
-			w.Header().Set("X-Correlation-ID", tmp)
-
-			slog.Debug("created new correlation id", slog.String("correlation_id", tmp))
-		} else {
-			w.Header().Set("X-Correlation-ID", correlationID)
+	for _, opt := range options {
+		if opt == nil {
+			return nil, errors.New("options cannot be nil")
 		}
 
-		next.ServeHTTP(w, r)
-	})
+		if err := opt(h); err != nil {
+			return nil, err
+		}
+	}
+
+	return func(next http.Handler) http.Handler {
+		if err := h.SetNext(next); err != nil {
+			return nil
+		}
+		return h
+	}, nil
 }

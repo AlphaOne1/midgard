@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/AlphaOne1/midgard/util"
 )
 
 // Limiter is the interface a limiter has to implement to be used in the rate
@@ -18,30 +19,30 @@ type Limiter interface {
 
 // Handler holds the internal rate limiter information.
 type Handler struct {
+	defs.MWBase
 	Limit Limiter
-	Next  http.Handler
+}
+
+func (h *Handler) GetMWBase() *defs.MWBase {
+	if h == nil {
+		return nil
+	}
+
+	return &h.MWBase
 }
 
 // ServeHTTP limits the requests using the internal Limiter.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if h == nil {
-		slog.Error("rate limiter not initialized")
-		w.WriteHeader(http.StatusServiceUnavailable)
-		if _, err := w.Write([]byte("service not available")); err != nil {
-			slog.Error("failed to write response", slog.String("error", err.Error()))
-		}
+	if !util.IntroCheck(h, w, r) {
 		return
 	}
 
 	if !h.Limit.Limit() {
-		w.WriteHeader(http.StatusTooManyRequests)
-		if _, err := w.Write([]byte("too many requests")); err != nil {
-			slog.Error("failed to write response", slog.String("error", err.Error()))
-		}
+		util.WriteState(w, h.Log(), http.StatusTooManyRequests)
 		return
 	}
 
-	h.Next.ServeHTTP(w, r)
+	h.Next().ServeHTTP(w, r)
 }
 
 // WithLimiter sets the Limiter to use.
@@ -57,11 +58,25 @@ func WithLimiter(l Limiter) func(h *Handler) error {
 	}
 }
 
+// WithLogger configures the logger to use.
+func WithLogger(log *slog.Logger) func(h *Handler) error {
+	return defs.WithLogger[*Handler](log)
+}
+
+// WithLogLevel configures the log level to use with the logger.
+func WithLogLevel(level slog.Level) func(h *Handler) error {
+	return defs.WithLogLevel[*Handler](level)
+}
+
 // New creates a new rate limiter middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
 	h := Handler{}
 
 	for _, opt := range options {
+		if opt == nil {
+			return nil, errors.New("options cannot be nil")
+		}
+
 		if err := opt(&h); err != nil {
 			return nil, err
 		}
@@ -72,7 +87,9 @@ func New(options ...func(*Handler) error) (defs.Middleware, error) {
 	}
 
 	return func(next http.Handler) http.Handler {
-		h.Next = next
+		if err := h.SetNext(next); err != nil {
+			return nil
+		}
 		return &h
 	}, nil
 }

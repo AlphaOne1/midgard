@@ -6,35 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/AlphaOne1/midgard/util"
 )
-
-func TestGetOrCreateID(t *testing.T) {
-	tests := []struct {
-		in      string
-		wantNew bool
-	}{
-		{
-			in:      "",
-			wantNew: true,
-		},
-		{
-			in:      "nonsense",
-			wantNew: false,
-		},
-	}
-
-	for k, v := range tests {
-		got := getOrCreateID(v.in)
-
-		if v.wantNew == true && got == v.in {
-			t.Errorf("%v: wanted new UUID but got old one", k)
-		}
-
-		if !v.wantNew == true && got != v.in {
-			t.Errorf("%v: wanted old UUID but got new one", k)
-		}
-	}
-}
 
 func TestCorrelationNewID(t *testing.T) {
 	var gotCorrelationHeaderInside bool
@@ -45,7 +19,7 @@ func TestCorrelationNewID(t *testing.T) {
 		}
 	}
 
-	handler := New()(http.HandlerFunc(insideHandler))
+	handler := util.Must(New())(http.HandlerFunc(insideHandler))
 
 	req := httptest.NewRequest("GET", "/", nil)
 	rec := httptest.NewRecorder()
@@ -70,7 +44,7 @@ func TestCorrelationSuppliedID(t *testing.T) {
 		}
 	}
 
-	handler := New()(http.HandlerFunc(insideHandler))
+	handler := util.Must(New())(http.HandlerFunc(insideHandler))
 
 	req := httptest.NewRequest("GET", "/", nil)
 	req.Header.Add("X-Correlation-ID", "setOutside")

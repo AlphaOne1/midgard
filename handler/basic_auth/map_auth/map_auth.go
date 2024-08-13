@@ -11,7 +11,7 @@ type MapAuthenticator struct {
 
 // Authorize checks if a given username has the given password entry
 // identical in the internal auths map.
-func (a *MapAuthenticator) Authorize(username, password string) (bool, error) {
+func (a *MapAuthenticator) Authenticate(username, password string) (bool, error) {
 
 	if a == nil {
 		return false, errors.New("map auth not initialized")

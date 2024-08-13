@@ -6,8 +6,15 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"testing"
+	"reflect"
+
+	"github.com/AlphaOne1/midgard/defs"
+	"github.com/google/uuid"
 )
+
+// exitFunc is used to exit the program. For testing purposes it can be set to another function suitable
+// for non-exiting tests. Do not touch, if insecure!
+var exitFunc = os.Exit
 
 // Must exits the program if the given pair of function return and error contains an non-nil error value,
 // otherwise the function return value val is returned.
@@ -16,11 +23,7 @@ func Must[T any](val T, err error) T {
 		slog.Error("must-condition not met",
 			slog.String("error", err.Error()))
 
-		if !testing.Testing() {
-			os.Exit(1)
-		} else {
-			slog.Info("not exiting due to test-mode")
-		}
+		exitFunc(1)
 	}
 
 	return val
@@ -45,6 +48,55 @@ func MapKeys[T comparable, S any](m map[T]S) []T {
 	}
 
 	return result
+}
+
+// GetOrCreateID generates a new uuid, if the given id is empty, otherwise the given id is returned.
+func GetOrCreateID(id string) string {
+	if len(id) > 0 {
+		return id
+	}
+
+	newID := "n/a"
+
+	if newUuid, err := uuid.NewRandom(); err == nil {
+		newID = newUuid.String()
+	}
+
+	return newID
+}
+
+// WriteState sets the specified HTTP response code and writes the code specific text as body.
+// If an error occurs on writing to the client, it is logged to the specified logging instance.
+// It is intended to give error feedback to clients.
+func WriteState(w http.ResponseWriter, log *slog.Logger, httpState int) {
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(httpState)
+
+	if _, err := w.Write([]byte(http.StatusText(httpState))); err != nil {
+		log.Error("failed to write response", slog.String("error", err.Error()))
+	}
+}
+
+// Introcheck is used to facilitate the introductory check in each handler for the basic requirements.
+// It manages the corresponding logging operations and can be used as follows:
+//
+//	if !util.IntroCheck(h, w, r) {
+//	    return
+//	}
+func IntroCheck(h defs.MWBaser, w http.ResponseWriter, r *http.Request) bool {
+	if reflect.ValueOf(h).IsNil() {
+		slog.Error("handler nil")
+		WriteState(w, slog.Default(), http.StatusInternalServerError)
+		return false
+	}
+
+	if r == nil {
+		slog.Debug("request nil")
+		WriteState(w, h.GetMWBase().Log(), http.StatusBadRequest)
+		return false
+	}
+
+	return true
 }
 
 // DummyHandler is a handler used for internal testing.

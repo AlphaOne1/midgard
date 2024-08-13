@@ -3,9 +3,6 @@
 package cors
 
 import (
-	"bytes"
-	"errors"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -64,7 +61,7 @@ func TestEvalCSSHandler(t *testing.T) {
 			header:      map[string][]string{"Origin": {"dummy.com"}},
 			wantCode:    http.StatusForbidden,
 			wantHeader:  nil,
-			wantContent: "origin [dummy.com] not allowed",
+			wantContent: http.StatusText(http.StatusForbidden),
 		}, { // 5
 			cssMethods:  []string{http.MethodGet},
 			cssOrigins:  []string{"dummy0.com", "dummy1.com"},
@@ -72,7 +69,7 @@ func TestEvalCSSHandler(t *testing.T) {
 			header:      map[string][]string{"Origin": {"dummy0.com"}},
 			wantCode:    http.StatusMethodNotAllowed,
 			wantHeader:  nil,
-			wantContent: "method POST not allowed",
+			wantContent: http.StatusText(http.StatusMethodNotAllowed),
 		}, { // 6
 			cssMethods: []string{http.MethodGet},
 			cssOrigins: []string{"dummy0.com", "dummy1.com"},
@@ -83,7 +80,7 @@ func TestEvalCSSHandler(t *testing.T) {
 			},
 			wantCode:    http.StatusForbidden,
 			wantHeader:  nil,
-			wantContent: "header X-Forbidden not allowed",
+			wantContent: http.StatusText(http.StatusForbidden),
 		}, { // 7
 			cssMethods: []string{http.MethodGet},
 			cssOrigins: []string{"dummy0.com", "dummy1.com"},
@@ -113,7 +110,7 @@ func TestEvalCSSHandler(t *testing.T) {
 			},
 			wantCode:    http.StatusForbidden,
 			wantHeader:  nil,
-			wantContent: "origin [] not allowed",
+			wantContent: http.StatusText(http.StatusForbidden),
 		},
 	}
 
@@ -148,37 +145,5 @@ func TestEvalCSSHandler(t *testing.T) {
 				t.Errorf("%v: wanted [%v:%v] but did not find it", k, wk, wv)
 			}
 		}
-	}
-}
-
-func TestOptionError(t *testing.T) {
-	errOpt := func(h *Handler) error {
-		return errors.New("testerror")
-	}
-
-	_, err := New(errOpt)
-
-	if err == nil {
-		t.Errorf("expected middleware creation to fail")
-	}
-}
-
-func TestHandlerNil(t *testing.T) {
-	var subject *Handler = nil
-
-	rec := httptest.NewRecorder()
-
-	subject.ServeHTTP(rec, nil)
-
-	if rec.Result().StatusCode != http.StatusServiceUnavailable {
-		t.Errorf("ServeHTTP on nil handler should give error state")
-	}
-
-	body := bytes.Buffer{}
-
-	_, _ = io.Copy(&body, rec.Body)
-
-	if body.String() != "service not available" {
-		t.Errorf("expected 'service not available' but got '%s'", body.String())
 	}
 }

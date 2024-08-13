@@ -38,13 +38,13 @@ func main() {
 	// generate a handler that is prepended with the given middlewares
 	finalHandler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
+			util.Must(correlation.New()),
 			util.Must(access_log.New(
 				access_log.WithLogLevel(slog.LevelDebug))),
 			util.Must(cors.New(
-				cors.WithHeaders(cors.MinimumAllowHeaders()),
+				cors.WithHeaders(append(cors.MinimumAllowHeaders(), "X-Correlation-ID")),
 				cors.WithMethods([]string{http.MethodGet}),
 				cors.WithOrigins([]string{"*"}))),
-			correlation.New(),
 			util.Must(method_filter.New(
 				method_filter.WithMethods([]string{http.MethodGet}))),
 		},

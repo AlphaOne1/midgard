@@ -86,7 +86,7 @@ that has all the given middlewares prepended:
 ```go
 finalHandler := midgard.StackMiddlewareHandler(
     []midgard.Middleware{
-        correlation.New(),
+        util.Must(correlation.New()),
         util.Must(access_log.New(
             access_log.WithLogLevel(slog.LevelDebug))),
         util.Must(cors.New(
@@ -106,7 +106,7 @@ It generates a new middleware:
 ```go
 newMiddleware:= midgard.StackMiddleware(
     []midgard.Middleware{
-        correlation.New(),
+        util.Must(correlation.New()),
         util.Must(access_log.New(
             access_log.WithLogLevel(slog.LevelDebug))),
         util.Must(cors.New(
@@ -121,7 +121,7 @@ newMiddleware:= midgard.StackMiddleware(
 The native solution for this would be to nest the calls to the middleware like this:
 
 ```go
-finalHandler := correlation.New()(
+finalHandler := util.Must(correlation.New())(
                     util.Must(access_log.New(
                         access_log.WithLogLevel(slog.LevelDebug)))(
                         util.Must(cors.New(
