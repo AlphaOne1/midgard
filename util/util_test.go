@@ -108,6 +108,14 @@ func TestWriteState(t *testing.T) {
 		if rec.Body.String() != http.StatusText(v.state) {
 			t.Errorf("%v: wanted %v but got %v", k, http.StatusText(v.state), rec.Body.String())
 		}
+
+		if ct := rec.Result().Header["Content-Type"]; len(ct) == 0 || ct[0] != "text/plain; charset=utf-8" {
+			t.Errorf("%v: content type not set correctly, set to %v", k, ct)
+		}
+
+		if cto := rec.Result().Header["X-Content-Type-Options"]; len(cto) == 0 || cto[0] != "nosniff" {
+			t.Errorf("%v: content type options not set correctly, set to %v", k, cto)
+		}
 	}
 }
 
