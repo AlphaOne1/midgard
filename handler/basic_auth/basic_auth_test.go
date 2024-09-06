@@ -151,3 +151,33 @@ func TestBasicAuthDefaultRealm(t *testing.T) {
 		t.Errorf("default realm not set correctly: %v", authHeader)
 	}
 }
+
+func TestBasicAuthRedirect(t *testing.T) {
+	handler := midgard.StackMiddlewareHandler(
+		[]defs.Middleware{
+			util.Must(New(
+				WithAuthenticator(&AuthTest{}),
+				WithRedirect("/login.html"),
+			)),
+		},
+		http.HandlerFunc(util.DummyHandler),
+	)
+
+	req, _ := http.NewRequest("GET", "/", nil)
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Result().StatusCode != http.StatusFound {
+		t.Errorf("got state %v but wanted %v",
+			rec.Result().StatusCode,
+			http.StatusFound)
+	}
+
+	relocHeader := rec.Result().Header.Get("Location")
+
+	if !strings.Contains(relocHeader, `/login.html`) {
+		t.Errorf("redirect not set correctly: %v", relocHeader)
+	}
+
+}
