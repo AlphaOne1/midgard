@@ -29,6 +29,7 @@ type Handler struct {
 	auth          Authenticator // auth holds the Authenticator used
 	realm         string        // realm to report to the client
 	authRealmInfo string        // authRealmInfo holds the response header
+	redirect      string        // redirect address to authenticate
 }
 
 func (h *Handler) GetMWBase() *defs.MWBase {
@@ -40,9 +41,13 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 }
 
 // sendNoAuth sends the client that his credentials are not allowed
-func (h *Handler) sendNoAuth(w http.ResponseWriter) {
-	w.Header().Add("WWW-Authenticate", h.authRealmInfo)
-	util.WriteState(w, h.Log(), http.StatusUnauthorized)
+func (h *Handler) sendNoAuth(w http.ResponseWriter, r *http.Request) {
+	if len(h.redirect) > 0 {
+		http.Redirect(w, r, h.redirect, http.StatusFound)
+	} else {
+		w.Header().Add("WWW-Authenticate", h.authRealmInfo)
+		util.WriteState(w, h.Log(), http.StatusUnauthorized)
+	}
 }
 
 // ExtractUserPass extracts the username and the password out of the given header
@@ -89,7 +94,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !authFound {
-		h.sendNoAuth(w)
+		h.sendNoAuth(w, r)
 		return
 	}
 
@@ -102,7 +107,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !hasAuth {
-		h.sendNoAuth(w)
+		h.sendNoAuth(w, r)
 		return
 	}
 
@@ -122,6 +127,14 @@ func WithAuthenticator(auth Authenticator) func(h *Handler) error {
 func WithRealm(realm string) func(h *Handler) error {
 	return func(h *Handler) error {
 		h.realm = realm
+
+		return nil
+	}
+}
+
+func WithRedirect(redirect string) func(h *Handler) error {
+	return func(h *Handler) error {
+		h.redirect = redirect
 
 		return nil
 	}
