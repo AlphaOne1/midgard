@@ -1,5 +1,6 @@
 // Copyright the midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
+
 package correlation
 
 import (
@@ -59,8 +60,6 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 // New generates a new correlation id enriching middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
 	h := &Handler{}
-
-	h.SetLog(slog.Default())
 
 	for _, opt := range options {
 		if opt == nil {

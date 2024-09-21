@@ -1,5 +1,6 @@
 // Copyright the midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
+
 package map_auth
 
 import "errors"
@@ -9,7 +10,7 @@ type MapAuthenticator struct {
 	auths map[string]string // map containing username-password pairs
 }
 
-// Authorize checks if a given username has the given password entry
+// Authenticate checks if a given username has the given password entry
 // identical in the internal auths map.
 func (a *MapAuthenticator) Authenticate(username, password string) (bool, error) {
 

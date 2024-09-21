@@ -1,5 +1,6 @@
 // Copyright the midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
+
 package method_filter
 
 import (
@@ -27,7 +28,7 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 }
 
 // ServeHTTP denies access (405) if the method is not in the whitelist.
-func (m *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !util.IntroCheck(m, w, r) {
 		return
 	}
