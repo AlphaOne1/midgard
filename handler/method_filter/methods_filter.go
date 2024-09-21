@@ -29,21 +29,21 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 
 // ServeHTTP denies access (405) if the method is not in the whitelist.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if !util.IntroCheck(m, w, r) {
+	if !util.IntroCheck(h, w, r) {
 		return
 	}
 
-	if m.Methods == nil {
-		m.Log().Error("method filter not initialized")
-		util.WriteState(w, m.Log(), http.StatusServiceUnavailable)
+	if h.Methods == nil {
+		h.Log().Error("method filter not initialized")
+		util.WriteState(w, h.Log(), http.StatusServiceUnavailable)
 		return
 	}
 
-	if m.Methods[r.Method] {
-		m.Next().ServeHTTP(w, r)
+	if h.Methods[r.Method] {
+		h.Next().ServeHTTP(w, r)
 	}
 
-	util.WriteState(w, m.Log(), http.StatusMethodNotAllowed)
+	util.WriteState(w, h.Log(), http.StatusMethodNotAllowed)
 }
 
 // WithMethods sets the methods_filter configuration to allow the given methods to pass. If used multiple times,
