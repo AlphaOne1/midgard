@@ -42,6 +42,11 @@ func TestMethodFilter(t *testing.T) {
 			method:   "",
 			wantCode: http.StatusMethodNotAllowed,
 		},
+		{ // 5
+			filter:   []string{},
+			method:   http.MethodGet,
+			wantCode: http.StatusMethodNotAllowed,
+		},
 	}
 
 	for k, v := range tests {
@@ -57,6 +62,21 @@ func TestMethodFilter(t *testing.T) {
 		if rec.Code != v.wantCode {
 			t.Errorf("%v: method filter did not work as expected, wanted %v but got %v", k, v.wantCode, rec.Code)
 		}
+	}
+}
+
+func TestMethodFilterUninitialized(t *testing.T) {
+	req, _ := http.NewRequest(http.MethodGet, "", strings.NewReader(""))
+	// set method after, as Go could change it
+	req.Method = http.MethodGet
+	rec := httptest.NewRecorder()
+
+	mw := util.Must(New())(http.HandlerFunc(util.DummyHandler))
+
+	mw.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusServiceUnavailable {
+		t.Errorf("method filter did not work as expected, wanted %v but got %v", http.StatusServiceUnavailable, rec.Code)
 	}
 }
 
