@@ -1,5 +1,6 @@
 // Copyright the midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
+
 package util
 
 import (
@@ -8,8 +9,9 @@ import (
 	"os"
 	"reflect"
 
-	"github.com/AlphaOne1/midgard/defs"
 	"github.com/google/uuid"
+
+	"github.com/AlphaOne1/midgard/defs"
 )
 
 // exitFunc is used to exit the program. For testing purposes it can be set to another function suitable
@@ -82,7 +84,7 @@ func WriteState(w http.ResponseWriter, log *slog.Logger, httpState int) {
 	}
 }
 
-// Introcheck is used to facilitate the introductory check in each handler for the basic requirements.
+// IntroCheck is used to facilitate the introductory check in each handler for the basic requirements.
 // It manages the corresponding logging operations and can be used as follows:
 //
 //	if !util.IntroCheck(h, w, r) {
