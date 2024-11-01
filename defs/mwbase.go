@@ -92,7 +92,7 @@ func (mw *MWBase) SetNext(n http.Handler) error {
 // for each handler.
 func WithLogger[T MWBaser](l *slog.Logger) func(h T) error {
 	return func(h T) error {
-		if reflect.ValueOf(h).IsNil() {
+		if value := reflect.ValueOf(h); !value.IsValid() || value.IsNil() {
 			return errors.New("cannot configure nil handler")
 		}
 
@@ -104,7 +104,7 @@ func WithLogger[T MWBaser](l *slog.Logger) func(h T) error {
 // for each handler.
 func WithLogLevel[T MWBaser](l slog.Level) func(h T) error {
 	return func(h T) error {
-		if reflect.ValueOf(h).IsNil() {
+		if value := reflect.ValueOf(h); !value.IsValid() || value.IsNil() {
 			return errors.New("cannot configure nil handler")
 		}
 
