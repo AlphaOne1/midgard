@@ -109,12 +109,5 @@ func IntroCheck(h defs.MWBaser, w http.ResponseWriter, r *http.Request) bool {
 // DummyHandler is a handler used for internal testing.
 // It simply writes the text "dummy" to the given http.ResponseWriter.
 func DummyHandler(w http.ResponseWriter, r *http.Request) {
-	if _, err := w.Write([]byte("dummy")); err != nil {
-		slog.Error("could not write dummy", slog.String("error", err.Error()))
-	}
-	if r.Body != nil {
-		if err := r.Body.Close(); err != nil {
-			slog.Error("could not close request body", slog.String("error", err.Error()))
-		}
-	}
+	_, _ = w.Write([]byte("dummy"))
 }
