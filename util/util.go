@@ -108,6 +108,6 @@ func IntroCheck(h defs.MWBaser, w http.ResponseWriter, r *http.Request) bool {
 
 // DummyHandler is a handler used for internal testing.
 // It simply writes the text "dummy" to the given http.ResponseWriter.
-func DummyHandler(w http.ResponseWriter, r *http.Request) {
+func DummyHandler(w http.ResponseWriter, _ /*r*/ *http.Request) {
 	_, _ = w.Write([]byte("dummy"))
 }

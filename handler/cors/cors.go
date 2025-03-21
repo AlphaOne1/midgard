@@ -188,28 +188,28 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 // If no headers are specified, all headers are allowed.
 // If origin contains "*" or is empty, the allowed origins are set to *.
 func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
-	handler := Handler{}
+	h := Handler{}
 
 	for _, opt := range options {
 		if opt == nil {
 			return nil, errors.New("options cannot be nil")
 		}
 
-		if err := opt(&handler); err != nil {
+		if err := opt(&h); err != nil {
 			return nil, err
 		}
 	}
 
 	// if no origins are specified or one of the specified allowed origins is *
 	// just set the origins to *
-	if len(handler.Origins) == 0 || slices.Contains(handler.Origins, "*") {
-		_ = WithOrigins([]string{"*"})(&handler)
+	if len(h.Origins) == 0 || slices.Contains(h.Origins, "*") {
+		_ = WithOrigins([]string{"*"})(&h)
 	}
 
 	return func(next http.Handler) http.Handler {
-		if err := handler.SetNext(next); err != nil {
+		if err := h.SetNext(next); err != nil {
 			return nil
 		}
-		return &handler
+		return &h
 	}, nil
 }
