@@ -4,6 +4,7 @@ Release 0.1.0
 Initial release
 
 - added access log middleware
+- added header adding middleware
 - added basic auth middleware
 - added correlation ID middleware
 - added CORS middleware
