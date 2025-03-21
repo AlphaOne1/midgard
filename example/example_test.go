@@ -1,5 +1,6 @@
 // Copyright the midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
+
 package main
 
 import (

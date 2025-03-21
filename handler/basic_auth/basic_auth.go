@@ -153,32 +153,32 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 
 // New generates a new basic authentication middleware.
 func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
-	handler := Handler{}
+	h := Handler{}
 
 	for _, opt := range options {
 		if opt == nil {
 			return nil, errors.New("options cannot be nil")
 		}
 
-		if err := opt(&handler); err != nil {
+		if err := opt(&h); err != nil {
 			return nil, err
 		}
 	}
 
-	if handler.auth == nil {
+	if h.auth == nil {
 		return nil, errors.New("no authenticator configured")
 	}
 
-	if handler.realm == "" {
-		handler.realm = "Restricted"
+	if h.realm == "" {
+		h.realm = "Restricted"
 	}
 
-	handler.authRealmInfo = `Basic realm="` + handler.realm + `", charset="UTF-8"`
+	h.authRealmInfo = `Basic realm="` + h.realm + `", charset="UTF-8"`
 
 	return func(next http.Handler) http.Handler {
-		if err := handler.SetNext(next); err != nil {
+		if err := h.SetNext(next); err != nil {
 			return nil
 		}
-		return &handler
+		return &h
 	}, nil
 }

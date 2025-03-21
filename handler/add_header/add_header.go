@@ -1,22 +1,22 @@
 // Copyright the midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package access_log
+package add_header
 
 import (
-	"context"
 	"errors"
 	"log/slog"
+	"maps"
 	"net/http"
 
 	"github.com/AlphaOne1/midgard/defs"
-	"github.com/AlphaOne1/midgard/handler/basic_auth"
 	"github.com/AlphaOne1/midgard/util"
 )
 
-// Handler holds the information necessary for the log
+// Handler holds the information of the added headers
 type Handler struct {
 	defs.MWBase
+	headers map[string]string
 }
 
 func (h *Handler) GetMWBase() *defs.MWBase {
@@ -27,35 +27,15 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 	return &h.MWBase
 }
 
-// ServeHTTP implements the access logging middleware. It logs every request with its
-// correlationID, the clients address, http method and accessed path.
+// ServeHTTP handles the requests, adding the additionally provided headers to the responses.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !util.IntroCheck(h, w, r) {
 		return
 	}
 
-	entries := []any{
-		slog.String("client", r.RemoteAddr),
-		slog.String("method", r.Method),
+	for k, v := range h.headers {
+		w.Header().Set(k, v)
 	}
-
-	if r.URL != nil {
-		entries = append(entries, slog.String("target", r.URL.Path))
-	}
-
-	if correlationID := r.Header.Get("X-Correlation-ID"); correlationID != "" {
-		entries = append(entries, slog.String("correlation_id", correlationID))
-	}
-
-	if authLine := r.Header.Get("Authorization"); authLine != "" {
-		username, _, userFound, _ := basic_auth.ExtractUserPass(authLine)
-
-		if userFound {
-			entries = append(entries, slog.String("user", username))
-		}
-	}
-
-	h.Log().Log(context.Background(), h.LogLevel(), "access", entries...)
 
 	h.Next().ServeHTTP(w, r)
 }
@@ -70,7 +50,19 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 	return defs.WithLogLevel[*Handler](level)
 }
 
-// New generates a new access logging middleware.
+// WithHeaders configures the headers to add to responses.
+func WithHeaders(headers map[string]string) func(*Handler) error {
+	return func(h *Handler) error {
+		if h.headers == nil {
+			h.headers = make(map[string]string, len(headers))
+		}
+
+		maps.Insert(h.headers, maps.All(headers))
+		return nil
+	}
+}
+
+// New generates a new header adding middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
 	h := new(Handler)
 

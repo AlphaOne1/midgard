@@ -1,5 +1,6 @@
 // Copyright the midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
+
 package main
 
 import (
@@ -54,7 +55,7 @@ func main() {
 	// register the newly generated handler for the / endpoint
 	http.Handle("/", finalHandler)
 
-	server := &http.Server{Addr: ":8080", Handler: nil}
+	server := &http.Server{Addr: "localhost:8080", Handler: nil}
 
 	go func() {
 		time.Sleep(1 * time.Second)
