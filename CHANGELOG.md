@@ -1,3 +1,8 @@
+Release 0.1.1
+=============
+
+- fix add_headers to allow for duplate headers
+
 Release 0.1.0
 =============
 
