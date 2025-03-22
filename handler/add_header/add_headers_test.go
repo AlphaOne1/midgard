@@ -12,8 +12,8 @@ import (
 )
 
 func TestAddHeaders(t *testing.T) {
-	handler := util.Must(New(WithHeaders(map[string]string{
-		"X-Test-Header": "testValue",
+	handler := util.Must(New(WithHeaders([][2]string{
+		{"X-Test-Header", "testValue"},
 	})))(http.HandlerFunc(util.DummyHandler))
 
 	req := httptest.NewRequest("GET", "/", nil)

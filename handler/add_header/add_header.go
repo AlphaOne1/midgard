@@ -6,7 +6,6 @@ package add_header
 import (
 	"errors"
 	"log/slog"
-	"maps"
 	"net/http"
 
 	"github.com/AlphaOne1/midgard/defs"
@@ -16,7 +15,7 @@ import (
 // Handler holds the information of the added headers
 type Handler struct {
 	defs.MWBase
-	headers map[string]string
+	headers [][2]string
 }
 
 func (h *Handler) GetMWBase() *defs.MWBase {
@@ -33,8 +32,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for k, v := range h.headers {
-		w.Header().Set(k, v)
+	for _, v := range h.headers {
+		w.Header().Set(v[0], v[1])
 	}
 
 	h.Next().ServeHTTP(w, r)
@@ -51,13 +50,9 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 }
 
 // WithHeaders configures the headers to add to responses.
-func WithHeaders(headers map[string]string) func(*Handler) error {
+func WithHeaders(headers [][2]string) func(*Handler) error {
 	return func(h *Handler) error {
-		if h.headers == nil {
-			h.headers = make(map[string]string, len(headers))
-		}
-
-		maps.Insert(h.headers, maps.All(headers))
+		h.headers = append(h.headers, headers...)
 		return nil
 	}
 }
