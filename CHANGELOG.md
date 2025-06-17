@@ -1,3 +1,8 @@
+Release 0.1.2
+=============
+
+- update crypto dependency
+
 Release 0.1.1
 =============
 
