@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 MD033 MD041 -->
 <p align="center">
     <img src="midgard_logo.svg" width="25%" alt="Logo"><br>
     <a href="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml"
@@ -27,9 +28,11 @@
     <a href="https://codecov.io/github/AlphaOne1/midgard"
        rel="external"
        target="_blank">
-        <img src="https://codecov.io/github/AlphaOne1/midgard/graph/badge.svg?token=X58EXDA6I9"
+        <img src="https://codecov.io/github/AlphaOne1/midgard/graph/badge.svg"
              alt="Code Coverage">
     </a>
+    <img src="https://img.shields.io/coderabbit/prs/github/AlphaOne1/midgard"
+         alt="CodeRabbit Reviews">
     <a href="https://www.bestpractices.dev/projects/9251"
        rel="external"
        target="_blank">
@@ -46,21 +49,22 @@
        rel="external"
        target="_blank">
         <img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard.svg?type=shield&issueType=license"
-            alt="FOSSA Status">
+            alt="FOSSA License Status">
     </a>
-    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard?ref=badge_shield&issueType=security" 
+    <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard?ref=badge_shield&issueType=security"
        rel="external"
        target="_blank">
         <img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard.svg?type=shield&issueType=security"
-             alt="FOSSA Status">
+             alt="FOSSA Security Status">
     </a>
-    <a href="http://godoc.org/github.com/AlphaOne1/midgard"
+    <a href="http://pkg.go.dev/github.com/AlphaOne1/midgard"
        rel="external"
        target="_blank">
-        <img src="https://godoc.org/github.com/AlphaOne1/midgard?status.svg"
-             alt="GoDoc Reference">
+        <img src="https://pkg.go.dev/badge/github.com/AlphaOne1/midgard.svg"
+             alt="Go Reference">
     </a>
 </p>
+<!-- markdownlint-enable MD013 MD033 MD041 -->
 
 midgard
 =======
