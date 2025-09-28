@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package main
@@ -11,6 +11,8 @@ import (
 )
 
 func TestExampleMain(t *testing.T) {
+	t.Parallel()
+
 	go main()
 
 	time.Sleep(500 * time.Millisecond)

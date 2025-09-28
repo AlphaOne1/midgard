@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package util
@@ -19,6 +19,8 @@ import (
 )
 
 func TestMustGood(t *testing.T) {
+	t.Parallel()
+
 	got := Must("pass", nil)
 
 	if got != "pass" {
@@ -26,6 +28,7 @@ func TestMustGood(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // manipulating global exit function
 func TestMustBad(t *testing.T) {
 	outbuf := bytes.Buffer{}
 	exitFunc = func(_ int) {}
@@ -49,6 +52,8 @@ func TestMustBad(t *testing.T) {
 }
 
 func TestGetOrCreateID(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		in      string
 		wantNew bool
@@ -77,6 +82,8 @@ func TestGetOrCreateID(t *testing.T) {
 }
 
 func TestDummyHandler(t *testing.T) {
+	t.Parallel()
+
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
@@ -88,6 +95,8 @@ func TestDummyHandler(t *testing.T) {
 }
 
 func TestWriteState(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		state int
 	}{
@@ -129,6 +138,8 @@ func (h *MWTest) GetMWBase() *defs.MWBase {
 }
 
 func TestIntroCheck(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		h    *MWTest
 		req  *http.Request
@@ -168,6 +179,8 @@ func TestIntroCheck(t *testing.T) {
 }
 
 func TestMapKeys(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		in   map[string]int
 		want []string

@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package add_header
@@ -12,6 +12,8 @@ import (
 )
 
 func TestAddHeaders(t *testing.T) {
+	t.Parallel()
+
 	handler := util.Must(New(WithHeaders([][2]string{
 		{"X-Test-Header", "testValue"},
 	})))(http.HandlerFunc(util.DummyHandler))

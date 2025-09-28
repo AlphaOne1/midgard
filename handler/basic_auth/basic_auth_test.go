@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package basic_auth
@@ -26,6 +26,8 @@ func (a *AuthTest) Authenticate(username, password string) (bool, error) {
 }
 
 func TestBasicAuth(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		User      string
 		Pass      string
@@ -93,6 +95,8 @@ func TestBasicAuth(t *testing.T) {
 }
 
 func TestBasicAuthDecodeError(t *testing.T) {
+	t.Parallel()
+
 	handler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
 			util.Must(New(
@@ -119,6 +123,8 @@ func TestBasicAuthDecodeError(t *testing.T) {
 }
 
 func TestBasicAuthNoAuthenticator(t *testing.T) {
+	t.Parallel()
+
 	_, mwErr := New(
 		WithRealm("testrealm"))
 
@@ -128,6 +134,8 @@ func TestBasicAuthNoAuthenticator(t *testing.T) {
 }
 
 func TestBasicAuthDefaultRealm(t *testing.T) {
+	t.Parallel()
+
 	handler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
 			util.Must(New(WithAuthenticator(&AuthTest{}))),
@@ -154,6 +162,8 @@ func TestBasicAuthDefaultRealm(t *testing.T) {
 }
 
 func TestBasicAuthRedirect(t *testing.T) {
+	t.Parallel()
+
 	handler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
 			util.Must(New(

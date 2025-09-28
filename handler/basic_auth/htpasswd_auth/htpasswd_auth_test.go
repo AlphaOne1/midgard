@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package htpasswd_auth
@@ -10,6 +10,8 @@ import (
 )
 
 func TestHtpasswdAuth(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		Username string
 		Password string
@@ -48,6 +50,8 @@ func TestHtpasswdAuth(t *testing.T) {
 }
 
 func TestHtpasswdNil(t *testing.T) {
+	t.Parallel()
+
 	var subject *HTPassWDAuth = nil
 
 	if _, err := subject.Authorize("u", "p"); err == nil {
@@ -56,6 +60,8 @@ func TestHtpasswdNil(t *testing.T) {
 }
 
 func TestHtpasswdNonExistingFile(t *testing.T) {
+	t.Parallel()
+
 	_, err := New(WithAuthFile("IDoNotExistNowhereInThisWorldForgetIt"))
 
 	if err == nil {
@@ -64,6 +70,8 @@ func TestHtpasswdNonExistingFile(t *testing.T) {
 }
 
 func TestHtpasswdNoOptions(t *testing.T) {
+	t.Parallel()
+
 	_, err := New()
 
 	if err == nil {
@@ -72,6 +80,8 @@ func TestHtpasswdNoOptions(t *testing.T) {
 }
 
 func TestHtpasswdWrongReader(t *testing.T) {
+	t.Parallel()
+
 	_, err := New(WithAuthInput(nil))
 
 	if err == nil {
@@ -80,6 +90,8 @@ func TestHtpasswdWrongReader(t *testing.T) {
 }
 
 func TestHtpasswdEmptyFilename(t *testing.T) {
+	t.Parallel()
+
 	_, err := New(WithAuthFile(""))
 
 	if err == nil {

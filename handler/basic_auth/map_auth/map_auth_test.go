@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package map_auth
@@ -8,6 +8,8 @@ import (
 )
 
 func TestMapAuthenticator(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		Auths      map[string]string
 		User       string

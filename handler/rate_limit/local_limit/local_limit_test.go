@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package local_limit
@@ -11,6 +11,8 @@ import (
 )
 
 func TestLocalLimitRate(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		TargetRate   float64
 		SleepTime    time.Duration
@@ -61,6 +63,8 @@ func TestLocalLimitRate(t *testing.T) {
 }
 
 func TestMaxDropsAbsolute(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		want int64
 	}{
@@ -79,6 +83,8 @@ func TestMaxDropsAbsolute(t *testing.T) {
 }
 
 func TestMaxDropsInterval(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		want time.Duration
 	}{
@@ -101,6 +107,8 @@ func TestMaxDropsInterval(t *testing.T) {
 }
 
 func TestWithSleepInterval(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		want    time.Duration
 		wantErr bool
@@ -137,6 +145,8 @@ func TestWithSleepInterval(t *testing.T) {
 }
 
 func TestWithDropTimeout(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		want time.Duration
 	}{

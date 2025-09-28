@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package midgard
@@ -15,6 +15,8 @@ import (
 )
 
 func TestStackMiddleware(t *testing.T) {
+	t.Parallel()
+
 	newMWHandler := StackMiddlewareHandler(
 		[]defs.Middleware{
 			util.Must(method_filter.New(
@@ -54,6 +56,8 @@ func TestStackMiddleware(t *testing.T) {
 }
 
 func TestEmptyMiddlewareHandler(t *testing.T) {
+	t.Parallel()
+
 	newMWHandler := StackMiddlewareHandler(
 		[]defs.Middleware{},
 		http.HandlerFunc(util.DummyHandler))
@@ -81,6 +85,8 @@ func TestEmptyMiddlewareHandler(t *testing.T) {
 }
 
 func TestEmptyMiddleware(t *testing.T) {
+	t.Parallel()
+
 	got := StackMiddleware([]defs.Middleware{})
 
 	if got != nil {

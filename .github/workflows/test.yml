@@ -1,4 +1,4 @@
-# Copyright the midgard contributors.
+# SPDX-FileCopyrightText: 2025 The midgard contributors.
 # SPDX-License-Identifier: MPL-2.0
 
 name: Tests
@@ -11,7 +11,7 @@ on:
         branches:
           - master
 
-# Declare default permissions as read only.
+# Declare default permissions as read-only.
 permissions: read-all
 
 jobs:
@@ -19,13 +19,13 @@ jobs:
         strategy:
             matrix:
                 go-version:
-                  - "1.23"
+                  - "stable"
         runs-on: ubuntu-latest
         steps:
           - name: Harden Runner
             uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
             with:
-              egress-policy: audit
+                egress-policy: audit
 
           - name: Install Go
             uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
@@ -44,13 +44,13 @@ jobs:
         strategy:
             matrix:
                 go-version:
-                  - "1.23"
+                  - "stable"
         runs-on: ubuntu-latest
         steps:
           - name: Harden Runner
             uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
             with:
-              egress-policy: audit
+                egress-policy: audit
 
           - name: Install Go
             uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
@@ -73,7 +73,7 @@ jobs:
         strategy:
             matrix:
                 go-version:
-                  - "1.23"
+                  - "stable"
                 platform:
                   #- macos-latest
                   - ubuntu-latest
@@ -83,7 +83,7 @@ jobs:
           - name: Harden Runner
             uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
             with:
-              egress-policy: audit
+                egress-policy: audit
 
           - name: Install Go
             uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
@@ -96,7 +96,13 @@ jobs:
                 fetch-depth: 1
 
           - name: Test
-            run: go test -v `go list ./... | grep -v example` --covermode=count --coverpkg=./... --coverprofile=coverage.txt
+            run: go tool gotestsum --junitfile junit.xml -- -race -v `go list ./...` --covermode=atomic --coverpkg=./... --coverprofile=coverage.txt
+
+          - name: Upload test results to Codecov
+            if: ${{ !cancelled() }}
+            uses: codecov/test-results-action@47f89e9acb64b76debcd5ea40642d25a4adced9f # v1.1.1
+            with:
+                token: ${{ secrets.CODECOV_TOKEN }}
 
           - name: Coverage
             run: go tool cover -func=coverage.txt
@@ -111,7 +117,7 @@ jobs:
         strategy:
             matrix:
                 go-version:
-                  - "1.23"
+                  - "stable"
                 platform:
                   #- macos-latest
                   - ubuntu-latest
@@ -123,7 +129,7 @@ jobs:
           - name: Harden Runner
             uses: step-security/harden-runner@f4a75cfd619ee5ce8d5b864b0d183aff3c69b55a # v2.13.1
             with:
-              egress-policy: audit
+                egress-policy: audit
 
           - name: Install Go
             uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0

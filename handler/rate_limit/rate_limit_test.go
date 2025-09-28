@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package rate_limit
@@ -16,6 +16,7 @@ import (
 )
 
 func TestRateLimit(t *testing.T) {
+	t.Parallel()
 
 	handler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
@@ -46,6 +47,8 @@ func TestRateLimit(t *testing.T) {
 }
 
 func TestNoOptions(t *testing.T) {
+	t.Parallel()
+
 	_, err := New()
 
 	if err == nil {
@@ -54,6 +57,8 @@ func TestNoOptions(t *testing.T) {
 }
 
 func TestNilLimiter(t *testing.T) {
+	t.Parallel()
+
 	_, err := New(WithLimiter(nil))
 
 	if err == nil {

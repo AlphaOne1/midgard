@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package access_log
@@ -15,6 +15,7 @@ import (
 	"github.com/AlphaOne1/midgard/util"
 )
 
+//nolint:paralleltest // testing output, manipulating global log behaviour
 func TestAccessLogging(t *testing.T) {
 	oldLog := slog.Default()
 	defer slog.SetDefault(oldLog)
@@ -58,6 +59,7 @@ func TestAccessLogging(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // testing output, manipulating global log behaviour
 func TestAccessLoggingCorrelationID(t *testing.T) {
 	oldLog := slog.Default()
 	defer slog.SetDefault(oldLog)
@@ -82,6 +84,7 @@ func TestAccessLoggingCorrelationID(t *testing.T) {
 	}
 }
 
+//nolint:paralleltest // testing output, manipulating global log behaviour
 func TestAccessLoggingUser(t *testing.T) {
 	oldLog := slog.Default()
 	defer slog.SetDefault(oldLog)

@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package correlation
@@ -12,6 +12,8 @@ import (
 )
 
 func TestCorrelationNewID(t *testing.T) {
+	t.Parallel()
+
 	var gotCorrelationHeaderInside bool
 
 	insideHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -37,6 +39,8 @@ func TestCorrelationNewID(t *testing.T) {
 }
 
 func TestCorrelationSuppliedID(t *testing.T) {
+	t.Parallel()
+
 	var gotCorrelationHeaderInside bool
 
 	insideHandler := func(w http.ResponseWriter, r *http.Request) {

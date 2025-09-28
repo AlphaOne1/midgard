@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package method_filter
@@ -13,6 +13,8 @@ import (
 )
 
 func TestMethodFilter(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		filter   []string
 		method   string
@@ -67,6 +69,8 @@ func TestMethodFilter(t *testing.T) {
 }
 
 func TestMethodFilterUninitialized(t *testing.T) {
+	t.Parallel()
+
 	req, _ := http.NewRequest(http.MethodGet, "", strings.NewReader(""))
 	// set method after, as Go could change it
 	req.Method = http.MethodGet

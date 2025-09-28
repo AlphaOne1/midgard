@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package defs
@@ -12,6 +12,8 @@ import (
 )
 
 func TestLogNil(t *testing.T) {
+	t.Parallel()
+
 	var m *MWBase
 
 	if m.Log() != slog.Default() {
@@ -20,6 +22,8 @@ func TestLogNil(t *testing.T) {
 }
 
 func TestSetLogNil(t *testing.T) {
+	t.Parallel()
+
 	var m *MWBase
 
 	if err := m.SetLog(slog.Default()); err == nil {
@@ -28,6 +32,8 @@ func TestSetLogNil(t *testing.T) {
 }
 
 func TestSetLogger(t *testing.T) {
+	t.Parallel()
+
 	var m MWBase
 	var testLogger = slog.New(slog.NewTextHandler(os.Stdout, nil))
 
@@ -39,6 +45,8 @@ func TestSetLogger(t *testing.T) {
 }
 
 func TestSetNilLogger(t *testing.T) {
+	t.Parallel()
+
 	var m MWBase
 
 	err := (&m).SetLog(nil)
@@ -49,6 +57,8 @@ func TestSetNilLogger(t *testing.T) {
 }
 
 func TestLogLevelNil(t *testing.T) {
+	t.Parallel()
+
 	var m *MWBase
 
 	if m.LogLevel() != slog.LevelInfo {
@@ -57,6 +67,8 @@ func TestLogLevelNil(t *testing.T) {
 }
 
 func TestSetLogLevelNil(t *testing.T) {
+	t.Parallel()
+
 	var m *MWBase
 
 	if err := m.SetLogLevel(slog.LevelInfo); err == nil {
@@ -65,6 +77,8 @@ func TestSetLogLevelNil(t *testing.T) {
 }
 
 func TestSetLogLevel(t *testing.T) {
+	t.Parallel()
+
 	var m MWBase
 
 	err := (&m).SetLogLevel(slog.LevelWarn)
@@ -75,6 +89,8 @@ func TestSetLogLevel(t *testing.T) {
 }
 
 func TestNextNil(t *testing.T) {
+	t.Parallel()
+
 	var m *MWBase
 
 	if m.Next() != nil {
@@ -83,6 +99,8 @@ func TestNextNil(t *testing.T) {
 }
 
 func TestSetNextNil(t *testing.T) {
+	t.Parallel()
+
 	var m *MWBase
 
 	if err := m.SetNext(nil); err == nil {
@@ -91,6 +109,8 @@ func TestSetNextNil(t *testing.T) {
 }
 
 func TestSetNext(t *testing.T) {
+	t.Parallel()
+
 	var m MWBase
 	testHandler := http.Handler(http.HandlerFunc(func(_ http.ResponseWriter, _ *http.Request) {}))
 
@@ -102,6 +122,8 @@ func TestSetNext(t *testing.T) {
 }
 
 func TestSetNilNext(t *testing.T) {
+	t.Parallel()
+
 	var m MWBase
 
 	err := (&m).SetNext(nil)
@@ -120,6 +142,8 @@ func (h *TestMWBaser) GetMWBase() *MWBase {
 }
 
 func TestWithLogger(t *testing.T) {
+	t.Parallel()
+
 	testLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	option := WithLogger[*TestMWBaser](testLogger)
 	testHandler := TestMWBaser{}
@@ -132,6 +156,8 @@ func TestWithLogger(t *testing.T) {
 }
 
 func TestWithLoggerNil(t *testing.T) {
+	t.Parallel()
+
 	testLogger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 	option := WithLogger[MWBaser](testLogger)
 	var testHandler MWBaser
@@ -144,6 +170,8 @@ func TestWithLoggerNil(t *testing.T) {
 }
 
 func TestWithLogLevel(t *testing.T) {
+	t.Parallel()
+
 	option := WithLogLevel[*TestMWBaser](slog.LevelWarn)
 	testHandler := TestMWBaser{}
 
@@ -155,6 +183,8 @@ func TestWithLogLevel(t *testing.T) {
 }
 
 func TestWithLogLevelNil(t *testing.T) {
+	t.Parallel()
+
 	option := WithLogLevel[MWBaser](slog.LevelWarn)
 	var testHandler MWBaser
 

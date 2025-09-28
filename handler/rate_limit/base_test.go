@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package rate_limit
@@ -20,6 +20,8 @@ import (
 //
 
 func TestHandlerNil(t *testing.T) {
+	t.Parallel()
+
 	var handler *Handler
 
 	if got := handler.GetMWBase(); got != nil {
@@ -41,6 +43,8 @@ func TestHandlerNil(t *testing.T) {
 //
 
 func TestOptionError(t *testing.T) {
+	t.Parallel()
+
 	errOpt := func(h *Handler) error {
 		return errors.New("testerror")
 	}
@@ -53,6 +57,8 @@ func TestOptionError(t *testing.T) {
 }
 
 func TestOptionNil(t *testing.T) {
+	t.Parallel()
+
 	_, err := New(nil)
 
 	if err == nil {
@@ -61,6 +67,8 @@ func TestOptionNil(t *testing.T) {
 }
 
 func TestHandlerNextNil(t *testing.T) {
+	t.Parallel()
+
 	h := util.Must(New(
 		WithLogLevel(slog.LevelDebug),
 		WithLimiter(util.Must(local_limit.New()))))(
@@ -76,6 +84,8 @@ func TestHandlerNextNil(t *testing.T) {
 //
 
 func TestOptionWithLevel(t *testing.T) {
+	t.Parallel()
+
 	h := util.Must(New(
 		WithLogLevel(slog.LevelDebug),
 		WithLimiter(util.Must(local_limit.New()))))(
@@ -87,6 +97,8 @@ func TestOptionWithLevel(t *testing.T) {
 }
 
 func TestOptionWithLevelOnNil(t *testing.T) {
+	t.Parallel()
+
 	err := WithLogLevel(slog.LevelDebug)(nil)
 
 	if err == nil {
@@ -99,6 +111,8 @@ func TestOptionWithLevelOnNil(t *testing.T) {
 //
 
 func TestOptionWithLogger(t *testing.T) {
+	t.Parallel()
+
 	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	h := util.Must(New(
 		WithLogger(l),
@@ -111,6 +125,8 @@ func TestOptionWithLogger(t *testing.T) {
 }
 
 func TestOptionWithLoggerOnNil(t *testing.T) {
+	t.Parallel()
+
 	err := WithLogger(slog.Default())(nil)
 
 	if err == nil {
@@ -119,6 +135,8 @@ func TestOptionWithLoggerOnNil(t *testing.T) {
 }
 
 func TestOptionWithNilLogger(t *testing.T) {
+	t.Parallel()
+
 	var l *slog.Logger = nil
 	_, hErr := New(WithLogger(l))
 

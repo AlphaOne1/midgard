@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2025 The midgard contributors.
+# SPDX-License-Identifier: MPL-2.0
+
+# Configuration file for golangci-lint
+# See https://golangci-lint.run/usage/configuration/ for more information
+
+version: "2"
+
+run:
+    timeout: 5m
+    tests: true
+
+linters:
+    default: all
+
+    disable:
+        - exhaustruct
+        - forbidigo
+        - noinlineerr
+        - nonamedreturns
+        - wsl
+        - wsl_v5
+
+    exclusions:
+        warn-unused: true
+
+        rules:
+            - path: _test\.go
+              linters:
+                  - cyclop
+                  - dupword
+                  - err113
+                  - funlen
+                  - gocognit
+                  - maintidx
+                  - nestif
+
+            - path: examples/
+              linters:
+                  - err113
+
+    settings:
+        cyclop:
+            max-complexity: 25
+
+        depguard:
+            rules:
+                main:
+                    files:
+                        - $all
+                        - "!$test"
+                        - "!**/examples/**/*"
+                    allow:
+                        - $gostd
+                test:
+                    files:
+                        - $test
+                        - "**/examples/**/*"
+                        - "!**/examples/configSchema/main.go"
+                    allow:
+                        - $gostd
+
+        exhaustive:
+            default-signifies-exhaustive: true
+
+        mnd:
+            ignored-numbers:
+                - "2"
+
+        perfsprint:
+            errorf: false
+
+        testpackage:
+            skip-regexp: internal_test\.go
+
+        varnamelen:
+            max-distance: 10
+
+        whitespace:
+            multi-if: true
+            multi-func: true
+
+issues:
+    max-issues-per-linter: 0
+    max-same-issues: 0
