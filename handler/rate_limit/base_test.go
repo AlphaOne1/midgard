@@ -31,6 +31,7 @@ func TestHandlerNil(t *testing.T) {
 	req := httptest.NewRequest("GET", "/", nil)
 	rec := httptest.NewRecorder()
 
+	//goland:noinspection GoMaybeNil
 	handler.ServeHTTP(rec, req)
 
 	if rec.Result().StatusCode != http.StatusInternalServerError {
