@@ -29,6 +29,8 @@ func (a *AuthTest) Authenticate(username, password string) (bool, error) {
 }
 
 func TestBasicAuth(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		User      string
 		Pass      string

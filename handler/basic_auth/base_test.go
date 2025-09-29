@@ -122,9 +122,9 @@ func TestOptionWithLevelOnNil(t *testing.T) {
 func TestOptionWithLogger(t *testing.T) {
 	t.Parallel()
 
-	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	newLog := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	h := util.Must(basic_auth.New(
-		basic_auth.WithLogger(l),
+		basic_auth.WithLogger(newLog),
 		basic_auth.WithAuthenticator(util.Must(map_auth.New(map_auth.WithAuths(map[string]string{"test": "test"}))))))(
 		http.HandlerFunc(util.DummyHandler))
 
@@ -134,7 +134,7 @@ func TestOptionWithLogger(t *testing.T) {
 		t.Fatalf("wrong type")
 	}
 
-	if val.Log() != l {
+	if val.Log() != newLog {
 		t.Errorf("logger not set correctly")
 	}
 }

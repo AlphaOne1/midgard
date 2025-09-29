@@ -13,6 +13,8 @@ import (
 )
 
 func TestLocalLimitRate(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		TargetRate   float64
 		SleepTime    time.Duration

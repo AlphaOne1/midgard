@@ -16,6 +16,8 @@ import (
 )
 
 func TestEvalCSSHandler(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		cssMethods  []string
 		cssOrigins  []string

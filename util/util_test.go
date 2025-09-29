@@ -98,6 +98,8 @@ func TestDummyHandler(t *testing.T) {
 }
 
 func TestWriteState(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		state int
 	}{

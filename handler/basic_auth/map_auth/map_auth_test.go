@@ -11,6 +11,8 @@ import (
 )
 
 func TestMapAuthenticator(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		Auths      map[string]string
 		User       string

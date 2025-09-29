@@ -15,6 +15,8 @@ import (
 )
 
 func TestMethodFilter(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		filter   []string
 		method   string

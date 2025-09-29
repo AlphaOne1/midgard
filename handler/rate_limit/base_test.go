@@ -121,9 +121,9 @@ func TestOptionWithLevelOnNil(t *testing.T) {
 func TestOptionWithLogger(t *testing.T) {
 	t.Parallel()
 
-	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	newLog := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	h := util.Must(rate_limit.New(
-		rate_limit.WithLogger(l),
+		rate_limit.WithLogger(newLog),
 		rate_limit.WithLimiter(util.Must(local_limit.New()))))(
 		http.HandlerFunc(util.DummyHandler))
 
@@ -133,7 +133,7 @@ func TestOptionWithLogger(t *testing.T) {
 		t.Fatalf("wrong type")
 	}
 
-	if val.Log() != l {
+	if val.Log() != newLog {
 		t.Errorf("logger not set correctly")
 	}
 }
