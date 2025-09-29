@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package method_filter
+package method_filter_test
 
 import (
 	"errors"
@@ -11,6 +11,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/AlphaOne1/midgard/handler/method_filter"
 	"github.com/AlphaOne1/midgard/util"
 )
 
@@ -21,7 +22,7 @@ import (
 func TestHandlerNil(t *testing.T) {
 	t.Parallel()
 
-	var handler *Handler
+	var handler *method_filter.Handler
 
 	if got := handler.GetMWBase(); got != nil {
 		t.Errorf("MWBase of nil must be nil, but got non-nil")
@@ -45,11 +46,11 @@ func TestHandlerNil(t *testing.T) {
 func TestOptionError(t *testing.T) {
 	t.Parallel()
 
-	errOpt := func( /* h */ *Handler) error {
+	errOpt := func( /* h */ *method_filter.Handler) error {
 		return errors.New("testerror")
 	}
 
-	_, err := New(errOpt)
+	_, err := method_filter.New(errOpt)
 
 	if err == nil {
 		t.Errorf("expected middleware creation to fail")
@@ -59,7 +60,7 @@ func TestOptionError(t *testing.T) {
 func TestOptionNil(t *testing.T) {
 	t.Parallel()
 
-	_, err := New(nil)
+	_, err := method_filter.New(nil)
 
 	if err == nil {
 		t.Errorf("expected middleware creation to fail")
@@ -69,7 +70,7 @@ func TestOptionNil(t *testing.T) {
 func TestHandlerNextNil(t *testing.T) {
 	t.Parallel()
 
-	h := util.Must(New(WithLogLevel(slog.LevelDebug)))(nil)
+	h := util.Must(method_filter.New(method_filter.WithLogLevel(slog.LevelDebug)))(nil)
 
 	if h != nil {
 		t.Errorf("expected handler to be nil")
@@ -83,9 +84,15 @@ func TestHandlerNextNil(t *testing.T) {
 func TestOptionWithLevel(t *testing.T) {
 	t.Parallel()
 
-	h := util.Must(New(WithLogLevel(slog.LevelDebug)))(http.HandlerFunc(util.DummyHandler))
+	h := util.Must(method_filter.New(method_filter.WithLogLevel(slog.LevelDebug)))(http.HandlerFunc(util.DummyHandler))
 
-	if h.(*Handler).LogLevel() != slog.LevelDebug {
+	val, isValid := h.(*method_filter.Handler)
+
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.LogLevel() != slog.LevelDebug {
 		t.Errorf("wanted loglevel debug not set")
 	}
 }
@@ -93,7 +100,7 @@ func TestOptionWithLevel(t *testing.T) {
 func TestOptionWithLevelOnNil(t *testing.T) {
 	t.Parallel()
 
-	err := WithLogLevel(slog.LevelDebug)(nil)
+	err := method_filter.WithLogLevel(slog.LevelDebug)(nil)
 
 	if err == nil {
 		t.Errorf("expted error on configuring nil handler")
@@ -108,9 +115,15 @@ func TestOptionWithLogger(t *testing.T) {
 	t.Parallel()
 
 	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	h := util.Must(New(WithLogger(l)))(http.HandlerFunc(util.DummyHandler))
+	h := util.Must(method_filter.New(method_filter.WithLogger(l)))(http.HandlerFunc(util.DummyHandler))
 
-	if h.(*Handler).Log() != l {
+	val, isValid := h.(*method_filter.Handler)
+
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.Log() != l {
 		t.Errorf("logger not set correctly")
 	}
 }
@@ -118,7 +131,7 @@ func TestOptionWithLogger(t *testing.T) {
 func TestOptionWithLoggerOnNil(t *testing.T) {
 	t.Parallel()
 
-	err := WithLogger(slog.Default())(nil)
+	err := method_filter.WithLogger(slog.Default())(nil)
 
 	if err == nil {
 		t.Errorf("expted error on configuring nil handler")
@@ -129,7 +142,7 @@ func TestOptionWithNilLogger(t *testing.T) {
 	t.Parallel()
 
 	var l *slog.Logger
-	_, hErr := New(WithLogger(l))
+	_, hErr := method_filter.New(method_filter.WithLogger(l))
 
 	if hErr == nil {
 		t.Errorf("expected error on configuration with nil logger")

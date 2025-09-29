@@ -85,8 +85,13 @@ func TestOptionWithLevel(t *testing.T) {
 	t.Parallel()
 
 	h := util.Must(cors.New(cors.WithLogLevel(slog.LevelDebug)))(http.HandlerFunc(util.DummyHandler))
+	val, isValid := h.(*cors.Handler)
 
-	if h.(*cors.Handler).LogLevel() != slog.LevelDebug {
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.LogLevel() != slog.LevelDebug {
 		t.Errorf("wanted loglevel debug not set")
 	}
 }
@@ -111,7 +116,13 @@ func TestOptionWithLogger(t *testing.T) {
 	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	h := util.Must(cors.New(cors.WithLogger(l)))(http.HandlerFunc(util.DummyHandler))
 
-	if h.(*cors.Handler).Log() != l {
+	val, isValid := h.(*cors.Handler)
+
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.Log() != l {
 		t.Errorf("logger not set correctly")
 	}
 }

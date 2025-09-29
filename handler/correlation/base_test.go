@@ -86,7 +86,13 @@ func TestOptionWithLevel(t *testing.T) {
 
 	h := util.Must(correlation.New(correlation.WithLogLevel(slog.LevelDebug)))(http.HandlerFunc(util.DummyHandler))
 
-	if h.(*correlation.Handler).LogLevel() != slog.LevelDebug {
+	val, isValid := h.(*correlation.Handler)
+
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.LogLevel() != slog.LevelDebug {
 		t.Errorf("wanted loglevel debug not set")
 	}
 }
@@ -111,7 +117,13 @@ func TestOptionWithLogger(t *testing.T) {
 	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	h := util.Must(correlation.New(correlation.WithLogger(l)))(http.HandlerFunc(util.DummyHandler))
 
-	if h.(*correlation.Handler).Log() != l {
+	val, isValid := h.(*correlation.Handler)
+
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.Log() != l {
 		t.Errorf("logger not set correctly")
 	}
 }

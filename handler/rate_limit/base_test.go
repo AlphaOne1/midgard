@@ -93,7 +93,13 @@ func TestOptionWithLevel(t *testing.T) {
 		rate_limit.WithLimiter(util.Must(local_limit.New()))))(
 		http.HandlerFunc(util.DummyHandler))
 
-	if h.(*rate_limit.Handler).LogLevel() != slog.LevelDebug {
+	val, isValid := h.(*rate_limit.Handler)
+
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.LogLevel() != slog.LevelDebug {
 		t.Errorf("wanted loglevel debug not set")
 	}
 }
@@ -121,7 +127,13 @@ func TestOptionWithLogger(t *testing.T) {
 		rate_limit.WithLimiter(util.Must(local_limit.New()))))(
 		http.HandlerFunc(util.DummyHandler))
 
-	if h.(*rate_limit.Handler).Log() != l {
+	val, isValid := h.(*rate_limit.Handler)
+
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.Log() != l {
 		t.Errorf("logger not set correctly")
 	}
 }
