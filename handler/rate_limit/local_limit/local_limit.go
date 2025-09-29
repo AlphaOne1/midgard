@@ -7,6 +7,7 @@ package local_limit
 import (
 	"errors"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -33,9 +34,9 @@ type LocalLimit struct {
 	// SleepInterval is the time between the generation of drops
 	SleepInterval time.Duration
 	// dropStarted signalizes if the drop generation has been started.
-	dropStarted bool
+	dropStarted atomic.Bool
 	// stop signals the internal drop generator to stop working
-	stop bool
+	stop atomic.Bool
 	// overflow stores the fractional drops, especially with a low TargetRate this
 	// guarantees no lost drops.
 	overflow float64
@@ -47,14 +48,14 @@ type LocalLimit struct {
 
 // run generates the drops. It is called internally as a go routine.
 func (l *LocalLimit) run() {
-	l.dropStarted = true
+	l.dropStarted.Store(true)
 	l.lastIter = time.Now()
 
 	var iterTime time.Duration
 	var drops float64
 	var fillDrops int64
 
-	for !l.stop {
+	for !l.stop.Load() {
 		time.Sleep(l.SleepInterval)
 		iterTime = time.Since(l.lastIter)
 		drops = iterTime.Seconds()*l.TargetRate + l.overflow
@@ -78,14 +79,14 @@ func (l *LocalLimit) run() {
 
 // Stop sets the stop marker, so the drop generator can stop eventually.
 func (l *LocalLimit) Stop() {
-	l.stop = true
+	l.stop.Store(true)
 }
 
 // Limit gives true, if the rate limit is not yet exceeded, otherwise false.
 // If there are currently no drops to exhaust, it will wait the configured
 // DropTimeout for a drop.
 func (l *LocalLimit) Limit() bool {
-	if !l.dropStarted {
+	if !l.dropStarted.Load() {
 		l.dropStartOnce.Do(func() { go l.run() })
 	}
 
@@ -170,7 +171,7 @@ func New(options ...func(*LocalLimit) error) (*LocalLimit, error) {
 		DropTimeout:   150 * time.Millisecond,
 		drops:         make(chan drop),
 		MaxDrops:      1_000,
-		dropStarted:   false,
+		dropStarted:   atomic.Bool{},
 	}
 
 	for _, opt := range options {
