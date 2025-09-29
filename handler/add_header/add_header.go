@@ -20,6 +20,7 @@ type Handler struct {
 	headers [][2]string
 }
 
+// GetMWBase returns the MWBase instance of the handler.
 func (h *Handler) GetMWBase() *defs.MWBase {
 	if h == nil {
 		return nil

@@ -21,6 +21,7 @@ type Handler struct {
 	Methods map[string]bool
 }
 
+// GetMWBase returns the MWBase instance of the handler.
 func (h *Handler) GetMWBase() *defs.MWBase {
 	if h == nil {
 		return nil
