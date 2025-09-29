@@ -43,16 +43,6 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 	return &h.MWBase
 }
 
-// sendNoAuth sends the client that his credentials are not allowed.
-func (h *Handler) sendNoAuth(w http.ResponseWriter, r *http.Request) {
-	if len(h.redirect) > 0 {
-		http.Redirect(w, r, h.redirect, http.StatusFound)
-	} else {
-		w.Header().Add("WWW-Authenticate", h.authRealmInfo)
-		util.WriteState(w, h.Log(), http.StatusUnauthorized)
-	}
-}
-
 // ExtractUserPass extracts the username and the password out of the given header
 // value for Authorization. It signalizes if the desired information exists or en
 // error, when the auth string is unprocessable.
@@ -117,6 +107,16 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.Next().ServeHTTP(w, r)
+}
+
+// sendNoAuth sends the client that his credentials are not allowed.
+func (h *Handler) sendNoAuth(w http.ResponseWriter, r *http.Request) {
+	if len(h.redirect) > 0 {
+		http.Redirect(w, r, h.redirect, http.StatusFound)
+	} else {
+		w.Header().Add("WWW-Authenticate", h.authRealmInfo)
+		util.WriteState(w, h.Log(), http.StatusUnauthorized)
+	}
 }
 
 // WithAuthenticator sets the Authenticator to use.

@@ -4,6 +4,7 @@
 package cors_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -15,8 +16,6 @@ import (
 )
 
 func TestEvalCSSHandler(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		cssMethods  []string
 		cssOrigins  []string
@@ -119,35 +118,39 @@ func TestEvalCSSHandler(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		req, _ := http.NewRequestWithContext(t.Context(), v.method, "http://dummy.com:8080", strings.NewReader(""))
+		t.Run(fmt.Sprintf("TestEvalCSSHandler-%v", k), func(t *testing.T) {
+			t.Parallel()
 
-		for hk, hv := range v.header {
-			for _, hvi := range hv {
-				req.Header.Add(hk, hvi)
+			req, _ := http.NewRequestWithContext(t.Context(), v.method, "http://dummy.com:8080", strings.NewReader(""))
+
+			for hk, hv := range v.header {
+				for _, hvi := range hv {
+					req.Header.Add(hk, hvi)
+				}
 			}
-		}
 
-		rec := httptest.NewRecorder()
+			rec := httptest.NewRecorder()
 
-		mw := util.Must(cors.New(
-			cors.WithMethods(v.cssMethods),
-			cors.WithHeaders(cors.MinimumAllowHeaders()),
-			cors.WithOrigins(v.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
+			mw := util.Must(cors.New(
+				cors.WithMethods(v.cssMethods),
+				cors.WithHeaders(cors.MinimumAllowHeaders()),
+				cors.WithOrigins(v.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
 
-		mw.ServeHTTP(rec, req)
+			mw.ServeHTTP(rec, req)
 
-		if rec.Code != v.wantCode {
-			t.Errorf("%v: css filter did not work as expected, wanted %v but got %v", k, v.wantCode, rec.Code)
-		}
-
-		if rec.Body.String() != v.wantContent {
-			t.Errorf("%v: wanted '%v' in body, but got '%v'", k, v.wantContent, rec.Body.String())
-		}
-
-		for wk, wv := range v.wantHeader {
-			if val, found := rec.Result().Header[wk]; !found || !slices.Contains(val, wv) {
-				t.Errorf("%v: wanted [%v:%v] but did not find it", k, wk, wv)
+			if rec.Code != v.wantCode {
+				t.Errorf("css filter did not work as expected, wanted %v but got %v", v.wantCode, rec.Code)
 			}
-		}
+
+			if rec.Body.String() != v.wantContent {
+				t.Errorf("wanted '%v' in body, but got '%v'", v.wantContent, rec.Body.String())
+			}
+
+			for wk, wv := range v.wantHeader {
+				if val, found := rec.Result().Header[wk]; !found || !slices.Contains(val, wv) {
+					t.Errorf("wanted [%v:%v] but did not find it", wk, wv)
+				}
+			}
+		})
 	}
 }

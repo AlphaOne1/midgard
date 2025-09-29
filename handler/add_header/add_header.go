@@ -63,23 +63,23 @@ func WithHeaders(headers [][2]string) func(*Handler) error {
 
 // New generates a new header adding middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
-	h := new(Handler)
+	handler := new(Handler)
 
 	for _, opt := range options {
 		if opt == nil {
 			return nil, errors.New("options cannot be nil")
 		}
 
-		if err := opt(h); err != nil {
+		if err := opt(handler); err != nil {
 			return nil, err
 		}
 	}
 
 	return func(next http.Handler) http.Handler {
-		if err := h.SetNext(next); err != nil {
+		if err := handler.SetNext(next); err != nil {
 			return nil
 		}
 
-		return h
+		return handler
 	}, nil
 }

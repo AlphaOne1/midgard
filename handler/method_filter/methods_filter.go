@@ -78,23 +78,23 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 
 // New sets up the method filter middleware. Its parameters are functions manipulating an internal Config variable.
 func New(options ...func(m *Handler) error) (defs.Middleware, error) {
-	h := Handler{}
+	handler := Handler{}
 
 	for _, opt := range options {
 		if opt == nil {
 			return nil, errors.New("options cannot be nil")
 		}
 
-		if err := opt(&h); err != nil {
+		if err := opt(&handler); err != nil {
 			return nil, err
 		}
 	}
 
 	return func(next http.Handler) http.Handler {
-		if err := h.SetNext(next); err != nil {
+		if err := handler.SetNext(next); err != nil {
 			return nil
 		}
 
-		return &h
+		return &handler
 	}, nil
 }

@@ -4,6 +4,7 @@
 package method_filter_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -14,8 +15,6 @@ import (
 )
 
 func TestMethodFilter(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		filter   []string
 		method   string
@@ -54,18 +53,22 @@ func TestMethodFilter(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "", strings.NewReader(""))
-		// set the method after, as Go could change it
-		req.Method = v.method
-		rec := httptest.NewRecorder()
+		t.Run(fmt.Sprintf("TestMethodFilter-%v", k), func(t *testing.T) {
+			t.Parallel()
 
-		mw := util.Must(method_filter.New(method_filter.WithMethods(v.filter)))(http.HandlerFunc(util.DummyHandler))
+			req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "", strings.NewReader(""))
+			// set the method after, as Go could change it
+			req.Method = v.method
+			rec := httptest.NewRecorder()
 
-		mw.ServeHTTP(rec, req)
+			mw := util.Must(method_filter.New(method_filter.WithMethods(v.filter)))(http.HandlerFunc(util.DummyHandler))
 
-		if rec.Code != v.wantCode {
-			t.Errorf("%v: method filter did not work as expected, wanted %v but got %v", k, v.wantCode, rec.Code)
-		}
+			mw.ServeHTTP(rec, req)
+
+			if rec.Code != v.wantCode {
+				t.Errorf("method filter did not work as expected, wanted %v but got %v", v.wantCode, rec.Code)
+			}
+		})
 	}
 }
 

@@ -1,13 +1,14 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package midgard
+package midgard_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/AlphaOne1/midgard"
 	"github.com/AlphaOne1/midgard/defs"
 	"github.com/AlphaOne1/midgard/handler/correlation"
 	"github.com/AlphaOne1/midgard/handler/method_filter"
@@ -17,7 +18,7 @@ import (
 func TestStackMiddleware(t *testing.T) {
 	t.Parallel()
 
-	newMWHandler := StackMiddlewareHandler(
+	newMWHandler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
 			util.Must(method_filter.New(
 				method_filter.WithMethods([]string{http.MethodGet}))),
@@ -58,7 +59,7 @@ func TestStackMiddleware(t *testing.T) {
 func TestEmptyMiddlewareHandler(t *testing.T) {
 	t.Parallel()
 
-	newMWHandler := StackMiddlewareHandler(
+	newMWHandler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{},
 		http.HandlerFunc(util.DummyHandler))
 
@@ -87,7 +88,7 @@ func TestEmptyMiddlewareHandler(t *testing.T) {
 func TestEmptyMiddleware(t *testing.T) {
 	t.Parallel()
 
-	got := StackMiddleware([]defs.Middleware{})
+	got := midgard.StackMiddleware([]defs.Middleware{})
 
 	if got != nil {
 		t.Errorf("expected nil on empty middleware stack")

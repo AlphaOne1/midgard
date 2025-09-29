@@ -7,6 +7,7 @@ package util_test
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -97,8 +98,6 @@ func TestDummyHandler(t *testing.T) {
 }
 
 func TestWriteState(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		state int
 	}{
@@ -114,20 +113,24 @@ func TestWriteState(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		rec := httptest.NewRecorder()
-		util.WriteState(rec, slog.Default(), v.state)
+		t.Run(fmt.Sprintf("TestWriteState-%v", k), func(t *testing.T) {
+			t.Parallel()
 
-		if rec.Body.String() != http.StatusText(v.state) {
-			t.Errorf("%v: wanted %v but got %v", k, http.StatusText(v.state), rec.Body.String())
-		}
+			rec := httptest.NewRecorder()
+			util.WriteState(rec, slog.Default(), v.state)
 
-		if ct := rec.Result().Header["Content-Type"]; len(ct) == 0 || ct[0] != "text/plain; charset=utf-8" {
-			t.Errorf("%v: content type not set correctly, set to %v", k, ct)
-		}
+			if rec.Body.String() != http.StatusText(v.state) {
+				t.Errorf("wanted %v but got %v", http.StatusText(v.state), rec.Body.String())
+			}
 
-		if cto := rec.Result().Header["X-Content-Type-Options"]; len(cto) == 0 || cto[0] != "nosniff" {
-			t.Errorf("%v: content type options not set correctly, set to %v", k, cto)
-		}
+			if ct := rec.Result().Header["Content-Type"]; len(ct) == 0 || ct[0] != "text/plain; charset=utf-8" {
+				t.Errorf("content type not set correctly, set to %v", ct)
+			}
+
+			if cto := rec.Result().Header["X-Content-Type-Options"]; len(cto) == 0 || cto[0] != "nosniff" {
+				t.Errorf("content type options not set correctly, set to %v", cto)
+			}
+		})
 	}
 }
 

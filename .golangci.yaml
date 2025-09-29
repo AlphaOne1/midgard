@@ -95,6 +95,9 @@ linters:
 
         varnamelen:
             max-distance: 10
+            ignore-decls:
+                - w http.ResponseWriter
+                - r *http.Request
 
         whitespace:
             multi-if: true

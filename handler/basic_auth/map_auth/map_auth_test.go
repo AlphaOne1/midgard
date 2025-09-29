@@ -4,14 +4,13 @@
 package map_auth_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/AlphaOne1/midgard/handler/basic_auth/map_auth"
 )
 
 func TestMapAuthenticator(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		Auths      map[string]string
 		User       string
@@ -47,38 +46,42 @@ func TestMapAuthenticator(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		auth, newErr := map_auth.New(map_auth.WithAuths(v.Auths))
+		t.Run(fmt.Sprintf("TestMapAuthenticator_%v", k), func(t *testing.T) {
+			t.Parallel()
 
-		if newErr != nil {
-			if !v.WantNewErr {
-				t.Errorf("%v: got error on creation, but wanted none", k)
+			auth, newErr := map_auth.New(map_auth.WithAuths(v.Auths))
+
+			if newErr != nil {
+				if !v.WantNewErr {
+					t.Errorf("%v: got error on creation, but wanted none", k)
+				}
+
+				return
 			}
 
-			continue
-		}
+			if v.WantNewErr {
+				t.Errorf("%v: wanted error on creation, but got none", k)
 
-		if v.WantNewErr {
-			t.Errorf("%v: wanted error on creation, but got none", k)
+				return
+			}
 
-			continue
-		}
+			gotAuth, gotErr := auth.Authenticate(v.User, v.Pass)
 
-		gotAuth, gotErr := auth.Authenticate(v.User, v.Pass)
-
-		if gotErr != nil {
-			if !v.WantError {
-				t.Errorf("%v: did not expect error, but got: %v", k, gotErr)
+			if gotErr != nil {
+				if !v.WantError {
+					t.Errorf("did not expect error, but got: %v", gotErr)
+				}
+				if gotAuth {
+					t.Errorf("got error, so auth should not work, but got: %v", gotAuth)
+				}
+			} else {
+				if v.WantError {
+					t.Errorf("did expect error, but got none")
+				}
+				if gotAuth != v.Want {
+					t.Errorf("got auth %v but wanted %v", gotAuth, v.Want)
+				}
 			}
-			if gotAuth {
-				t.Errorf("%v: got error, so auth should not work, but got: %v", k, gotAuth)
-			}
-		} else {
-			if v.WantError {
-				t.Errorf("%v: did expect error, but got none", k)
-			}
-			if gotAuth != v.Want {
-				t.Errorf("%v: got auth %v but wanted %v", k, gotAuth, v.Want)
-			}
-		}
+		})
 	}
 }

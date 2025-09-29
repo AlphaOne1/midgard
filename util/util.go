@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package util provides utility functions for the midgard package.
 package util
 
 import (

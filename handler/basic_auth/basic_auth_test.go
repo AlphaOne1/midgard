@@ -6,6 +6,7 @@ package basic_auth_test
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -28,8 +29,6 @@ func (a *AuthTest) Authenticate(username, password string) (bool, error) {
 }
 
 func TestBasicAuth(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		User      string
 		Pass      string
@@ -77,22 +76,25 @@ func TestBasicAuth(t *testing.T) {
 	)
 
 	for k, v := range tests {
-		req, _ := http.NewRequestWithContext(t.Context(), "GET", "/", nil)
-		rec := httptest.NewRecorder()
+		t.Run(fmt.Sprintf("TestBasicAuth-%d", k), func(t *testing.T) {
+			t.Parallel()
 
-		req.Header.Add(
-			"Authorization",
-			"Basic "+
-				base64.StdEncoding.EncodeToString([]byte(v.User+":"+v.Pass)))
+			req, _ := http.NewRequestWithContext(t.Context(), "GET", "/", nil)
+			rec := httptest.NewRecorder()
 
-		handler.ServeHTTP(rec, req)
+			req.Header.Add(
+				"Authorization",
+				"Basic "+
+					base64.StdEncoding.EncodeToString([]byte(v.User+":"+v.Pass)))
 
-		if rec.Result().StatusCode != v.WantState {
-			t.Errorf("%v: got state %v but wanted %v",
-				k,
-				rec.Result().StatusCode,
-				v.WantState)
-		}
+			handler.ServeHTTP(rec, req)
+
+			if rec.Result().StatusCode != v.WantState {
+				t.Errorf("got state %v but wanted %v",
+					rec.Result().StatusCode,
+					v.WantState)
+			}
+		})
 	}
 }
 

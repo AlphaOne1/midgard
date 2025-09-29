@@ -43,21 +43,19 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 	return &h.MWBase
 }
 
-var minimumAllowHeaders = []string{
-	"Accept",
-	"Accept-Encoding",
-	"Authorization",
-	"Content-Length",
-	"Content-Type",
-	"Origin",
-	"User-Agent",
-	"X-CSRF-Token",
-}
-
 // MinimumAllowHeaders returns a minimal list of headers, that should not do
 // harm. It can be used to limit the allowed headers to a reasonable small set.
 func MinimumAllowHeaders() []string {
-	return append(make([]string, 0, len(minimumAllowHeaders)), minimumAllowHeaders...)
+	return []string{
+		"Accept",
+		"Accept-Encoding",
+		"Authorization",
+		"Content-Length",
+		"Content-Type",
+		"Origin",
+		"User-Agent",
+		"X-CSRF-Token",
+	}
 }
 
 // relevantOrigin gets the origin that the client matches with the allowed origins.

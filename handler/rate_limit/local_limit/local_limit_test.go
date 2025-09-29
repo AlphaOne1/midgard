@@ -4,6 +4,7 @@
 package local_limit_test
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -12,8 +13,6 @@ import (
 )
 
 func TestLocalLimitRate(t *testing.T) {
-	t.Parallel()
-
 	tests := []struct {
 		TargetRate   float64
 		SleepTime    time.Duration
@@ -41,25 +40,29 @@ func TestLocalLimitRate(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		got := 0
+		t.Run(fmt.Sprintf("TestLocalLimitRate_%v", k), func(t *testing.T) {
+			t.Parallel()
 
-		limiter := util.Must(local_limit.New(
-			local_limit.WithTargetRate(v.TargetRate),
-			local_limit.WithSleepInterval(v.SleepTime)))
+			got := 0
 
-		startTime := time.Now()
+			limiter := util.Must(local_limit.New(
+				local_limit.WithTargetRate(v.TargetRate),
+				local_limit.WithSleepInterval(v.SleepTime)))
 
-		for time.Since(startTime) < v.TestDuration {
-			if limiter.Limit() {
-				got++
+			startTime := time.Now()
+
+			for time.Since(startTime) < v.TestDuration {
+				if limiter.Limit() {
+					got++
+				}
 			}
-		}
 
-		if got < v.WantDrops-1 || got > v.WantDrops+1 {
-			t.Errorf("%v: got %v drops but wanted %v", k, got, v.WantDrops)
-		}
+			if got < v.WantDrops-1 || got > v.WantDrops+1 {
+				t.Errorf("got %v drops but wanted %v", got, v.WantDrops)
+			}
 
-		limiter.Stop()
+			limiter.Stop()
+		})
 	}
 }
 

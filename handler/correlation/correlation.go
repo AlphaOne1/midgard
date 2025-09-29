@@ -13,6 +13,7 @@ import (
 	"github.com/AlphaOne1/midgard/util"
 )
 
+// Handler is the basic structure of the correlation id enriching middleware.
 type Handler struct {
 	defs.MWBase
 }
