@@ -115,7 +115,7 @@ func TestWriteState(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		t.Run(fmt.Sprintf("TestWriteState-%v", k), func(t *testing.T) {
+		t.Run(fmt.Sprintf("TestWriteState-%d", k), func(t *testing.T) {
 			t.Parallel()
 
 			rec := httptest.NewRecorder()
@@ -206,21 +206,25 @@ func TestMapKeys(t *testing.T) {
 		},
 	}
 
-	for k, v := range tests {
-		got := util.MapKeys(v.in)
-		slices.Sort(got)
-		slices.Sort(v.want)
+	for k, test := range tests {
+		t.Run(fmt.Sprintf("TestMapKeys-%d", k), func(t *testing.T) {
+			t.Parallel()
 
-		if v.in == nil && got != nil {
-			t.Errorf("%v: got non-nil result %v but wanted nil", k, got)
-		}
+			got := util.MapKeys(test.in)
+			slices.Sort(got)
+			slices.Sort(test.want)
 
-		if len(v.in) == 0 && v.in != nil && (len(got) != 0 || got == nil) {
-			t.Errorf("%v: got %v but wanted zero length non-nil result", k, got)
-		}
+			if test.in == nil && got != nil {
+				t.Errorf("got non-nil result %v but wanted nil", got)
+			}
 
-		if len(v.in) > 0 && strings.Join(got, ",") != strings.Join(v.want, ",") {
-			t.Errorf("%v: got %v but wanted %v", k, got, v.want)
-		}
+			if len(test.in) == 0 && test.in != nil && (len(got) != 0 || got == nil) {
+				t.Errorf("got %v but wanted zero length non-nil result", got)
+			}
+
+			if len(test.in) > 0 && strings.Join(got, ",") != strings.Join(test.want, ",") {
+				t.Errorf("got %v but wanted %v", got, test.want)
+			}
+		})
 	}
 }

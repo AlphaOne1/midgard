@@ -119,13 +119,13 @@ func TestEvalCSSHandler(t *testing.T) {
 		},
 	}
 
-	for k, v := range tests {
-		t.Run(fmt.Sprintf("TestEvalCSSHandler-%v", k), func(t *testing.T) {
+	for k, test := range tests {
+		t.Run(fmt.Sprintf("TestEvalCSSHandler-%d", k), func(t *testing.T) {
 			t.Parallel()
 
-			req, _ := http.NewRequestWithContext(t.Context(), v.method, "http://dummy.com:8080", strings.NewReader(""))
+			req, _ := http.NewRequestWithContext(t.Context(), test.method, "http://dummy.com:8080", strings.NewReader(""))
 
-			for hk, hv := range v.header {
+			for hk, hv := range test.header {
 				for _, hvi := range hv {
 					req.Header.Add(hk, hvi)
 				}
@@ -134,21 +134,21 @@ func TestEvalCSSHandler(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			mw := util.Must(cors.New(
-				cors.WithMethods(v.cssMethods),
+				cors.WithMethods(test.cssMethods),
 				cors.WithHeaders(cors.MinimumAllowHeaders()),
-				cors.WithOrigins(v.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
+				cors.WithOrigins(test.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
 
 			mw.ServeHTTP(rec, req)
 
-			if rec.Code != v.wantCode {
-				t.Errorf("css filter did not work as expected, wanted %v but got %v", v.wantCode, rec.Code)
+			if rec.Code != test.wantCode {
+				t.Errorf("css filter did not work as expected, wanted %v but got %v", test.wantCode, rec.Code)
 			}
 
-			if rec.Body.String() != v.wantContent {
-				t.Errorf("wanted '%v' in body, but got '%v'", v.wantContent, rec.Body.String())
+			if rec.Body.String() != test.wantContent {
+				t.Errorf("wanted '%v' in body, but got '%v'", test.wantContent, rec.Body.String())
 			}
 
-			for wk, wv := range v.wantHeader {
+			for wk, wv := range test.wantHeader {
 				if val, found := rec.Result().Header[wk]; !found || !slices.Contains(val, wv) {
 					t.Errorf("wanted [%v:%v] but did not find it", wk, wv)
 				}

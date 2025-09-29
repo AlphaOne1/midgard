@@ -51,7 +51,7 @@ func WithAuthInput(in io.Reader) func(a *HTPassWDAuth) error {
 // WithAuthFile configures the htpasswd file to be read from the
 // filesystem with the given name.
 func WithAuthFile(fileName string) func(a *HTPassWDAuth) error {
-	return func(a *HTPassWDAuth) error {
+	return func(auth *HTPassWDAuth) error {
 		if len(fileName) == 0 {
 			return errors.New("input file name is necessary")
 		}
@@ -64,23 +64,23 @@ func WithAuthFile(fileName string) func(a *HTPassWDAuth) error {
 
 		defer func() { _ = input.Close() }()
 
-		return WithAuthInput(input)(a)
+		return WithAuthInput(input)(auth)
 	}
 }
 
 // New creates a new htpasswd authenticator.
 func New(options ...func(*HTPassWDAuth) error) (*HTPassWDAuth, error) {
-	a := HTPassWDAuth{}
+	auth := HTPassWDAuth{}
 
 	for _, opt := range options {
-		if err := opt(&a); err != nil {
+		if err := opt(&auth); err != nil {
 			return nil, err
 		}
 	}
 
-	if a.auth == nil {
+	if auth.auth == nil {
 		return nil, errors.New("htpasswd input is required")
 	}
 
-	return &a, nil
+	return &auth, nil
 }

@@ -41,26 +41,26 @@ func TestLocalLimitRate(t *testing.T) {
 		},
 	}
 
-	for k, v := range tests {
-		t.Run(fmt.Sprintf("TestLocalLimitRate_%v", k), func(t *testing.T) {
+	for k, test := range tests {
+		t.Run(fmt.Sprintf("TestLocalLimitRate-%d", k), func(t *testing.T) {
 			t.Parallel()
 
 			got := 0
 
 			limiter := util.Must(local_limit.New(
-				local_limit.WithTargetRate(v.TargetRate),
-				local_limit.WithSleepInterval(v.SleepTime)))
+				local_limit.WithTargetRate(test.TargetRate),
+				local_limit.WithSleepInterval(test.SleepTime)))
 
 			startTime := time.Now()
 
-			for time.Since(startTime) < v.TestDuration {
+			for time.Since(startTime) < test.TestDuration {
 				if limiter.Limit() {
 					got++
 				}
 			}
 
-			if got < v.WantDrops-1 || got > v.WantDrops+1 {
-				t.Errorf("got %v drops but wanted %v", got, v.WantDrops)
+			if got < test.WantDrops-1 || got > test.WantDrops+1 {
+				t.Errorf("got %v drops but wanted %v", got, test.WantDrops)
 			}
 
 			limiter.Stop()
@@ -161,19 +161,23 @@ func TestWithDropTimeout(t *testing.T) {
 		{want: 400 * time.Millisecond},
 	}
 
-	for k, v := range tests {
-		h := util.Must(local_limit.New(
-			local_limit.WithTargetRate(0.1),
-			local_limit.WithDropTimeout(v.want)))
+	for k, test := range tests {
+		t.Run(fmt.Sprintf("TestWithDropTimeout-%d", k), func(t *testing.T) {
+			t.Parallel()
 
-		startTime := time.Now()
-		h.Limit()
-		duration := time.Since(startTime)
-		h.Stop()
+			h := util.Must(local_limit.New(
+				local_limit.WithTargetRate(0.1),
+				local_limit.WithDropTimeout(test.want)))
 
-		if duration < time.Duration(float64(v.want)*0.95) ||
-			duration > time.Duration(float64(v.want)*1.05) {
-			t.Errorf("%v: used %v but the timeout was %v", k, duration, v.want)
-		}
+			startTime := time.Now()
+			h.Limit()
+			duration := time.Since(startTime)
+			h.Stop()
+
+			if duration < time.Duration(float64(test.want)*0.95) ||
+				duration > time.Duration(float64(test.want)*1.05) {
+				t.Errorf("used %v but the timeout was %v", duration, test.want)
+			}
+		})
 	}
 }

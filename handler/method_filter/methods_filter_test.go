@@ -54,21 +54,21 @@ func TestMethodFilter(t *testing.T) {
 		},
 	}
 
-	for k, v := range tests {
-		t.Run(fmt.Sprintf("TestMethodFilter-%v", k), func(t *testing.T) {
+	for k, test := range tests {
+		t.Run(fmt.Sprintf("TestMethodFilter-%d", k), func(t *testing.T) {
 			t.Parallel()
 
 			req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "", strings.NewReader(""))
 			// set the method after, as Go could change it
-			req.Method = v.method
+			req.Method = test.method
 			rec := httptest.NewRecorder()
 
-			mw := util.Must(method_filter.New(method_filter.WithMethods(v.filter)))(http.HandlerFunc(util.DummyHandler))
+			mw := util.Must(method_filter.New(method_filter.WithMethods(test.filter)))(http.HandlerFunc(util.DummyHandler))
 
 			mw.ServeHTTP(rec, req)
 
-			if rec.Code != v.wantCode {
-				t.Errorf("method filter did not work as expected, wanted %v but got %v", v.wantCode, rec.Code)
+			if rec.Code != test.wantCode {
+				t.Errorf("method filter did not work as expected, wanted %v but got %v", test.wantCode, rec.Code)
 			}
 		})
 	}

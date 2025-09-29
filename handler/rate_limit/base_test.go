@@ -151,7 +151,7 @@ func TestOptionWithLoggerOnNil(t *testing.T) {
 func TestOptionWithNilLogger(t *testing.T) {
 	t.Parallel()
 
-	var l *slog.Logger = nil
+	var l *slog.Logger
 	_, hErr := rate_limit.New(rate_limit.WithLogger(l))
 
 	if hErr == nil {

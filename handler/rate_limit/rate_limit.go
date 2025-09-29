@@ -22,6 +22,7 @@ type Limiter interface {
 // Handler holds the internal rate limiter information.
 type Handler struct {
 	defs.MWBase
+
 	Limit Limiter
 }
 
@@ -42,6 +43,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if !h.Limit.Limit() {
 		util.WriteState(w, h.Log(), http.StatusTooManyRequests)
+
 		return
 	}
 
@@ -73,26 +75,27 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 
 // New creates a new rate limiter middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
-	h := Handler{}
+	handler := Handler{}
 
 	for _, opt := range options {
 		if opt == nil {
 			return nil, errors.New("options cannot be nil")
 		}
 
-		if err := opt(&h); err != nil {
+		if err := opt(&handler); err != nil {
 			return nil, err
 		}
 	}
 
-	if h.Limit == nil {
+	if handler.Limit == nil {
 		return nil, errors.New("invalid limiter (nil)")
 	}
 
 	return func(next http.Handler) http.Handler {
-		if err := h.SetNext(next); err != nil {
+		if err := handler.SetNext(next); err != nil {
 			return nil
 		}
-		return &h
+
+		return &handler
 	}, nil
 }

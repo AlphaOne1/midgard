@@ -49,17 +49,17 @@ func WithAuths(auths map[string]string) func(a *MapAuthenticator) error {
 
 // New creates a new MapAuthenticator with the given configuration.
 func New(options ...func(a *MapAuthenticator) error) (*MapAuthenticator, error) {
-	a := MapAuthenticator{}
+	authenticator := MapAuthenticator{}
 
 	for _, opt := range options {
-		if err := opt(&a); err != nil {
+		if err := opt(&authenticator); err != nil {
 			return nil, err
 		}
 	}
 
-	if len(a.auths) == 0 {
+	if len(authenticator.auths) == 0 {
 		return nil, errors.New("no auths configured")
 	}
 
-	return &a, nil
+	return &authenticator, nil
 }

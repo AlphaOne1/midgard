@@ -137,6 +137,7 @@ func WithRealm(realm string) func(h *Handler) error {
 	}
 }
 
+// WithRedirect sets the redirect address to use.
 func WithRedirect(redirect string) func(h *Handler) error {
 	return func(h *Handler) error {
 		h.redirect = redirect
@@ -157,33 +158,33 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 
 // New generates a new basic authentication middleware.
 func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
-	h := Handler{}
+	handler := Handler{}
 
 	for _, opt := range options {
 		if opt == nil {
 			return nil, errors.New("options cannot be nil")
 		}
 
-		if err := opt(&h); err != nil {
+		if err := opt(&handler); err != nil {
 			return nil, err
 		}
 	}
 
-	if h.auth == nil {
+	if handler.auth == nil {
 		return nil, errors.New("no authenticator configured")
 	}
 
-	if h.realm == "" {
-		h.realm = "Restricted"
+	if handler.realm == "" {
+		handler.realm = "Restricted"
 	}
 
-	h.authRealmInfo = `Basic realm="` + h.realm + `", charset="UTF-8"`
+	handler.authRealmInfo = `Basic realm="` + handler.realm + `", charset="UTF-8"`
 
 	return func(next http.Handler) http.Handler {
-		if err := h.SetNext(next); err != nil {
+		if err := handler.SetNext(next); err != nil {
 			return nil
 		}
 
-		return &h
+		return &handler
 	}, nil
 }

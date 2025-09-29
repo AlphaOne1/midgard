@@ -46,6 +46,30 @@ type LocalLimit struct {
 	lastIter time.Time
 }
 
+// Stop sets the stop marker, so the drop generator can stop eventually.
+func (l *LocalLimit) Stop() {
+	l.stop.Store(true)
+}
+
+// Limit gives true, if the rate limit is not yet exceeded, otherwise false.
+// If there are currently no drops to exhaust, it will wait the configured
+// DropTimeout for a drop.
+func (l *LocalLimit) Limit() bool {
+	if !l.dropStarted.Load() {
+		l.dropStartOnce.Do(func() { go l.run() })
+	}
+
+	dropped := false
+
+	select {
+	case <-l.drops:
+		dropped = true
+	case <-time.After(l.DropTimeout):
+	}
+
+	return dropped
+}
+
 // run generates the drops. It is called internally as a go routine.
 func (l *LocalLimit) run() {
 	l.dropStarted.Store(true)
@@ -75,30 +99,6 @@ func (l *LocalLimit) run() {
 
 		l.lastIter = time.Now()
 	}
-}
-
-// Stop sets the stop marker, so the drop generator can stop eventually.
-func (l *LocalLimit) Stop() {
-	l.stop.Store(true)
-}
-
-// Limit gives true, if the rate limit is not yet exceeded, otherwise false.
-// If there are currently no drops to exhaust, it will wait the configured
-// DropTimeout for a drop.
-func (l *LocalLimit) Limit() bool {
-	if !l.dropStarted.Load() {
-		l.dropStartOnce.Do(func() { go l.run() })
-	}
-
-	dropped := false
-
-	select {
-	case <-l.drops:
-		dropped = true
-	case <-time.After(l.DropTimeout):
-	}
-
-	return dropped
 }
 
 // WithDropTimeout sets the timeout a process calling Limit will wait, before
@@ -165,20 +165,24 @@ func WithTargetRate(r float64) func(l *LocalLimit) error {
 
 // New creates a new local rate limiter.
 func New(options ...func(*LocalLimit) error) (*LocalLimit, error) {
-	l := LocalLimit{
+	const DefaultSleepInterval = 100 * time.Millisecond
+	const DefaultDropTimeout = 100 * time.Millisecond
+	const DefaultMaxDrops = 1_000
+
+	limit := LocalLimit{
 		TargetRate:    1,
-		SleepInterval: 100 * time.Millisecond,
-		DropTimeout:   150 * time.Millisecond,
+		SleepInterval: DefaultSleepInterval,
+		DropTimeout:   DefaultDropTimeout,
 		drops:         make(chan drop),
-		MaxDrops:      1_000,
+		MaxDrops:      DefaultMaxDrops,
 		dropStarted:   atomic.Bool{},
 	}
 
 	for _, opt := range options {
-		if err := opt(&l); err != nil {
+		if err := opt(&limit); err != nil {
 			return nil, err
 		}
 	}
 
-	return &l, nil
+	return &limit, nil
 }

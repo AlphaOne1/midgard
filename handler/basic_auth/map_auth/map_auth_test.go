@@ -47,41 +47,41 @@ func TestMapAuthenticator(t *testing.T) {
 		},
 	}
 
-	for k, v := range tests {
-		t.Run(fmt.Sprintf("TestMapAuthenticator_%v", k), func(t *testing.T) {
+	for k, test := range tests {
+		t.Run(fmt.Sprintf("TestMapAuthenticator-%d", k), func(t *testing.T) {
 			t.Parallel()
 
-			auth, newErr := map_auth.New(map_auth.WithAuths(v.Auths))
+			auth, newErr := map_auth.New(map_auth.WithAuths(test.Auths))
 
 			if newErr != nil {
-				if !v.WantNewErr {
-					t.Errorf("%v: got error on creation, but wanted none", k)
+				if !test.WantNewErr {
+					t.Errorf("got error on creation, but wanted none")
 				}
 
 				return
 			}
 
-			if v.WantNewErr {
-				t.Errorf("%v: wanted error on creation, but got none", k)
+			if test.WantNewErr {
+				t.Errorf("wanted error on creation, but got none")
 
 				return
 			}
 
-			gotAuth, gotErr := auth.Authenticate(v.User, v.Pass)
+			gotAuth, gotErr := auth.Authenticate(test.User, test.Pass)
 
 			if gotErr != nil {
-				if !v.WantError {
+				if !test.WantError {
 					t.Errorf("did not expect error, but got: %v", gotErr)
 				}
 				if gotAuth {
 					t.Errorf("got error, so auth should not work, but got: %v", gotAuth)
 				}
 			} else {
-				if v.WantError {
+				if test.WantError {
 					t.Errorf("did expect error, but got none")
 				}
-				if gotAuth != v.Want {
-					t.Errorf("got auth %v but wanted %v", gotAuth, v.Want)
+				if gotAuth != test.Want {
+					t.Errorf("got auth %v but wanted %v", gotAuth, test.Want)
 				}
 			}
 		})

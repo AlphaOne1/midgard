@@ -77,24 +77,24 @@ func TestBasicAuth(t *testing.T) {
 		http.HandlerFunc(util.DummyHandler),
 	)
 
-	for k, v := range tests {
+	for k, test := range tests {
 		t.Run(fmt.Sprintf("TestBasicAuth-%d", k), func(t *testing.T) {
 			t.Parallel()
 
-			req, _ := http.NewRequestWithContext(t.Context(), "GET", "/", nil)
+			req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 			rec := httptest.NewRecorder()
 
 			req.Header.Add(
 				"Authorization",
 				"Basic "+
-					base64.StdEncoding.EncodeToString([]byte(v.User+":"+v.Pass)))
+					base64.StdEncoding.EncodeToString([]byte(test.User+":"+test.Pass)))
 
 			handler.ServeHTTP(rec, req)
 
-			if rec.Result().StatusCode != v.WantState {
+			if rec.Result().StatusCode != test.WantState {
 				t.Errorf("got state %v but wanted %v",
 					rec.Result().StatusCode,
-					v.WantState)
+					test.WantState)
 			}
 		})
 	}
