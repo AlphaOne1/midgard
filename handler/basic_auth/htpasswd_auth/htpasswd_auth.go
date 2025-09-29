@@ -1,17 +1,19 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package htpasswd_auth implements the basic auth functionality using a htpasswd file.
 package htpasswd_auth
 
 import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/tg123/go-htpasswd"
 )
 
-// HTPassWDAuth holds the htpasswd relevant data
+// HTPassWDAuth holds the htpasswd relevant data.
 type HTPassWDAuth struct {
 	auth *htpasswd.File
 }
@@ -41,6 +43,7 @@ func WithAuthInput(in io.Reader) func(a *HTPassWDAuth) error {
 		var err error
 
 		a.auth, err = htpasswd.NewFromReader(in, htpasswd.DefaultSystems, nil)
+
 		return err
 	}
 }
@@ -53,7 +56,7 @@ func WithAuthFile(fileName string) func(a *HTPassWDAuth) error {
 			return errors.New("input file name is necessary")
 		}
 
-		input, err := os.Open(fileName)
+		input, err := os.Open(filepath.Clean(fileName))
 
 		if err != nil {
 			return err

@@ -10,7 +10,7 @@ Release 0.1.2
 Release 0.1.1
 =============
 
-- fix add_headers to allow for duplate headers
+- fix add_headers to allow for duplicate headers
 
 Release 0.1.0
 =============

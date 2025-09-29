@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package rate_limit provides middleware for rate limiting HTTP requests.
 package rate_limit
 
 import (

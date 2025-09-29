@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package defs contains the common types and functions for all midgard handlers.
 package defs
 
 import (
@@ -43,6 +44,7 @@ func (mw *MWBase) SetLog(l *slog.Logger) error {
 	}
 
 	mw.log = l
+
 	return nil
 }
 
@@ -59,6 +61,7 @@ func (mw *MWBase) LogLevel() slog.Level {
 func (mw *MWBase) SetLogLevel(l slog.Level) error {
 	if mw != nil {
 		mw.logLevel = l
+
 		return nil
 	}
 
@@ -85,6 +88,7 @@ func (mw *MWBase) SetNext(n http.Handler) error {
 	}
 
 	mw.next = n
+
 	return nil
 }
 

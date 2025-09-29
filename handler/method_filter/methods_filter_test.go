@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package method_filter
+package method_filter_test
 
 import (
 	"net/http"
@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/AlphaOne1/midgard/handler/method_filter"
 	"github.com/AlphaOne1/midgard/util"
 )
 
@@ -53,12 +54,12 @@ func TestMethodFilter(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		req, _ := http.NewRequest(http.MethodGet, "", strings.NewReader(""))
-		// set method after, as Go could change it
+		req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "", strings.NewReader(""))
+		// set the method after, as Go could change it
 		req.Method = v.method
 		rec := httptest.NewRecorder()
 
-		mw := util.Must(New(WithMethods(v.filter)))(http.HandlerFunc(util.DummyHandler))
+		mw := util.Must(method_filter.New(method_filter.WithMethods(v.filter)))(http.HandlerFunc(util.DummyHandler))
 
 		mw.ServeHTTP(rec, req)
 
@@ -71,12 +72,12 @@ func TestMethodFilter(t *testing.T) {
 func TestMethodFilterUninitialized(t *testing.T) {
 	t.Parallel()
 
-	req, _ := http.NewRequest(http.MethodGet, "", strings.NewReader(""))
-	// set method after, as Go could change it
+	req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "", strings.NewReader(""))
+	// set the method after, as Go could change it
 	req.Method = http.MethodGet
 	rec := httptest.NewRecorder()
 
-	mw := util.Must(New())(http.HandlerFunc(util.DummyHandler))
+	mw := util.Must(method_filter.New())(http.HandlerFunc(util.DummyHandler))
 
 	mw.ServeHTTP(rec, req)
 
@@ -94,10 +95,11 @@ func FuzzMethodFilter(f *testing.F) {
 	f.Add(http.MethodPut)
 
 	activeFilter := map[string]bool{http.MethodOptions: true, http.MethodGet: true}
-	mw := util.Must(New(WithMethods(util.MapKeys(activeFilter))))(http.HandlerFunc(util.DummyHandler))
+	mw := util.Must(method_filter.New(
+		method_filter.WithMethods(util.MapKeys(activeFilter))))(http.HandlerFunc(util.DummyHandler))
 
 	f.Fuzz(func(t *testing.T, method string) {
-		req, _ := http.NewRequest(http.MethodGet, "", strings.NewReader(""))
+		req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "", strings.NewReader(""))
 		req.Method = method
 		rec := httptest.NewRecorder()
 

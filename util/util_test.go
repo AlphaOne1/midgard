@@ -1,7 +1,8 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package util
+// Package util provides utility functions for the midgard package.
+package util_test
 
 import (
 	"bytes"
@@ -16,12 +17,13 @@ import (
 	"testing"
 
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/AlphaOne1/midgard/util"
 )
 
 func TestMustGood(t *testing.T) {
 	t.Parallel()
 
-	got := Must("pass", nil)
+	got := util.Must("pass", nil)
 
 	if got != "pass" {
 		t.Errorf(`expected "pass" but got %v`, got)
@@ -31,12 +33,12 @@ func TestMustGood(t *testing.T) {
 //nolint:paralleltest // manipulating global exit function
 func TestMustBad(t *testing.T) {
 	outbuf := bytes.Buffer{}
-	exitFunc = func(_ int) {}
-	defer func() { exitFunc = os.Exit }()
+	*(util.TexitFunc) = func(_ int) {}
+	defer func() { *(util.TexitFunc) = os.Exit }()
 
 	slog.SetDefault(slog.New(slog.NewTextHandler(&outbuf, &slog.HandlerOptions{})))
 
-	got := Must("nopass", errors.New("testerror"))
+	got := util.Must("nopass", errors.New("testerror"))
 
 	if got != "nopass" {
 		t.Errorf("got %v but wanted `nopass`", got)
@@ -69,7 +71,7 @@ func TestGetOrCreateID(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		got := GetOrCreateID(v.in)
+		got := util.GetOrCreateID(v.in)
 
 		if v.wantNew == true && got == v.in {
 			t.Errorf("%v: wanted new UUID but got old one", k)
@@ -87,7 +89,7 @@ func TestDummyHandler(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
-	DummyHandler(rec, req)
+	util.DummyHandler(rec, req)
 
 	if rec.Body.String() != "dummy" {
 		t.Errorf("wanted Dummy but got %v", rec.Body.String())
@@ -113,7 +115,7 @@ func TestWriteState(t *testing.T) {
 
 	for k, v := range tests {
 		rec := httptest.NewRecorder()
-		WriteState(rec, slog.Default(), v.state)
+		util.WriteState(rec, slog.Default(), v.state)
 
 		if rec.Body.String() != http.StatusText(v.state) {
 			t.Errorf("%v: wanted %v but got %v", k, http.StatusText(v.state), rec.Body.String())
@@ -147,12 +149,12 @@ func TestIntroCheck(t *testing.T) {
 	}{
 		{
 			h:    &MWTest{},
-			req:  Must(http.NewRequest(http.MethodGet, "/", nil)),
+			req:  util.Must(http.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)),
 			want: true,
 		},
 		{
 			h:    nil,
-			req:  Must(http.NewRequest(http.MethodGet, "/", nil)),
+			req:  util.Must(http.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)),
 			want: false,
 		},
 		{
@@ -170,7 +172,7 @@ func TestIntroCheck(t *testing.T) {
 	rec := httptest.NewRecorder()
 
 	for k, v := range tests {
-		got := IntroCheck(v.h, rec, v.req)
+		got := util.IntroCheck(v.h, rec, v.req)
 
 		if got != v.want {
 			t.Errorf("%v: got %v but wanted %v", k, got, v.want)
@@ -200,7 +202,7 @@ func TestMapKeys(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		got := MapKeys(v.in)
+		got := util.MapKeys(v.in)
 		slices.Sort(got)
 		slices.Sort(v.want)
 

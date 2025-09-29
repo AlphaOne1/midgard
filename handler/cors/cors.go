@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package cors provides a middleware for handling CORS (Cross-Origin Resource Sharing) requests.
 package cors
 
 import (
@@ -15,9 +16,10 @@ import (
 	"github.com/AlphaOne1/midgard/util"
 )
 
-// Handler is a middleware that sets up the cross site scripting circumvention headers.
+// Handler is a middleware that sets up the cross-site scripting circumvention headers.
 type Handler struct {
 	defs.MWBase
+
 	// Headers contains the allowed headers
 	Headers map[string]bool
 	// HeadersReturn contains the comma-concatenated allowed headers
@@ -91,9 +93,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	relevantOrigin, roErr := relevantOrigin(origin, h.Origins)
 
-	// no relevant origin found in request
+	// no relevant origin found in the request
 	if roErr != nil {
 		util.WriteState(w, h.Log(), http.StatusForbidden)
+
 		return
 	}
 
@@ -105,12 +108,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", h.HeadersReturn)
 
 		w.WriteHeader(http.StatusOK)
+
 		return
 	}
 
 	// we have methods configured, but the request does not match any of them
 	if len(h.Methods) > 0 && !h.Methods[r.Method] {
 		util.WriteState(w, h.Log(), http.StatusMethodNotAllowed)
+
 		return
 	}
 
@@ -120,6 +125,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		for hdr := range r.Header {
 			if !h.Headers[strings.ToLower(hdr)] {
 				util.WriteState(w, h.Log(), http.StatusForbidden)
+
 				return
 			}
 		}
@@ -183,7 +189,7 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 	return defs.WithLogLevel[*Handler](level)
 }
 
-// New sets up the cross site scripting circumvention disable headers.
+// New sets up the cross-site scripting circumvention disable headers.
 // If no methods are specified, all methods are allowed.
 // If no headers are specified, all headers are allowed.
 // If origin contains "*" or is empty, the allowed origins are set to *.
@@ -210,6 +216,7 @@ func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 		if err := h.SetNext(next); err != nil {
 			return nil
 		}
+
 		return &h
 	}, nil
 }

@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package basic_auth
+package basic_auth_test
 
 import (
 	"encoding/base64"
@@ -13,6 +13,7 @@ import (
 
 	"github.com/AlphaOne1/midgard"
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/AlphaOne1/midgard/handler/basic_auth"
 	"github.com/AlphaOne1/midgard/util"
 )
 
@@ -22,6 +23,7 @@ func (a *AuthTest) Authenticate(username, password string) (bool, error) {
 	if password == "generr" {
 		return false, errors.New("generated")
 	}
+
 	return username == "testuser" && password == "testpass", nil
 }
 
@@ -67,15 +69,15 @@ func TestBasicAuth(t *testing.T) {
 
 	handler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
-			util.Must(New(
-				WithAuthenticator(&AuthTest{}),
-				WithRealm("testrealm"))),
+			util.Must(basic_auth.New(
+				basic_auth.WithAuthenticator(&AuthTest{}),
+				basic_auth.WithRealm("testrealm"))),
 		},
 		http.HandlerFunc(util.DummyHandler),
 	)
 
 	for k, v := range tests {
-		req, _ := http.NewRequest("GET", "/", nil)
+		req, _ := http.NewRequestWithContext(t.Context(), "GET", "/", nil)
 		rec := httptest.NewRecorder()
 
 		req.Header.Add(
@@ -99,14 +101,14 @@ func TestBasicAuthDecodeError(t *testing.T) {
 
 	handler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
-			util.Must(New(
-				WithAuthenticator(&AuthTest{}),
-				WithRealm("testrealm"))),
+			util.Must(basic_auth.New(
+				basic_auth.WithAuthenticator(&AuthTest{}),
+				basic_auth.WithRealm("testrealm"))),
 		},
 		http.HandlerFunc(util.DummyHandler),
 	)
 
-	req, _ := http.NewRequest("GET", "/", nil)
+	req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	req.Header.Add(
@@ -125,8 +127,8 @@ func TestBasicAuthDecodeError(t *testing.T) {
 func TestBasicAuthNoAuthenticator(t *testing.T) {
 	t.Parallel()
 
-	_, mwErr := New(
-		WithRealm("testrealm"))
+	_, mwErr := basic_auth.New(
+		basic_auth.WithRealm("testrealm"))
 
 	if mwErr == nil || mwErr.Error() != "no authenticator configured" {
 		t.Errorf("uncought undefined authenticator")
@@ -138,12 +140,12 @@ func TestBasicAuthDefaultRealm(t *testing.T) {
 
 	handler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
-			util.Must(New(WithAuthenticator(&AuthTest{}))),
+			util.Must(basic_auth.New(basic_auth.WithAuthenticator(&AuthTest{}))),
 		},
 		http.HandlerFunc(util.DummyHandler),
 	)
 
-	req, _ := http.NewRequest("GET", "/", nil)
+	req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)
@@ -166,15 +168,15 @@ func TestBasicAuthRedirect(t *testing.T) {
 
 	handler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
-			util.Must(New(
-				WithAuthenticator(&AuthTest{}),
-				WithRedirect("/login.html"),
+			util.Must(basic_auth.New(
+				basic_auth.WithAuthenticator(&AuthTest{}),
+				basic_auth.WithRedirect("/login.html"),
 			)),
 		},
 		http.HandlerFunc(util.DummyHandler),
 	)
 
-	req, _ := http.NewRequest("GET", "/", nil)
+	req, _ := http.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)
@@ -190,5 +192,4 @@ func TestBasicAuthRedirect(t *testing.T) {
 	if !strings.Contains(relocHeader, `/login.html`) {
 		t.Errorf("redirect not set correctly: %v", relocHeader)
 	}
-
 }

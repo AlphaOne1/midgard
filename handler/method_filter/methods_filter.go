@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package method_filter provides a middleware for filtering HTTP requests by methods.
 package method_filter
 
 import (
@@ -15,6 +16,7 @@ import (
 // Handler only lets configured HTTP methods pass.
 type Handler struct {
 	defs.MWBase
+
 	// Methods contains methods whitelist for the endpoint.
 	Methods map[string]bool
 }
@@ -36,6 +38,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if h.Methods == nil {
 		h.Log().Error("method filter not initialized")
 		util.WriteState(w, h.Log(), http.StatusServiceUnavailable)
+
 		return
 	}
 
@@ -90,6 +93,7 @@ func New(options ...func(m *Handler) error) (defs.Middleware, error) {
 		if err := h.SetNext(next); err != nil {
 			return nil
 		}
+
 		return &h
 	}, nil
 }

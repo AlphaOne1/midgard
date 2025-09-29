@@ -1,10 +1,12 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package map_auth
+package map_auth_test
 
 import (
 	"testing"
+
+	"github.com/AlphaOne1/midgard/handler/basic_auth/map_auth"
 )
 
 func TestMapAuthenticator(t *testing.T) {
@@ -45,18 +47,20 @@ func TestMapAuthenticator(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		auth, newErr := New(WithAuths(v.Auths))
+		auth, newErr := map_auth.New(map_auth.WithAuths(v.Auths))
 
 		if newErr != nil {
 			if !v.WantNewErr {
 				t.Errorf("%v: got error on creation, but wanted none", k)
 			}
+
 			continue
-		} else {
-			if v.WantNewErr {
-				t.Errorf("%v: wanted error on creation, but got none", k)
-				continue
-			}
+		}
+
+		if v.WantNewErr {
+			t.Errorf("%v: wanted error on creation, but got none", k)
+
+			continue
 		}
 
 		gotAuth, gotErr := auth.Authenticate(v.User, v.Pass)

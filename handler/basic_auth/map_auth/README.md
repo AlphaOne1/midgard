@@ -27,5 +27,5 @@ handler := midgard.StackMiddlewareHandler(
 )
 ```
 
-Be aware that writing credentials inside of program code is _not_ advisable and
-is just used here to illustrate the usage.
+Be aware that writing credentials inside program code is _not_ advisable and is
+just used here to illustrate the usage.

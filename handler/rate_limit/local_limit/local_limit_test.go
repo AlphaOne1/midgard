@@ -1,12 +1,13 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package local_limit
+package local_limit_test
 
 import (
 	"testing"
 	"time"
 
+	"github.com/AlphaOne1/midgard/handler/rate_limit/local_limit"
 	"github.com/AlphaOne1/midgard/util"
 )
 
@@ -42,9 +43,9 @@ func TestLocalLimitRate(t *testing.T) {
 	for k, v := range tests {
 		got := 0
 
-		limiter := util.Must(New(
-			WithTargetRate(v.TargetRate),
-			WithSleepInterval(v.SleepTime)))
+		limiter := util.Must(local_limit.New(
+			local_limit.WithTargetRate(v.TargetRate),
+			local_limit.WithSleepInterval(v.SleepTime)))
 
 		startTime := time.Now()
 
@@ -74,7 +75,7 @@ func TestMaxDropsAbsolute(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		h := util.Must(New(WithMaxDropsAbsolute(v.want)))
+		h := util.Must(local_limit.New(local_limit.WithMaxDropsAbsolute(v.want)))
 
 		if h.MaxDrops != v.want {
 			t.Errorf("%v: got %v wanted %v", k, h.MaxDrops, v.want)
@@ -94,9 +95,9 @@ func TestMaxDropsInterval(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		h := util.Must(New(
-			WithTargetRate(100),
-			WithMaxDropsInterval(v.want)))
+		h := util.Must(local_limit.New(
+			local_limit.WithTargetRate(100),
+			local_limit.WithMaxDropsInterval(v.want)))
 
 		wantAbsolute := int64(v.want.Seconds() * h.TargetRate)
 
@@ -132,7 +133,7 @@ func TestWithSleepInterval(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		h, hErr := New(WithSleepInterval(v.want))
+		h, hErr := local_limit.New(local_limit.WithSleepInterval(v.want))
 
 		if (hErr != nil) != v.wantErr {
 			t.Errorf("%v: got error %v, want error %v", k, hErr, v.wantErr)
@@ -156,9 +157,9 @@ func TestWithDropTimeout(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		h := util.Must(New(
-			WithTargetRate(0.1),
-			WithDropTimeout(v.want)))
+		h := util.Must(local_limit.New(
+			local_limit.WithTargetRate(0.1),
+			local_limit.WithDropTimeout(v.want)))
 
 		startTime := time.Now()
 		h.Limit()
@@ -169,6 +170,5 @@ func TestWithDropTimeout(t *testing.T) {
 			duration > time.Duration(float64(v.want)*1.05) {
 			t.Errorf("%v: used %v but the timeout was %v", k, duration, v.want)
 		}
-
 	}
 }

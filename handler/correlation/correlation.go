@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package correlation provides a middleware for adding correlation ids to HTTP requests.
 package correlation
 
 import (
@@ -57,7 +58,7 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 	return defs.WithLogLevel[*Handler](level)
 }
 
-// New generates a new correlation id enriching middleware.
+// New generates a new correlation-id-enriching middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
 	h := &Handler{}
 
@@ -75,6 +76,7 @@ func New(options ...func(*Handler) error) (defs.Middleware, error) {
 		if err := h.SetNext(next); err != nil {
 			return nil
 		}
+
 		return h
 	}, nil
 }

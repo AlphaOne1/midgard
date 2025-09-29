@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package cors
+package cors_test
 
 import (
 	"net/http"
@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/AlphaOne1/midgard/handler/cors"
 	"github.com/AlphaOne1/midgard/util"
 )
 
@@ -118,7 +119,7 @@ func TestEvalCSSHandler(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		req, _ := http.NewRequest(v.method, "http://dummy.com:8080", strings.NewReader(""))
+		req, _ := http.NewRequestWithContext(t.Context(), v.method, "http://dummy.com:8080", strings.NewReader(""))
 
 		for hk, hv := range v.header {
 			for _, hvi := range hv {
@@ -128,10 +129,10 @@ func TestEvalCSSHandler(t *testing.T) {
 
 		rec := httptest.NewRecorder()
 
-		mw := util.Must(New(
-			WithMethods(v.cssMethods),
-			WithHeaders(MinimumAllowHeaders()),
-			WithOrigins(v.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
+		mw := util.Must(cors.New(
+			cors.WithMethods(v.cssMethods),
+			cors.WithHeaders(cors.MinimumAllowHeaders()),
+			cors.WithOrigins(v.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
 
 		mw.ServeHTTP(rec, req)
 

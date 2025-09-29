@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package htpasswd_auth
+package htpasswd_auth_test
 
 import (
 	"testing"
 
+	"github.com/AlphaOne1/midgard/handler/basic_auth/htpasswd_auth"
 	"github.com/AlphaOne1/midgard/util"
 )
 
@@ -34,7 +35,7 @@ func TestHtpasswdAuth(t *testing.T) {
 		},
 	}
 
-	a := util.Must(New(WithAuthFile("testwd")))
+	a := util.Must(htpasswd_auth.New(htpasswd_auth.WithAuthFile("testwd")))
 
 	for k, v := range tests {
 		gotAuth, gotErr := a.Authorize(v.Username, v.Password)
@@ -52,7 +53,7 @@ func TestHtpasswdAuth(t *testing.T) {
 func TestHtpasswdNil(t *testing.T) {
 	t.Parallel()
 
-	var subject *HTPassWDAuth = nil
+	var subject *htpasswd_auth.HTPassWDAuth
 
 	if _, err := subject.Authorize("u", "p"); err == nil {
 		t.Errorf("authorize on nil authorizer should give error")
@@ -62,7 +63,7 @@ func TestHtpasswdNil(t *testing.T) {
 func TestHtpasswdNonExistingFile(t *testing.T) {
 	t.Parallel()
 
-	_, err := New(WithAuthFile("IDoNotExistNowhereInThisWorldForgetIt"))
+	_, err := htpasswd_auth.New(htpasswd_auth.WithAuthFile("IDoNotExistNowhereInThisWorldForgetIt"))
 
 	if err == nil {
 		t.Errorf("authorizer initialization with non-existent file should give error")
@@ -72,7 +73,7 @@ func TestHtpasswdNonExistingFile(t *testing.T) {
 func TestHtpasswdNoOptions(t *testing.T) {
 	t.Parallel()
 
-	_, err := New()
+	_, err := htpasswd_auth.New()
 
 	if err == nil {
 		t.Errorf("authorizer initialization without options should give error")
@@ -82,7 +83,7 @@ func TestHtpasswdNoOptions(t *testing.T) {
 func TestHtpasswdWrongReader(t *testing.T) {
 	t.Parallel()
 
-	_, err := New(WithAuthInput(nil))
+	_, err := htpasswd_auth.New(htpasswd_auth.WithAuthInput(nil))
 
 	if err == nil {
 		t.Errorf("authorizer initialization nil reader should give error")
@@ -92,7 +93,7 @@ func TestHtpasswdWrongReader(t *testing.T) {
 func TestHtpasswdEmptyFilename(t *testing.T) {
 	t.Parallel()
 
-	_, err := New(WithAuthFile(""))
+	_, err := htpasswd_auth.New(htpasswd_auth.WithAuthFile(""))
 
 	if err == nil {
 		t.Errorf("authorizer initialization with empty filename should give error")

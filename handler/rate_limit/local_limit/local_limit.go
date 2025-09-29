@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package local_limit provides a process-local rate limiter.
 package local_limit
 
 import (
@@ -9,7 +10,7 @@ import (
 	"time"
 )
 
-// drop is an empty structure to be used as drops in the internal algorithm
+// drop is an empty structure to be used as drops in the internal algorithm.
 type drop struct{}
 
 // LocalLimit is a instance local request limiter.
@@ -52,7 +53,6 @@ func (l *LocalLimit) run() {
 	var iterTime time.Duration
 	var drops float64
 	var fillDrops int64
-	var i int64
 
 	for !l.stop {
 		time.Sleep(l.SleepInterval)
@@ -61,7 +61,7 @@ func (l *LocalLimit) run() {
 
 		fillDrops = min(l.MaxDrops-int64(len(l.drops)), int64(drops))
 
-		for i = 0; i < fillDrops; i++ {
+		for range fillDrops {
 			l.drops <- drop{}
 		}
 
@@ -116,6 +116,7 @@ func WithDropTimeout(d time.Duration) func(l *LocalLimit) error {
 func WithMaxDropsAbsolute(d int64) func(l *LocalLimit) error {
 	return func(l *LocalLimit) error {
 		l.MaxDrops = d
+
 		return nil
 	}
 }
@@ -123,11 +124,12 @@ func WithMaxDropsAbsolute(d int64) func(l *LocalLimit) error {
 // WithMaxDropsInterval sets the maximum number of drops to be stored before
 // dismissing them. Other than WithMaxDropsAbsolute it calculates the number of
 // drops to store depending on the TargetRate parameter.
-// This methods must be called after setting the TargetRate. Otherwise the defaults
+// This method must be called after setting the TargetRate. Otherwise, the defaults
 // are used.
 func WithMaxDropsInterval(d time.Duration) func(l *LocalLimit) error {
 	return func(l *LocalLimit) error {
 		l.MaxDrops = max(1, int64(l.TargetRate*d.Seconds()))
+
 		return nil
 	}
 }

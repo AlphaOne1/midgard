@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package rate_limit
+package rate_limit_test
 
 import (
 	"errors"
@@ -11,6 +11,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/AlphaOne1/midgard/handler/rate_limit"
 	"github.com/AlphaOne1/midgard/handler/rate_limit/local_limit"
 	"github.com/AlphaOne1/midgard/util"
 )
@@ -22,13 +23,13 @@ import (
 func TestHandlerNil(t *testing.T) {
 	t.Parallel()
 
-	var handler *Handler
+	var handler *rate_limit.Handler
 
 	if got := handler.GetMWBase(); got != nil {
 		t.Errorf("MWBase of nil must be nil, but got non-nil")
 	}
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	//goland:noinspection GoMaybeNil
@@ -46,11 +47,11 @@ func TestHandlerNil(t *testing.T) {
 func TestOptionError(t *testing.T) {
 	t.Parallel()
 
-	errOpt := func(h *Handler) error {
+	errOpt := func( /* h */ *rate_limit.Handler) error {
 		return errors.New("testerror")
 	}
 
-	_, err := New(errOpt)
+	_, err := rate_limit.New(errOpt)
 
 	if err == nil {
 		t.Errorf("expected middleware creation to fail")
@@ -60,7 +61,7 @@ func TestOptionError(t *testing.T) {
 func TestOptionNil(t *testing.T) {
 	t.Parallel()
 
-	_, err := New(nil)
+	_, err := rate_limit.New(nil)
 
 	if err == nil {
 		t.Errorf("expected middleware creation to fail")
@@ -70,9 +71,9 @@ func TestOptionNil(t *testing.T) {
 func TestHandlerNextNil(t *testing.T) {
 	t.Parallel()
 
-	h := util.Must(New(
-		WithLogLevel(slog.LevelDebug),
-		WithLimiter(util.Must(local_limit.New()))))(
+	h := util.Must(rate_limit.New(
+		rate_limit.WithLogLevel(slog.LevelDebug),
+		rate_limit.WithLimiter(util.Must(local_limit.New()))))(
 		nil)
 
 	if h != nil {
@@ -87,12 +88,12 @@ func TestHandlerNextNil(t *testing.T) {
 func TestOptionWithLevel(t *testing.T) {
 	t.Parallel()
 
-	h := util.Must(New(
-		WithLogLevel(slog.LevelDebug),
-		WithLimiter(util.Must(local_limit.New()))))(
+	h := util.Must(rate_limit.New(
+		rate_limit.WithLogLevel(slog.LevelDebug),
+		rate_limit.WithLimiter(util.Must(local_limit.New()))))(
 		http.HandlerFunc(util.DummyHandler))
 
-	if h.(*Handler).LogLevel() != slog.LevelDebug {
+	if h.(*rate_limit.Handler).LogLevel() != slog.LevelDebug {
 		t.Errorf("wanted loglevel debug not set")
 	}
 }
@@ -100,7 +101,7 @@ func TestOptionWithLevel(t *testing.T) {
 func TestOptionWithLevelOnNil(t *testing.T) {
 	t.Parallel()
 
-	err := WithLogLevel(slog.LevelDebug)(nil)
+	err := rate_limit.WithLogLevel(slog.LevelDebug)(nil)
 
 	if err == nil {
 		t.Errorf("expted error on configuring nil handler")
@@ -115,12 +116,12 @@ func TestOptionWithLogger(t *testing.T) {
 	t.Parallel()
 
 	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	h := util.Must(New(
-		WithLogger(l),
-		WithLimiter(util.Must(local_limit.New()))))(
+	h := util.Must(rate_limit.New(
+		rate_limit.WithLogger(l),
+		rate_limit.WithLimiter(util.Must(local_limit.New()))))(
 		http.HandlerFunc(util.DummyHandler))
 
-	if h.(*Handler).Log() != l {
+	if h.(*rate_limit.Handler).Log() != l {
 		t.Errorf("logger not set correctly")
 	}
 }
@@ -128,7 +129,7 @@ func TestOptionWithLogger(t *testing.T) {
 func TestOptionWithLoggerOnNil(t *testing.T) {
 	t.Parallel()
 
-	err := WithLogger(slog.Default())(nil)
+	err := rate_limit.WithLogger(slog.Default())(nil)
 
 	if err == nil {
 		t.Errorf("expted error on configuring nil handler")
@@ -139,7 +140,7 @@ func TestOptionWithNilLogger(t *testing.T) {
 	t.Parallel()
 
 	var l *slog.Logger = nil
-	_, hErr := New(WithLogger(l))
+	_, hErr := rate_limit.New(rate_limit.WithLogger(l))
 
 	if hErr == nil {
 		t.Errorf("expected error on configuration with nil logger")

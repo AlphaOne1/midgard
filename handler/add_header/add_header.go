@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package add_header provides a middleware for adding headers to HTTP responses.
 package add_header
 
 import (
@@ -12,9 +13,10 @@ import (
 	"github.com/AlphaOne1/midgard/util"
 )
 
-// Handler holds the information of the added headers
+// Handler holds the information of the added headers.
 type Handler struct {
 	defs.MWBase
+
 	headers [][2]string
 }
 
@@ -53,6 +55,7 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 func WithHeaders(headers [][2]string) func(*Handler) error {
 	return func(h *Handler) error {
 		h.headers = append(h.headers, headers...)
+
 		return nil
 	}
 }
@@ -75,6 +78,7 @@ func New(options ...func(*Handler) error) (defs.Middleware, error) {
 		if err := h.SetNext(next); err != nil {
 			return nil
 		}
+
 		return h
 	}, nil
 }

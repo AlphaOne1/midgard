@@ -27,6 +27,7 @@ type Authenticator interface {
 // Handler holds the internal data of the basic authentication middleware.
 type Handler struct {
 	defs.MWBase
+
 	auth          Authenticator // auth holds the Authenticator used
 	realm         string        // realm to report to the client
 	authRealmInfo string        // authRealmInfo holds the response header
@@ -41,7 +42,7 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 	return &h.MWBase
 }
 
-// sendNoAuth sends the client that his credentials are not allowed
+// sendNoAuth sends the client that his credentials are not allowed.
 func (h *Handler) sendNoAuth(w http.ResponseWriter, r *http.Request) {
 	if len(h.redirect) > 0 {
 		http.Redirect(w, r, h.redirect, http.StatusFound)
@@ -96,6 +97,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if !authFound {
 		h.sendNoAuth(w, r)
+
 		return
 	}
 
@@ -109,6 +111,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if !hasAuth {
 		h.sendNoAuth(w, r)
+
 		return
 	}
 
@@ -124,7 +127,7 @@ func WithAuthenticator(auth Authenticator) func(h *Handler) error {
 	}
 }
 
-// WithRealm sets the realm to use
+// WithRealm sets the realm to use.
 func WithRealm(realm string) func(h *Handler) error {
 	return func(h *Handler) error {
 		h.realm = realm
@@ -179,6 +182,7 @@ func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 		if err := h.SetNext(next); err != nil {
 			return nil
 		}
+
 		return &h
 	}, nil
 }

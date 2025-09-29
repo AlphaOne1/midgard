@@ -90,13 +90,13 @@ Usage
 -----
 
 *midgard* defines a type `Middleware` that is just a convenience to not always
-having to write the full definition of what is commonly known as http middlware.
+having to write the full definition of what is commonly known as http middleware.
 
 ```go
 type Middleware func(http.Handler) http.Handler
 ```
 
-To ease the pain of stacking different middlwares *midgard* offsers two functions
+To ease the pain of stacking different middlewares, *midgard* offers two functions
 to facilitate it. `StackMiddlewareHandler` stacks the given slice of middlewares
 on top of each other and finally calls the given handler. It generates a new handler
 that has all the given middlewares prepended:
@@ -151,4 +151,4 @@ finalHandler := util.Must(correlation.New())(
 ```
 
 As you see, depending on the number of middlewares, that can be quite confusing.
-Further one cannot *easily* dynamially add or remove middlewares.
+Further one cannot *easily* dynamically add or remove middlewares.

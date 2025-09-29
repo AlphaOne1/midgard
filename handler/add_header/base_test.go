@@ -27,7 +27,7 @@ func TestHandlerNil(t *testing.T) {
 		t.Errorf("MWBase of nil must be nil, but got non-nil")
 	}
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	//goland:noinspection GoMaybeNil
@@ -45,7 +45,7 @@ func TestHandlerNil(t *testing.T) {
 func TestOptionError(t *testing.T) {
 	t.Parallel()
 
-	errOpt := func(h *Handler) error {
+	errOpt := func( /* h */ *Handler) error {
 		return errors.New("testerror")
 	}
 
@@ -128,7 +128,7 @@ func TestOptionWithLoggerOnNil(t *testing.T) {
 func TestOptionWithNilLogger(t *testing.T) {
 	t.Parallel()
 
-	var l *slog.Logger = nil
+	var l *slog.Logger
 	_, hErr := New(WithLogger(l))
 
 	if hErr == nil {

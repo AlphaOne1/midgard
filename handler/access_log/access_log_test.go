@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package access_log
+package access_log_test
 
 import (
 	"bytes"
@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"testing"
 
+	"github.com/AlphaOne1/midgard/handler/access_log"
 	"github.com/AlphaOne1/midgard/util"
 )
 
@@ -23,9 +24,9 @@ func TestAccessLogging(t *testing.T) {
 	logBuf := bytes.Buffer{}
 	slog.SetDefault(slog.New(slog.NewTextHandler(&logBuf, &slog.HandlerOptions{})))
 
-	handler := util.Must(New())(http.HandlerFunc(util.DummyHandler))
+	handler := util.Must(access_log.New())(http.HandlerFunc(util.DummyHandler))
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)
@@ -67,9 +68,9 @@ func TestAccessLoggingCorrelationID(t *testing.T) {
 	logBuf := bytes.Buffer{}
 	slog.SetDefault(slog.New(slog.NewTextHandler(&logBuf, &slog.HandlerOptions{})))
 
-	handler := util.Must(New())(http.HandlerFunc(util.DummyHandler))
+	handler := util.Must(access_log.New())(http.HandlerFunc(util.DummyHandler))
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Add("X-Correlation-ID", "setOutside")
 	rec := httptest.NewRecorder()
 
@@ -92,9 +93,9 @@ func TestAccessLoggingUser(t *testing.T) {
 	logBuf := bytes.Buffer{}
 	slog.SetDefault(slog.New(slog.NewTextHandler(&logBuf, &slog.HandlerOptions{})))
 
-	handler := util.Must(New())(http.HandlerFunc(util.DummyHandler))
+	handler := util.Must(access_log.New())(http.HandlerFunc(util.DummyHandler))
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte("testuser:testpass")))
 	rec := httptest.NewRecorder()
 

@@ -1,11 +1,12 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package map_auth implements the basic auth functionality using a user-pass-map.
 package map_auth
 
 import "errors"
 
-// MapAuthenticator holds the authentication relevant data
+// MapAuthenticator holds the authentication relevant data.
 type MapAuthenticator struct {
 	auths map[string]string // map containing username-password pairs
 }

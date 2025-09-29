@@ -1,6 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package example contains an example for midgard middleware usage.
 package main
 
 import (
@@ -13,11 +14,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/AlphaOne1/midgard/handler/correlation"
-
 	"github.com/AlphaOne1/midgard"
 	"github.com/AlphaOne1/midgard/defs"
 	"github.com/AlphaOne1/midgard/handler/access_log"
+	"github.com/AlphaOne1/midgard/handler/correlation"
 	"github.com/AlphaOne1/midgard/handler/cors"
 	"github.com/AlphaOne1/midgard/handler/method_filter"
 	"github.com/AlphaOne1/midgard/util"
@@ -55,7 +55,11 @@ func main() {
 	// register the newly generated handler for the / endpoint
 	http.Handle("/", finalHandler)
 
-	server := &http.Server{Addr: "localhost:8080", Handler: nil}
+	server := &http.Server{
+		Addr:              "localhost:8080",
+		Handler:           nil,
+		ReadHeaderTimeout: 1 * time.Second,
+	}
 
 	go func() {
 		time.Sleep(1 * time.Second)

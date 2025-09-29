@@ -1,10 +1,10 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package access_log provides a middleware that logs every request.
 package access_log
 
 import (
-	"context"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -14,7 +14,7 @@ import (
 	"github.com/AlphaOne1/midgard/util"
 )
 
-// Handler holds the information necessary for the log
+// Handler holds the information necessary for the log.
 type Handler struct {
 	defs.MWBase
 }
@@ -28,7 +28,7 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 }
 
 // ServeHTTP implements the access logging middleware. It logs every request with its
-// correlationID, the clients address, http method and accessed path.
+// correlationID, the client's address, http method and accessed path.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !util.IntroCheck(h, w, r) {
 		return
@@ -55,7 +55,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	h.Log().Log(context.Background(), h.LogLevel(), "access", entries...)
+	h.Log().Log(r.Context(), h.LogLevel(), "access", entries...)
 
 	h.Next().ServeHTTP(w, r)
 }
@@ -88,6 +88,7 @@ func New(options ...func(*Handler) error) (defs.Middleware, error) {
 		if err := h.SetNext(next); err != nil {
 			return nil
 		}
+
 		return h
 	}, nil
 }

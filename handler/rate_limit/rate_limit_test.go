@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package rate_limit
+package rate_limit_test
 
 import (
 	"net/http"
@@ -11,6 +11,7 @@ import (
 
 	"github.com/AlphaOne1/midgard"
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/AlphaOne1/midgard/handler/rate_limit"
 	"github.com/AlphaOne1/midgard/handler/rate_limit/local_limit"
 	"github.com/AlphaOne1/midgard/util"
 )
@@ -20,7 +21,7 @@ func TestRateLimit(t *testing.T) {
 
 	handler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
-			util.Must(New(WithLimiter(
+			util.Must(rate_limit.New(rate_limit.WithLimiter(
 				util.Must(local_limit.New(
 					local_limit.WithTargetRate(20),
 					local_limit.WithDropTimeout(15*time.Millisecond),
@@ -30,7 +31,7 @@ func TestRateLimit(t *testing.T) {
 
 	got := 0
 
-	for i := 0; i < 30; i++ {
+	for range 30 {
 		req := httptest.NewRequest(http.MethodGet, "/", nil)
 		rec := httptest.NewRecorder()
 
@@ -49,7 +50,7 @@ func TestRateLimit(t *testing.T) {
 func TestNoOptions(t *testing.T) {
 	t.Parallel()
 
-	_, err := New()
+	_, err := rate_limit.New()
 
 	if err == nil {
 		t.Errorf("expected middleware creation to fail")
@@ -59,7 +60,7 @@ func TestNoOptions(t *testing.T) {
 func TestNilLimiter(t *testing.T) {
 	t.Parallel()
 
-	_, err := New(WithLimiter(nil))
+	_, err := rate_limit.New(rate_limit.WithLimiter(nil))
 
 	if err == nil {
 		t.Errorf("expected middleware creation to fail")
