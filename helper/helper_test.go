@@ -53,6 +53,62 @@ func TestMustBad(t *testing.T) {
 	}
 }
 
+func TestWrapIfError(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		err        error
+		text       string
+		wantErr    bool
+		wantErrMsg string
+	}{
+		{ // 0
+			text:       "wrap this",
+			err:        errors.New("original error"),
+			wantErr:    true,
+			wantErrMsg: "wrap this: original error",
+		},
+		{ // 1
+			text:       "wrap that: %w",
+			err:        errors.New("original error"),
+			wantErr:    true,
+			wantErrMsg: "wrap that: %w: original error",
+		},
+		{ // 2
+			text:    "wrap this",
+			err:     nil,
+			wantErr: false,
+		},
+		{ // 3
+			text:       "",
+			err:        errors.New("error case"),
+			wantErr:    true,
+			wantErrMsg: "error case",
+		},
+		{ // 4
+			text:    "",
+			err:     nil,
+			wantErr: false,
+		},
+	}
+
+	for testIndex, test := range tests {
+		t.Run(fmt.Sprintf("WrapError-%d", testIndex), func(t *testing.T) {
+			t.Parallel()
+
+			got := helper.WrapIfError(test.text, test.err)
+
+			if (got != nil) != test.wantErr {
+				t.Errorf(`got error "%v", but wanted "%v"`, got, test.wantErr)
+			}
+
+			if test.wantErr && got.Error() != test.wantErrMsg {
+				t.Errorf(`got error "%v" but wanted "%v"`, got.Error(), test.wantErrMsg)
+			}
+		})
+	}
+}
+
 func TestGetOrCreateID(t *testing.T) {
 	t.Parallel()
 
@@ -73,11 +129,11 @@ func TestGetOrCreateID(t *testing.T) {
 	for k, v := range tests {
 		got := helper.GetOrCreateID(v.in)
 
-		if v.wantNew == true && got == v.in {
+		if v.wantNew && got == v.in {
 			t.Errorf("%v: wanted new UUID but got old one", k)
 		}
 
-		if !v.wantNew == true && got != v.in {
+		if !v.wantNew && got != v.in {
 			t.Errorf("%v: wanted old UUID but got new one", k)
 		}
 	}
@@ -173,14 +229,17 @@ func TestIntroCheck(t *testing.T) {
 		},
 	}
 
-	rec := httptest.NewRecorder()
-
 	for k, v := range tests {
-		got := helper.IntroCheck(v.h, rec, v.req)
+		t.Run(fmt.Sprintf("TestIntroCheck-%d", k), func(t *testing.T) {
+			t.Parallel()
 
-		if got != v.want {
-			t.Errorf("%v: got %v but wanted %v", k, got, v.want)
-		}
+			rec := httptest.NewRecorder()
+			got := helper.IntroCheck(v.h, rec, v.req)
+
+			if got != v.want {
+				t.Errorf("got %v but wanted %v", got, v.want)
+			}
+		})
 	}
 }
 

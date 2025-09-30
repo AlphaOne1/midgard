@@ -34,7 +34,7 @@ func TestCorrelationNewID(t *testing.T) {
 		t.Errorf("no X-Correlation-ID header added to request")
 	}
 
-	if rec.Header().Get("X-Correlation-iD") == "" {
+	if rec.Header().Get("X-Correlation-ID") == "" {
 		t.Errorf("no X-Correlation-ID header in response")
 	}
 }
@@ -62,7 +62,7 @@ func TestCorrelationSuppliedID(t *testing.T) {
 		t.Errorf("X-Correlation-ID header not added correctly to request")
 	}
 
-	if rec.Header().Get("X-Correlation-iD") != "setOutside" {
+	if rec.Header().Get("X-Correlation-ID") != "setOutside" {
 		t.Errorf("X-Correlation-ID header not set correctly in response")
 	}
 }

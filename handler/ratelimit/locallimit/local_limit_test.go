@@ -176,6 +176,7 @@ func TestWithDropTimeout(t *testing.T) {
 
 			if duration < time.Duration(float64(test.want)*0.95) ||
 				duration > time.Duration(float64(test.want)*1.05) {
+
 				t.Errorf("used %v but the timeout was %v", duration, test.want)
 			}
 		})

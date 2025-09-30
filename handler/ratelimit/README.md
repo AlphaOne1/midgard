@@ -15,6 +15,5 @@ Example
 rl := ratelimit.New(
     ratelimit.WithLimiter(locallimit.New(
         locallimit.WithTargetRate(10),
-        locallimit.WithSleepInterval(100*time.Millisecond)))
-)
+        locallimit.WithSleepInterval(100*time.Millisecond))))
 ```

@@ -5,6 +5,7 @@
 package helper
 
 import (
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -30,6 +31,21 @@ func Must[T any](val T, err error) T { //nolint:ireturn // as a generic, it must
 	}
 
 	return val
+}
+
+// WrapIfError wraps an existing error with the provided text.
+// It returns nil if `err` is nil, or the original `err` if `text` is empty.
+// Otherwise, it returns a new error with the format "text: original_error".
+func WrapIfError(text string, err error) error {
+	if err == nil {
+		return nil
+	}
+
+	if text == "" {
+		return err
+	}
+
+	return fmt.Errorf("%s: %w", text, err)
 }
 
 // MapKeys gets the keys of the given map and saves them into a slice. There is not to expect a particular

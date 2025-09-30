@@ -41,7 +41,7 @@ linters:
 
     settings:
         cyclop:
-            max-complexity: 25
+            max-complexity: 20
 
         depguard:
             rules:

@@ -12,6 +12,8 @@ import (
 	"path/filepath"
 
 	"github.com/tg123/go-htpasswd"
+
+	"github.com/AlphaOne1/midgard/helper"
 )
 
 // ErrEmptyInput is returned when the input is empty.
@@ -51,7 +53,7 @@ func WithAuthInput(in io.Reader) func(a *HTPassWDAuth) error {
 
 		a.auth, err = htpasswd.NewFromReader(in, htpasswd.DefaultSystems, nil)
 
-		return fmt.Errorf("could not read htpasswd input: %w", err)
+		return helper.WrapIfError("could not read htpasswd input", err)
 	}
 }
 

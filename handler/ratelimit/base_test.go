@@ -110,7 +110,7 @@ func TestOptionWithLevelOnNil(t *testing.T) {
 	err := ratelimit.WithLogLevel(slog.LevelDebug)(nil)
 
 	if err == nil {
-		t.Errorf("expted error on configuring nil handler")
+		t.Errorf("expected error on configuring nil handler")
 	}
 }
 
@@ -144,7 +144,7 @@ func TestOptionWithLoggerOnNil(t *testing.T) {
 	err := ratelimit.WithLogger(slog.Default())(nil)
 
 	if err == nil {
-		t.Errorf("expted error on configuring nil handler")
+		t.Errorf("expected error on configuring nil handler")
 	}
 }
 

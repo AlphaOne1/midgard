@@ -10,9 +10,8 @@ import (
 	"time"
 )
 
+//nolint:paralleltest // starting main with a fixed port is not safe for parallel tests
 func TestExampleMain(t *testing.T) {
-	t.Parallel()
-
 	go main()
 
 	time.Sleep(500 * time.Millisecond)

@@ -92,7 +92,6 @@ func TestMethodFilterUninitialized(t *testing.T) {
 }
 
 func FuzzMethodFilter(f *testing.F) {
-
 	f.Add(http.MethodDelete)
 	f.Add(http.MethodGet)
 	f.Add(http.MethodOptions)
@@ -112,6 +111,7 @@ func FuzzMethodFilter(f *testing.F) {
 
 		if activeFilter[method] && rec.Code != http.StatusOK ||
 			!activeFilter[method] && rec.Code != http.StatusMethodNotAllowed {
+
 			t.Errorf("method filter did not work as expected, method %v got %v", method, rec.Code)
 		}
 	})

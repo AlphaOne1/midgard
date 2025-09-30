@@ -4,6 +4,7 @@
 package htpasswdauth_test
 
 import (
+	"os"
 	"testing"
 
 	"github.com/AlphaOne1/midgard/handler/basicauth/htpasswdauth"
@@ -35,7 +36,7 @@ func TestHtpasswdAuth(t *testing.T) {
 		},
 	}
 
-	a := helper.Must(htpasswdauth.New(htpasswdauth.WithAuthFile("testwd")))
+	a := helper.Must(htpasswdauth.New(htpasswdauth.WithAuthFile(helper.Must(os.Getwd()) + "/testwd")))
 
 	for k, v := range tests {
 		gotAuth, gotErr := a.Authorize(v.Username, v.Password)

@@ -29,6 +29,4 @@ require (
 	gotest.tools/gotestsum v1.13.0 // indirect
 )
 
-replace golang.org/x/crypto v0.17.0 => golang.org/x/crypto v0.42.0
-
 tool gotest.tools/gotestsum

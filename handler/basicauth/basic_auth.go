@@ -54,7 +54,6 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 // value for Authorization. It signalizes if the desired information exists or en
 // error, when the auth string is unprocessable.
 func ExtractUserPass(auth string) (user, pass string, found bool, err error) {
-
 	authInfo, headerPrefixOK := strings.CutPrefix(auth, "Basic ")
 
 	if !headerPrefixOK || len(authInfo) < 6 {
@@ -72,6 +71,7 @@ func ExtractUserPass(auth string) (user, pass string, found bool, err error) {
 	if len(credentials) != 2 ||
 		len(credentials[0]) == 0 ||
 		len(credentials[1]) == 0 {
+
 		return "", "", false, nil
 	}
 

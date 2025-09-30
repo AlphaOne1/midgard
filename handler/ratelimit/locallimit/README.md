@@ -32,7 +32,7 @@ Example
 ```go
 limiter := helper.Must(locallimit.New(
     locallimit.WithTargetRate(v.TargetRate),
-    locallimit.WithDefaultSleepInterval(v.SleepTime)))
+    locallimit.WithSleepInterval(v.SleepTime)))
 
 if limiter.Limit() {
     doWork()

@@ -25,6 +25,6 @@ func TestAddHeaders(t *testing.T) {
 	handler.ServeHTTP(rec, req)
 
 	if rec.Header().Get("X-Test-Header") != "testValue" {
-		t.Errorf("X-Test-Header header not added correctly to request")
+		t.Errorf("X-Test-Header header not added correctly to response")
 	}
 }

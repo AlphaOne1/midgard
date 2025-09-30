@@ -135,7 +135,7 @@ func TestBasicAuthNoAuthenticator(t *testing.T) {
 		basicauth.WithRealm("testrealm"))
 
 	if mwErr == nil || mwErr.Error() != "no authenticator configured" {
-		t.Errorf("uncought undefined authenticator")
+		t.Errorf("uncaught undefined authenticator")
 	}
 }
 
