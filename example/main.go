@@ -16,11 +16,11 @@ import (
 
 	"github.com/AlphaOne1/midgard"
 	"github.com/AlphaOne1/midgard/defs"
-	"github.com/AlphaOne1/midgard/handler/access_log"
+	"github.com/AlphaOne1/midgard/handler/accesslog"
 	"github.com/AlphaOne1/midgard/handler/correlation"
 	"github.com/AlphaOne1/midgard/handler/cors"
-	"github.com/AlphaOne1/midgard/handler/method_filter"
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/handler/methodfilter"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
 //go:embed hello.html
@@ -39,15 +39,15 @@ func main() {
 	// generate a handler that is prepended with the given middlewares
 	finalHandler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
-			util.Must(correlation.New()),
-			util.Must(access_log.New(
-				access_log.WithLogLevel(slog.LevelDebug))),
-			util.Must(cors.New(
+			helper.Must(correlation.New()),
+			helper.Must(accesslog.New(
+				accesslog.WithLogLevel(slog.LevelDebug))),
+			helper.Must(cors.New(
 				cors.WithHeaders(append(cors.MinimumAllowHeaders(), "X-Correlation-ID")),
 				cors.WithMethods([]string{http.MethodGet}),
 				cors.WithOrigins([]string{"*"}))),
-			util.Must(method_filter.New(
-				method_filter.WithMethods([]string{http.MethodGet}))),
+			helper.Must(methodfilter.New(
+				methodfilter.WithMethods([]string{http.MethodGet}))),
 		},
 		http.HandlerFunc(HelloHandler),
 	)

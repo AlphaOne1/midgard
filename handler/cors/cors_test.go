@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/AlphaOne1/midgard/handler/cors"
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
 func TestEvalCSSHandler(t *testing.T) {
@@ -133,10 +133,10 @@ func TestEvalCSSHandler(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			mw := util.Must(cors.New(
+			mw := helper.Must(cors.New(
 				cors.WithMethods(test.cssMethods),
 				cors.WithHeaders(cors.MinimumAllowHeaders()),
-				cors.WithOrigins(test.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
+				cors.WithOrigins(test.cssOrigins)))(http.HandlerFunc(helper.DummyHandler))
 
 			mw.ServeHTTP(rec, req)
 

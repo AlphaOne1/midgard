@@ -11,8 +11,8 @@ import (
 	"github.com/AlphaOne1/midgard"
 	"github.com/AlphaOne1/midgard/defs"
 	"github.com/AlphaOne1/midgard/handler/correlation"
-	"github.com/AlphaOne1/midgard/handler/method_filter"
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/handler/methodfilter"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
 func TestStackMiddleware(t *testing.T) {
@@ -20,11 +20,11 @@ func TestStackMiddleware(t *testing.T) {
 
 	newMWHandler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
-			util.Must(method_filter.New(
-				method_filter.WithMethods([]string{http.MethodGet}))),
-			util.Must(correlation.New()),
+			helper.Must(methodfilter.New(
+				methodfilter.WithMethods([]string{http.MethodGet}))),
+			helper.Must(correlation.New()),
 		},
-		http.HandlerFunc(util.DummyHandler),
+		http.HandlerFunc(helper.DummyHandler),
 	)
 
 	_ = newMWHandler
@@ -61,7 +61,7 @@ func TestEmptyMiddlewareHandler(t *testing.T) {
 
 	newMWHandler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{},
-		http.HandlerFunc(util.DummyHandler))
+		http.HandlerFunc(helper.DummyHandler))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	res := httptest.NewRecorder()

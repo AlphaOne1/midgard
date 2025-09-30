@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-// Package correlation provides a middleware for adding correlation ids to HTTP requests.
-package correlation
+// Package ratelimit provides middleware for rate limiting HTTP requests.
+package ratelimit
 
 import (
 	"errors"
@@ -13,12 +13,23 @@ import (
 	"github.com/AlphaOne1/midgard/helper"
 )
 
+// ErrInvalidLimiter is returned when the given limiter is invalid.
+var ErrInvalidLimiter = errors.New("invalid limiter")
+
 // ErrNilOption is returned when an option is nil.
 var ErrNilOption = errors.New("option cannot be nil")
 
-// Handler is the basic structure of the correlation id enriching middleware.
+// Limiter is the interface a limiter has to implement to be used in the rate
+// limiter middleware.
+type Limiter interface {
+	Limit() bool
+}
+
+// Handler holds the internal rate limiter information.
 type Handler struct {
 	defs.MWBase
+
+	Limit Limiter
 }
 
 // GetMWBase returns the MWBase instance of the handler.
@@ -30,27 +41,32 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 	return &h.MWBase
 }
 
-// ServeHTTP is implements the correlation id enriching middleware.
-// It adds an X-Correlation-ID header if none was present.
+// ServeHTTP limits the requests using the internal Limiter.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !helper.IntroCheck(h, w, r) {
 		return
 	}
 
-	correlationID := r.Header.Get("X-Correlation-ID")
+	if !h.Limit.Limit() {
+		helper.WriteState(w, h.Log(), http.StatusTooManyRequests)
 
-	if correlationID == "" {
-		tmp := helper.GetOrCreateID("")
-
-		r.Header.Set("X-Correlation-ID", tmp)
-		w.Header().Set("X-Correlation-ID", tmp)
-
-		h.Log().Debug("created new correlation id", slog.String("correlation_id", tmp))
-	} else {
-		w.Header().Set("X-Correlation-ID", correlationID)
+		return
 	}
 
 	h.Next().ServeHTTP(w, r)
+}
+
+// WithLimiter sets the Limiter to use.
+func WithLimiter(l Limiter) func(h *Handler) error {
+	return func(h *Handler) error {
+		if l == nil {
+			return ErrInvalidLimiter
+		}
+
+		h.Limit = l
+
+		return nil
+	}
 }
 
 // WithLogger configures the logger to use.
@@ -63,18 +79,22 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 	return defs.WithLogLevel[*Handler](level)
 }
 
-// New generates a new correlation-id-enriching middleware.
+// New creates a new rate limiter middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
-	handler := &Handler{}
+	handler := Handler{}
 
 	for _, opt := range options {
 		if opt == nil {
 			return nil, ErrNilOption
 		}
 
-		if err := opt(handler); err != nil {
+		if err := opt(&handler); err != nil {
 			return nil, err
 		}
+	}
+
+	if handler.Limit == nil {
+		return nil, ErrInvalidLimiter
 	}
 
 	return func(next http.Handler) http.Handler {
@@ -82,6 +102,6 @@ func New(options ...func(*Handler) error) (defs.Middleware, error) {
 			return nil
 		}
 
-		return handler
+		return &handler
 	}, nil
 }

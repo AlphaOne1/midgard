@@ -3,7 +3,7 @@
 -->
 
 <!-- markdownlint-disable MD013 MD033 MD041 -->
-<p align="center">
+<p style="text-align: center;">
     <img src="midgard_logo.svg" width="25%" alt="Logo"><br>
     <a href="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml"
        rel="external noopener noreferrer"
@@ -104,15 +104,15 @@ that has all the given middlewares prepended:
 ```go
 finalHandler := midgard.StackMiddlewareHandler(
     []midgard.Middleware{
-        util.Must(correlation.New()),
-        util.Must(access_log.New(
-            access_log.WithLogLevel(slog.LevelDebug))),
-        util.Must(cors.New(
+        helper.Must(correlation.New()),
+        helper.Must(accesslog.New(
+            accesslog.WithLogLevel(slog.LevelDebug))),
+        helper.Must(cors.New(
             cors.WithHeaders(cors.MinimumAllowedHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),
-        util.Must(method_filter.New(
-            method_filter.WithMethods([]string{http.MethodGet}))),
+        helper.Must(methodfilter.New(
+            methodfilter.WithMethods([]string{http.MethodGet}))),
         },
     http.HandlerFunc(HelloHandler),
 )
@@ -124,30 +124,30 @@ It generates a new middleware:
 ```go
 newMiddleware:= midgard.StackMiddleware(
     []midgard.Middleware{
-        util.Must(correlation.New()),
-        util.Must(access_log.New(
-            access_log.WithLogLevel(slog.LevelDebug))),
-        util.Must(cors.New(
+        helper.Must(correlation.New()),
+        helper.Must(accesslog.New(
+            accesslog.WithLogLevel(slog.LevelDebug))),
+        helper.Must(cors.New(
             cors.WithHeaders(cors.MinimumAllowedHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),
-        util.Must(method_filter.New(
-            method_filter.WithMethods([]string{http.MethodGet}))),
+        helper.Must(methodfilter.New(
+            methodfilter.WithMethods([]string{http.MethodGet}))),
     })
 ```
 
 The native solution for this would be to nest the calls to the middleware like this:
 
 ```go
-finalHandler := util.Must(correlation.New())(
-                    util.Must(access_log.New(
-                        access_log.WithLogLevel(slog.LevelDebug)))(
-                        util.Must(cors.New(
+finalHandler := helper.Must(correlation.New())(
+                    helper.Must(accesslog.New(
+                        accesslog.WithLogLevel(slog.LevelDebug)))(
+                        helper.Must(cors.New(
                             cors.WithHeaders(cors.MinimumAllowedHeaders()),
                             cors.WithMethods([]string{http.MethodGet}),
                             cors.WithOrigins([]string{"*"})))(
-                            util.Must(method_filter.New(
-                                method_filter.WithMethods([]string{http.MethodGet}))))))
+                            helper.Must(methodfilter.New(
+                                methodfilter.WithMethods([]string{http.MethodGet}))))))
 ```
 
 As you see, depending on the number of middlewares, that can be quite confusing.

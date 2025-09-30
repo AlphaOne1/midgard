@@ -24,7 +24,7 @@ Example
 ```go
 finalHandler := midgard.StackMiddlewareHandler(
     []midgard.Middleware{
-        util.Must(cors.New(
+        helper.Must(cors.New(
             cors.WithHeaders(cors.MinimumAllowHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),

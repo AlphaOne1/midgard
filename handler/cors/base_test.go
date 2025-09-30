@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/AlphaOne1/midgard/handler/cors"
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
 //
@@ -70,7 +70,7 @@ func TestOptionNil(t *testing.T) {
 func TestHandlerNextNil(t *testing.T) {
 	t.Parallel()
 
-	h := util.Must(cors.New(cors.WithLogLevel(slog.LevelDebug)))(nil)
+	h := helper.Must(cors.New(cors.WithLogLevel(slog.LevelDebug)))(nil)
 
 	if h != nil {
 		t.Errorf("expected handler to be nil")
@@ -84,7 +84,7 @@ func TestHandlerNextNil(t *testing.T) {
 func TestOptionWithLevel(t *testing.T) {
 	t.Parallel()
 
-	h := util.Must(cors.New(cors.WithLogLevel(slog.LevelDebug)))(http.HandlerFunc(util.DummyHandler))
+	h := helper.Must(cors.New(cors.WithLogLevel(slog.LevelDebug)))(http.HandlerFunc(helper.DummyHandler))
 	val, isValid := h.(*cors.Handler)
 
 	if !isValid {
@@ -114,7 +114,7 @@ func TestOptionWithLogger(t *testing.T) {
 	t.Parallel()
 
 	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	h := util.Must(cors.New(cors.WithLogger(l)))(http.HandlerFunc(util.DummyHandler))
+	h := helper.Must(cors.New(cors.WithLogger(l)))(http.HandlerFunc(helper.DummyHandler))
 
 	val, isValid := h.(*cors.Handler)
 

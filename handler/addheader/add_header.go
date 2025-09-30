@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-// Package correlation provides a middleware for adding correlation ids to HTTP requests.
-package correlation
+// Package addheader provides a middleware for adding headers to HTTP responses.
+package addheader
 
 import (
 	"errors"
@@ -16,9 +16,11 @@ import (
 // ErrNilOption is returned when an option is nil.
 var ErrNilOption = errors.New("option cannot be nil")
 
-// Handler is the basic structure of the correlation id enriching middleware.
+// Handler holds the information of the added headers.
 type Handler struct {
 	defs.MWBase
+
+	headers [][2]string
 }
 
 // GetMWBase returns the MWBase instance of the handler.
@@ -30,24 +32,14 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 	return &h.MWBase
 }
 
-// ServeHTTP is implements the correlation id enriching middleware.
-// It adds an X-Correlation-ID header if none was present.
+// ServeHTTP handles the requests, adding the additionally provided headers to the responses.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !helper.IntroCheck(h, w, r) {
 		return
 	}
 
-	correlationID := r.Header.Get("X-Correlation-ID")
-
-	if correlationID == "" {
-		tmp := helper.GetOrCreateID("")
-
-		r.Header.Set("X-Correlation-ID", tmp)
-		w.Header().Set("X-Correlation-ID", tmp)
-
-		h.Log().Debug("created new correlation id", slog.String("correlation_id", tmp))
-	} else {
-		w.Header().Set("X-Correlation-ID", correlationID)
+	for _, v := range h.headers {
+		w.Header().Set(v[0], v[1])
 	}
 
 	h.Next().ServeHTTP(w, r)
@@ -63,9 +55,18 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 	return defs.WithLogLevel[*Handler](level)
 }
 
-// New generates a new correlation-id-enriching middleware.
+// WithHeaders configures the headers to add to responses.
+func WithHeaders(headers [][2]string) func(*Handler) error {
+	return func(h *Handler) error {
+		h.headers = append(h.headers, headers...)
+
+		return nil
+	}
+}
+
+// New generates a new header adding middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
-	handler := &Handler{}
+	handler := new(Handler)
 
 	for _, opt := range options {
 		if opt == nil {

@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/AlphaOne1/midgard/handler/correlation"
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
 func TestCorrelationNewID(t *testing.T) {
@@ -23,7 +23,7 @@ func TestCorrelationNewID(t *testing.T) {
 		}
 	}
 
-	handler := util.Must(correlation.New())(http.HandlerFunc(insideHandler))
+	handler := helper.Must(correlation.New())(http.HandlerFunc(insideHandler))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
@@ -50,7 +50,7 @@ func TestCorrelationSuppliedID(t *testing.T) {
 		}
 	}
 
-	handler := util.Must(correlation.New())(http.HandlerFunc(insideHandler))
+	handler := helper.Must(correlation.New())(http.HandlerFunc(insideHandler))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	req.Header.Add("X-Correlation-ID", "setOutside")

@@ -6,15 +6,23 @@ package cors
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"slices"
 	"strings"
 
 	"github.com/AlphaOne1/midgard/defs"
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/helper"
 )
+
+// ErrNilOption is returned when an option is nil.
+var ErrNilOption = errors.New("option cannot be nil")
+
+// ErrNoOrigin is returned when there is no origin in the request.
+var ErrNoOrigin = errors.New("no origin in header")
+
+// ErrOriginNotAllowed is returned when the origin is not allowed.
+var ErrOriginNotAllowed = errors.New("origin not allowed")
 
 // Handler is a middleware that sets up the cross-site scripting circumvention headers.
 type Handler struct {
@@ -66,7 +74,7 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 	}
 
 	if len(origin) == 0 {
-		return "", fmt.Errorf("no origin in header")
+		return "", ErrNoOrigin
 	}
 
 	for _, orig := range origin {
@@ -79,12 +87,12 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("origin not allowed")
+	return "", ErrOriginNotAllowed
 }
 
 // ServeHTTP sets up the client with the appropriate headers.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if !util.IntroCheck(h, w, r) {
+	if !helper.IntroCheck(h, w, r) {
 		return
 	}
 
@@ -94,7 +102,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// no relevant origin found in the request
 	if roErr != nil {
-		util.WriteState(w, h.Log(), http.StatusForbidden)
+		helper.WriteState(w, h.Log(), http.StatusForbidden)
 
 		return
 	}
@@ -113,7 +121,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	// we have methods configured, but the request does not match any of them
 	if len(h.Methods) > 0 && !h.Methods[r.Method] {
-		util.WriteState(w, h.Log(), http.StatusMethodNotAllowed)
+		helper.WriteState(w, h.Log(), http.StatusMethodNotAllowed)
 
 		return
 	}
@@ -123,7 +131,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(h.Headers) > 0 {
 		for hdr := range r.Header {
 			if !h.Headers[strings.ToLower(hdr)] {
-				util.WriteState(w, h.Log(), http.StatusForbidden)
+				helper.WriteState(w, h.Log(), http.StatusForbidden)
 
 				return
 			}
@@ -197,7 +205,7 @@ func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
 
 	for _, opt := range options {
 		if opt == nil {
-			return nil, errors.New("options cannot be nil")
+			return nil, ErrNilOption
 		}
 
 		if err := opt(&handler); err != nil {

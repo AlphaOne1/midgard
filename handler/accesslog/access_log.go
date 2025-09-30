@@ -1,8 +1,8 @@
 // SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-// Package correlation provides a middleware for adding correlation ids to HTTP requests.
-package correlation
+// Package accesslog provides a middleware that logs every request.
+package accesslog
 
 import (
 	"errors"
@@ -10,13 +10,14 @@ import (
 	"net/http"
 
 	"github.com/AlphaOne1/midgard/defs"
+	"github.com/AlphaOne1/midgard/handler/basicauth"
 	"github.com/AlphaOne1/midgard/helper"
 )
 
 // ErrNilOption is returned when an option is nil.
 var ErrNilOption = errors.New("option cannot be nil")
 
-// Handler is the basic structure of the correlation id enriching middleware.
+// Handler holds the information necessary for the log.
 type Handler struct {
 	defs.MWBase
 }
@@ -30,25 +31,35 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 	return &h.MWBase
 }
 
-// ServeHTTP is implements the correlation id enriching middleware.
-// It adds an X-Correlation-ID header if none was present.
+// ServeHTTP implements the access logging middleware. It logs every request with its
+// correlationID, the client's address, http method and accessed path.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if !helper.IntroCheck(h, w, r) {
 		return
 	}
 
-	correlationID := r.Header.Get("X-Correlation-ID")
-
-	if correlationID == "" {
-		tmp := helper.GetOrCreateID("")
-
-		r.Header.Set("X-Correlation-ID", tmp)
-		w.Header().Set("X-Correlation-ID", tmp)
-
-		h.Log().Debug("created new correlation id", slog.String("correlation_id", tmp))
-	} else {
-		w.Header().Set("X-Correlation-ID", correlationID)
+	entries := []any{
+		slog.String("client", r.RemoteAddr),
+		slog.String("method", r.Method),
 	}
+
+	if r.URL != nil {
+		entries = append(entries, slog.String("target", r.URL.Path))
+	}
+
+	if correlationID := r.Header.Get("X-Correlation-ID"); correlationID != "" {
+		entries = append(entries, slog.String("correlation_id", correlationID))
+	}
+
+	if authLine := r.Header.Get("Authorization"); authLine != "" {
+		username, _, userFound, _ := basicauth.ExtractUserPass(authLine)
+
+		if userFound {
+			entries = append(entries, slog.String("user", username))
+		}
+	}
+
+	h.Log().Log(r.Context(), h.LogLevel(), "access", entries...)
 
 	h.Next().ServeHTTP(w, r)
 }
@@ -63,9 +74,9 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 	return defs.WithLogLevel[*Handler](level)
 }
 
-// New generates a new correlation-id-enriching middleware.
+// New generates a new access logging middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
-	handler := &Handler{}
+	handler := new(Handler)
 
 	for _, opt := range options {
 		if opt == nil {
