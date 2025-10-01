@@ -3,7 +3,7 @@
 -->
 
 <!-- markdownlint-disable MD013 MD033 MD041 -->
-<p style="text-align: center;">
+<p align="center">
     <img src="midgard_logo.svg" width="25%" alt="Logo"><br>
     <a href="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml"
        rel="external noopener noreferrer"
