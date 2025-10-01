@@ -1,3 +1,7 @@
+<!-- SPDX-FileCopyrightText: 2025 The midgard contributors.
+     SPDX-License-Identifier: MPL-2.0
+-->
+
 Security Policy
 ===============
 
@@ -5,7 +9,7 @@ Supported Versions
 ------------------
 
 | Version        | Supported          |
-| -------------- | ------------------ |
+|----------------|--------------------|
 | master         | :white_check_mark: |
 | other branches | :x:                |
 

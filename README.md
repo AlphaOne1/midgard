@@ -1,5 +1,9 @@
+<!-- SPDX-FileCopyrightText: 2025 The midgard contributors.
+     SPDX-License-Identifier: MPL-2.0
+-->
+
 <!-- markdownlint-disable MD013 MD033 MD041 -->
-<p align="center">
+<p style="text-align: center;">
     <img src="midgard_logo.svg" width="25%" alt="Logo"><br>
     <a href="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml"
        rel="external noopener noreferrer"
@@ -49,6 +53,12 @@
         <img src="https://api.scorecard.dev/projects/github.com/AlphaOne1/midgard/badge"
              alt="OpenSSF Scorecard">
     </a>
+    <a href="https://api.reuse.software/info/github.com/AlphaOne1/midgard"
+       rel="external noopener noreferrer"
+       target="_blank">
+        <img src="https://api.reuse.software/badge/github.com/AlphaOne1/midgard"
+            alt="REUSE compliance">
+    </a>
     <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard?ref=badge_shield&issueType=license"
        rel="external noopener noreferrer"
        target="_blank">
@@ -80,13 +90,13 @@ Usage
 -----
 
 *midgard* defines a type `Middleware` that is just a convenience to not always
-having to write the full definition of what is commonly known as http middlware.
+having to write the full definition of what is commonly known as http middleware.
 
 ```go
 type Middleware func(http.Handler) http.Handler
 ```
 
-To ease the pain of stacking different middlwares *midgard* offsers two functions
+To ease the pain of stacking different middlewares, *midgard* offers two functions
 to facilitate it. `StackMiddlewareHandler` stacks the given slice of middlewares
 on top of each other and finally calls the given handler. It generates a new handler
 that has all the given middlewares prepended:
@@ -94,15 +104,15 @@ that has all the given middlewares prepended:
 ```go
 finalHandler := midgard.StackMiddlewareHandler(
     []midgard.Middleware{
-        util.Must(correlation.New()),
-        util.Must(access_log.New(
-            access_log.WithLogLevel(slog.LevelDebug))),
-        util.Must(cors.New(
+        helper.Must(correlation.New()),
+        helper.Must(accesslog.New(
+            accesslog.WithLogLevel(slog.LevelDebug))),
+        helper.Must(cors.New(
             cors.WithHeaders(cors.MinimumAllowedHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),
-        util.Must(method_filter.New(
-            method_filter.WithMethods([]string{http.MethodGet}))),
+        helper.Must(methodfilter.New(
+            methodfilter.WithMethods([]string{http.MethodGet}))),
         },
     http.HandlerFunc(HelloHandler),
 )
@@ -114,31 +124,31 @@ It generates a new middleware:
 ```go
 newMiddleware:= midgard.StackMiddleware(
     []midgard.Middleware{
-        util.Must(correlation.New()),
-        util.Must(access_log.New(
-            access_log.WithLogLevel(slog.LevelDebug))),
-        util.Must(cors.New(
+        helper.Must(correlation.New()),
+        helper.Must(accesslog.New(
+            accesslog.WithLogLevel(slog.LevelDebug))),
+        helper.Must(cors.New(
             cors.WithHeaders(cors.MinimumAllowedHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),
-        util.Must(method_filter.New(
-            method_filter.WithMethods([]string{http.MethodGet}))),
+        helper.Must(methodfilter.New(
+            methodfilter.WithMethods([]string{http.MethodGet}))),
     })
 ```
 
 The native solution for this would be to nest the calls to the middleware like this:
 
 ```go
-finalHandler := util.Must(correlation.New())(
-                    util.Must(access_log.New(
-                        access_log.WithLogLevel(slog.LevelDebug)))(
-                        util.Must(cors.New(
+finalHandler := helper.Must(correlation.New())(
+                    helper.Must(accesslog.New(
+                        accesslog.WithLogLevel(slog.LevelDebug)))(
+                        helper.Must(cors.New(
                             cors.WithHeaders(cors.MinimumAllowedHeaders()),
                             cors.WithMethods([]string{http.MethodGet}),
                             cors.WithOrigins([]string{"*"})))(
-                            util.Must(method_filter.New(
-                                method_filter.WithMethods([]string{http.MethodGet}))))))
+                            helper.Must(methodfilter.New(
+                                methodfilter.WithMethods([]string{http.MethodGet}))))))
 ```
 
 As you see, depending on the number of middlewares, that can be quite confusing.
-Further one cannot *easily* dynamially add or remove middlewares.
+Further one cannot *easily* dynamically add or remove middlewares.

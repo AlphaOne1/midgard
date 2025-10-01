@@ -1,4 +1,4 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 package main
@@ -10,11 +10,12 @@ import (
 	"time"
 )
 
+//nolint:paralleltest // starting main with a fixed port is not safe for parallel tests
 func TestExampleMain(t *testing.T) {
 	go main()
 
 	time.Sleep(500 * time.Millisecond)
-	req, reqErr := http.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	req, reqErr := http.NewRequestWithContext(t.Context(), http.MethodGet, "http://localhost:8080/", nil)
 
 	if reqErr != nil {
 		t.Errorf("unexpected request error: %v", reqErr)
@@ -27,6 +28,8 @@ func TestExampleMain(t *testing.T) {
 	if resErr != nil {
 		t.Errorf("got error for hello test page: %v", resErr)
 	}
+
+	defer func() { _ = res.Body.Close() }()
 
 	if resErr == nil && res.StatusCode != http.StatusOK {
 		body := make([]byte, res.ContentLength)

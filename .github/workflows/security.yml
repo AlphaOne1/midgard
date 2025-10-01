@@ -1,4 +1,4 @@
-# Copyright the midgard contributors.
+# SPDX-FileCopyrightText: 2025 The midgard contributors.
 # SPDX-License-Identifier: MPL-2.0
 
 name: Security
@@ -46,7 +46,7 @@ jobs:
         strategy:
             matrix:
                 go-version:
-                  - "1.23"
+                  - stable
         runs-on: ubuntu-latest
         permissions:
             security-events: write
@@ -69,9 +69,11 @@ jobs:
                 output-file: govulncheck-results.sarif
 
           - name: PrintSarif
+            id: PrintSarif
             run:  |
                 cat govulncheck-results.sarif
-                if [ grep results govulncheck-results.serif ]
+                
+                if grep "'results'" govulncheck-results.sarif
                 then
                     echo "hasResults=true" >> $GITHUB_OUTPUT
                 else

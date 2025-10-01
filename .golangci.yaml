@@ -1,0 +1,108 @@
+# SPDX-FileCopyrightText: 2025 The midgard contributors.
+# SPDX-License-Identifier: MPL-2.0
+
+# Configuration file for golangci-lint
+# See https://golangci-lint.run/usage/configuration/ for more information
+
+version: "2"
+
+run:
+    timeout: 5m
+    tests: true
+
+linters:
+    default: all
+
+    disable:
+        - exhaustruct
+        - forbidigo
+        - noinlineerr
+        - nonamedreturns
+        - wsl
+        - wsl_v5
+
+    exclusions:
+        warn-unused: true
+
+        rules:
+            - path: _test\.go
+              linters:
+                  - cyclop
+                  - dupword
+                  - err113
+                  - funlen
+                  - gocognit
+                  - maintidx
+                  - nestif
+
+            - path: examples/
+              linters:
+                  - err113
+
+    settings:
+        cyclop:
+            max-complexity: 20
+
+        depguard:
+            rules:
+                main:
+                    files:
+                        - $all
+                        - "!$test"
+                        - "!**/examples/**/*"
+                    allow:
+                        - $gostd
+                        - github.com/AlphaOne1/midgard
+                        - github.com/AlphaOne1/midgard/defs
+                        - github.com/AlphaOne1/midgard/helper
+                        - github.com/AlphaOne1/midgard/handler/accesslog
+                        - github.com/AlphaOne1/midgard/handler/basicauth
+                        - github.com/AlphaOne1/midgard/handler/correlation
+                        - github.com/AlphaOne1/midgard/handler/cors
+                        - github.com/AlphaOne1/midgard/handler/methodfilter
+                        - github.com/google/uuid
+                        - github.com/tg123/go-htpasswd
+                test:
+                    files:
+                        - $test
+                        - "**/examples/**/*"
+                        - "!**/examples/configSchema/main.go"
+                    allow:
+                        - $gostd
+                        - github.com/AlphaOne1/midgard
+                        - github.com/AlphaOne1/midgard/defs
+                        - github.com/AlphaOne1/midgard/handler/accesslog
+                        - github.com/AlphaOne1/midgard/handler/addheader
+                        - github.com/AlphaOne1/midgard/handler/basicauth
+                        - github.com/AlphaOne1/midgard/handler/correlation
+                        - github.com/AlphaOne1/midgard/handler/cors
+                        - github.com/AlphaOne1/midgard/handler/methodfilter
+                        - github.com/AlphaOne1/midgard/handler/ratelimit
+                        - github.com/AlphaOne1/midgard/helper
+
+        exhaustive:
+            default-signifies-exhaustive: true
+
+        mnd:
+            ignored-numbers:
+                - "2"
+
+        perfsprint:
+            errorf: false
+
+        testpackage:
+            skip-regexp: internal_test\.go
+
+        varnamelen:
+            max-distance: 10
+            ignore-decls:
+                - w http.ResponseWriter
+                - r *http.Request
+
+        whitespace:
+            multi-if: true
+            multi-func: true
+
+issues:
+    max-issues-per-linter: 0
+    max-same-issues: 0

@@ -1,3 +1,7 @@
+<!-- SPDX-FileCopyrightText: 2025 The midgard contributors.
+     SPDX-License-Identifier: MPL-2.0
+-->
+
 CORS Middleware
 ===============
 
@@ -20,7 +24,7 @@ Example
 ```go
 finalHandler := midgard.StackMiddlewareHandler(
     []midgard.Middleware{
-        util.Must(cors.New(
+        helper.Must(cors.New(
             cors.WithHeaders(cors.MinimumAllowHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),

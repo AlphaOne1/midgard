@@ -1,6 +1,7 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package defs contains the common types and functions for all midgard handlers.
 package defs
 
 import (
@@ -9,6 +10,15 @@ import (
 	"net/http"
 	"reflect"
 )
+
+// ErrNilLogger is returned when a logger is nil.
+var ErrNilLogger = errors.New("logger cannot be nil")
+
+// ErrNilHandler is returned when a handler is nil.
+var ErrNilHandler = errors.New("handler cannot be nil")
+
+// ErrNotInitialized is returned when a middleware is used before it has been initialized.
+var ErrNotInitialized = errors.New("middleware not initialized")
 
 // MWBase contains the basic middleware information common to each midgard handler.
 type MWBase struct {
@@ -35,14 +45,15 @@ func (mw *MWBase) Log() *slog.Logger {
 // SetLog sets a new slog.Logger to use for logging.
 func (mw *MWBase) SetLog(l *slog.Logger) error {
 	if mw == nil {
-		return errors.New("middleware not initialized")
+		return ErrNotInitialized
 	}
 
 	if l == nil {
-		return errors.New("cannot configure with nil logger")
+		return ErrNilLogger
 	}
 
 	mw.log = l
+
 	return nil
 }
 
@@ -59,10 +70,11 @@ func (mw *MWBase) LogLevel() slog.Level {
 func (mw *MWBase) SetLogLevel(l slog.Level) error {
 	if mw != nil {
 		mw.logLevel = l
+
 		return nil
 	}
 
-	return errors.New("middleware not initialized")
+	return ErrNotInitialized
 }
 
 // Next gets the next handler in a chain of handlers.
@@ -77,14 +89,15 @@ func (mw *MWBase) Next() http.Handler {
 // SetNext sets the next handler for the chain of handlers.
 func (mw *MWBase) SetNext(n http.Handler) error {
 	if mw == nil {
-		return errors.New("middleware not initialized")
+		return ErrNotInitialized
 	}
 
 	if n == nil {
-		return errors.New("next handler must not be nil")
+		return ErrNilHandler
 	}
 
 	mw.next = n
+
 	return nil
 }
 
@@ -93,7 +106,7 @@ func (mw *MWBase) SetNext(n http.Handler) error {
 func WithLogger[T MWBaser](l *slog.Logger) func(h T) error {
 	return func(h T) error {
 		if value := reflect.ValueOf(h); !value.IsValid() || value.IsNil() {
-			return errors.New("cannot configure nil handler")
+			return ErrNilHandler
 		}
 
 		return h.GetMWBase().SetLog(l)
@@ -105,7 +118,7 @@ func WithLogger[T MWBaser](l *slog.Logger) func(h T) error {
 func WithLogLevel[T MWBaser](l slog.Level) func(h T) error {
 	return func(h T) error {
 		if value := reflect.ValueOf(h); !value.IsValid() || value.IsNil() {
-			return errors.New("cannot configure nil handler")
+			return ErrNilHandler
 		}
 
 		return h.GetMWBase().SetLogLevel(l)

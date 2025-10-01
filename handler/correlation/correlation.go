@@ -1,6 +1,7 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package correlation provides a middleware for adding correlation ids to HTTP requests.
 package correlation
 
 import (
@@ -9,13 +10,18 @@ import (
 	"net/http"
 
 	"github.com/AlphaOne1/midgard/defs"
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
+// ErrNilOption is returned when an option is nil.
+var ErrNilOption = errors.New("option cannot be nil")
+
+// Handler is the basic structure of the correlation id enriching middleware.
 type Handler struct {
 	defs.MWBase
 }
 
+// GetMWBase returns the MWBase instance of the handler.
 func (h *Handler) GetMWBase() *defs.MWBase {
 	if h == nil {
 		return nil
@@ -27,14 +33,14 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 // ServeHTTP is implements the correlation id enriching middleware.
 // It adds an X-Correlation-ID header if none was present.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if !util.IntroCheck(h, w, r) {
+	if !helper.IntroCheck(h, w, r) {
 		return
 	}
 
 	correlationID := r.Header.Get("X-Correlation-ID")
 
 	if correlationID == "" {
-		tmp := util.GetOrCreateID("")
+		tmp := helper.GetOrCreateID("")
 
 		r.Header.Set("X-Correlation-ID", tmp)
 		w.Header().Set("X-Correlation-ID", tmp)
@@ -57,24 +63,25 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 	return defs.WithLogLevel[*Handler](level)
 }
 
-// New generates a new correlation id enriching middleware.
+// New generates a new correlation-id-enriching middleware.
 func New(options ...func(*Handler) error) (defs.Middleware, error) {
-	h := &Handler{}
+	handler := &Handler{}
 
 	for _, opt := range options {
 		if opt == nil {
-			return nil, errors.New("options cannot be nil")
+			return nil, ErrNilOption
 		}
 
-		if err := opt(h); err != nil {
+		if err := opt(handler); err != nil {
 			return nil, err
 		}
 	}
 
 	return func(next http.Handler) http.Handler {
-		if err := h.SetNext(next); err != nil {
+		if err := handler.SetNext(next); err != nil {
 			return nil
 		}
-		return h
+
+		return handler
 	}, nil
 }

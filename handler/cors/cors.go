@@ -1,23 +1,33 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
+// Package cors provides a middleware for handling CORS (Cross-Origin Resource Sharing) requests.
 package cors
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"slices"
 	"strings"
 
 	"github.com/AlphaOne1/midgard/defs"
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
-// Handler is a middleware that sets up the cross site scripting circumvention headers.
+// ErrNilOption is returned when an option is nil.
+var ErrNilOption = errors.New("option cannot be nil")
+
+// ErrNoOrigin is returned when there is no origin in the request.
+var ErrNoOrigin = errors.New("no origin in header")
+
+// ErrOriginNotAllowed is returned when the origin is not allowed.
+var ErrOriginNotAllowed = errors.New("origin not allowed")
+
+// Handler is a middleware that sets up the cross-site scripting circumvention headers.
 type Handler struct {
 	defs.MWBase
+
 	// Headers contains the allowed headers
 	Headers map[string]bool
 	// HeadersReturn contains the comma-concatenated allowed headers
@@ -32,6 +42,7 @@ type Handler struct {
 	Origins []string
 }
 
+// GetMWBase returns the MWBase instance of the handler.
 func (h *Handler) GetMWBase() *defs.MWBase {
 	if h == nil {
 		return nil
@@ -40,21 +51,19 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 	return &h.MWBase
 }
 
-var minimumAllowHeaders = []string{
-	"Accept",
-	"Accept-Encoding",
-	"Authorization",
-	"Content-Length",
-	"Content-Type",
-	"Origin",
-	"User-Agent",
-	"X-CSRF-Token",
-}
-
 // MinimumAllowHeaders returns a minimal list of headers, that should not do
 // harm. It can be used to limit the allowed headers to a reasonable small set.
 func MinimumAllowHeaders() []string {
-	return append(make([]string, 0, len(minimumAllowHeaders)), minimumAllowHeaders...)
+	return []string{
+		"Accept",
+		"Accept-Encoding",
+		"Authorization",
+		"Content-Length",
+		"Content-Type",
+		"Origin",
+		"User-Agent",
+		"X-CSRF-Token",
+	}
 }
 
 // relevantOrigin gets the origin that the client matches with the allowed origins.
@@ -65,7 +74,7 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 	}
 
 	if len(origin) == 0 {
-		return "", fmt.Errorf("no origin in header")
+		return "", ErrNoOrigin
 	}
 
 	for _, orig := range origin {
@@ -78,12 +87,12 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 		}
 	}
 
-	return "", fmt.Errorf("origin not allowed")
+	return "", ErrOriginNotAllowed
 }
 
 // ServeHTTP sets up the client with the appropriate headers.
 func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if !util.IntroCheck(h, w, r) {
+	if !helper.IntroCheck(h, w, r) {
 		return
 	}
 
@@ -91,9 +100,10 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	relevantOrigin, roErr := relevantOrigin(origin, h.Origins)
 
-	// no relevant origin found in request
+	// no relevant origin found in the request
 	if roErr != nil {
-		util.WriteState(w, h.Log(), http.StatusForbidden)
+		helper.WriteState(w, h.Log(), http.StatusForbidden)
+
 		return
 	}
 
@@ -105,12 +115,14 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", h.HeadersReturn)
 
 		w.WriteHeader(http.StatusOK)
+
 		return
 	}
 
 	// we have methods configured, but the request does not match any of them
 	if len(h.Methods) > 0 && !h.Methods[r.Method] {
-		util.WriteState(w, h.Log(), http.StatusMethodNotAllowed)
+		helper.WriteState(w, h.Log(), http.StatusMethodNotAllowed)
+
 		return
 	}
 
@@ -119,7 +131,8 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if len(h.Headers) > 0 {
 		for hdr := range r.Header {
 			if !h.Headers[strings.ToLower(hdr)] {
-				util.WriteState(w, h.Log(), http.StatusForbidden)
+				helper.WriteState(w, h.Log(), http.StatusForbidden)
+
 				return
 			}
 		}
@@ -183,33 +196,34 @@ func WithLogLevel(level slog.Level) func(h *Handler) error {
 	return defs.WithLogLevel[*Handler](level)
 }
 
-// New sets up the cross site scripting circumvention disable headers.
+// New sets up the cross-site scripting circumvention disable headers.
 // If no methods are specified, all methods are allowed.
 // If no headers are specified, all headers are allowed.
 // If origin contains "*" or is empty, the allowed origins are set to *.
 func New(options ...func(handler *Handler) error) (defs.Middleware, error) {
-	h := Handler{}
+	handler := Handler{}
 
 	for _, opt := range options {
 		if opt == nil {
-			return nil, errors.New("options cannot be nil")
+			return nil, ErrNilOption
 		}
 
-		if err := opt(&h); err != nil {
+		if err := opt(&handler); err != nil {
 			return nil, err
 		}
 	}
 
 	// if no origins are specified or one of the specified allowed origins is *
 	// just set the origins to *
-	if len(h.Origins) == 0 || slices.Contains(h.Origins, "*") {
-		_ = WithOrigins([]string{"*"})(&h)
+	if len(handler.Origins) == 0 || slices.Contains(handler.Origins, "*") {
+		_ = WithOrigins([]string{"*"})(&handler)
 	}
 
 	return func(next http.Handler) http.Handler {
-		if err := h.SetNext(next); err != nil {
+		if err := handler.SetNext(next); err != nil {
 			return nil
 		}
-		return &h
+
+		return &handler
 	}, nil
 }

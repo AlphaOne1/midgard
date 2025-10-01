@@ -1,7 +1,7 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package correlation
+package correlation_test
 
 import (
 	"errors"
@@ -11,7 +11,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/handler/correlation"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
 //
@@ -19,15 +20,18 @@ import (
 //
 
 func TestHandlerNil(t *testing.T) {
-	var handler *Handler
+	t.Parallel()
+
+	var handler *correlation.Handler
 
 	if got := handler.GetMWBase(); got != nil {
 		t.Errorf("MWBase of nil must be nil, but got non-nil")
 	}
 
-	req := httptest.NewRequest("GET", "/", nil)
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
+	//goland:noinspection GoMaybeNil
 	handler.ServeHTTP(rec, req)
 
 	if rec.Result().StatusCode != http.StatusInternalServerError {
@@ -40,11 +44,13 @@ func TestHandlerNil(t *testing.T) {
 //
 
 func TestOptionError(t *testing.T) {
-	errOpt := func(h *Handler) error {
+	t.Parallel()
+
+	errOpt := func( /* h */ *correlation.Handler) error {
 		return errors.New("testerror")
 	}
 
-	_, err := New(errOpt)
+	_, err := correlation.New(errOpt)
 
 	if err == nil {
 		t.Errorf("expected middleware creation to fail")
@@ -52,7 +58,9 @@ func TestOptionError(t *testing.T) {
 }
 
 func TestOptionNil(t *testing.T) {
-	_, err := New(nil)
+	t.Parallel()
+
+	_, err := correlation.New(nil)
 
 	if err == nil {
 		t.Errorf("expected middleware creation to fail")
@@ -60,7 +68,9 @@ func TestOptionNil(t *testing.T) {
 }
 
 func TestHandlerNextNil(t *testing.T) {
-	h := util.Must(New(WithLogLevel(slog.LevelDebug)))(nil)
+	t.Parallel()
+
+	h := helper.Must(correlation.New(correlation.WithLogLevel(slog.LevelDebug)))(nil)
 
 	if h != nil {
 		t.Errorf("expected handler to be nil")
@@ -72,18 +82,28 @@ func TestHandlerNextNil(t *testing.T) {
 //
 
 func TestOptionWithLevel(t *testing.T) {
-	h := util.Must(New(WithLogLevel(slog.LevelDebug)))(http.HandlerFunc(util.DummyHandler))
+	t.Parallel()
 
-	if h.(*Handler).LogLevel() != slog.LevelDebug {
+	h := helper.Must(correlation.New(correlation.WithLogLevel(slog.LevelDebug)))(http.HandlerFunc(helper.DummyHandler))
+
+	val, isValid := h.(*correlation.Handler)
+
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.LogLevel() != slog.LevelDebug {
 		t.Errorf("wanted loglevel debug not set")
 	}
 }
 
 func TestOptionWithLevelOnNil(t *testing.T) {
-	err := WithLogLevel(slog.LevelDebug)(nil)
+	t.Parallel()
+
+	err := correlation.WithLogLevel(slog.LevelDebug)(nil)
 
 	if err == nil {
-		t.Errorf("expted error on configuring nil handler")
+		t.Errorf("expected error on configuring nil handler")
 	}
 }
 
@@ -92,25 +112,37 @@ func TestOptionWithLevelOnNil(t *testing.T) {
 //
 
 func TestOptionWithLogger(t *testing.T) {
-	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
-	h := util.Must(New(WithLogger(l)))(http.HandlerFunc(util.DummyHandler))
+	t.Parallel()
 
-	if h.(*Handler).Log() != l {
+	l := slog.New(slog.NewJSONHandler(os.Stdout, nil))
+	h := helper.Must(correlation.New(correlation.WithLogger(l)))(http.HandlerFunc(helper.DummyHandler))
+
+	val, isValid := h.(*correlation.Handler)
+
+	if !isValid {
+		t.Fatalf("wrong type")
+	}
+
+	if val.Log() != l {
 		t.Errorf("logger not set correctly")
 	}
 }
 
 func TestOptionWithLoggerOnNil(t *testing.T) {
-	err := WithLogger(slog.Default())(nil)
+	t.Parallel()
+
+	err := correlation.WithLogger(slog.Default())(nil)
 
 	if err == nil {
-		t.Errorf("expted error on configuring nil handler")
+		t.Errorf("expected error on configuring nil handler")
 	}
 }
 
 func TestOptionWithNilLogger(t *testing.T) {
-	var l *slog.Logger = nil
-	_, hErr := New(WithLogger(l))
+	t.Parallel()
+
+	var l *slog.Logger
+	_, hErr := correlation.New(correlation.WithLogger(l))
 
 	if hErr == nil {
 		t.Errorf("expected error on configuration with nil logger")

@@ -1,19 +1,23 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package cors
+package cors_test
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"slices"
 	"strings"
 	"testing"
 
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/handler/cors"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
 func TestEvalCSSHandler(t *testing.T) {
+	t.Parallel()
+
 	tests := []struct {
 		cssMethods  []string
 		cssOrigins  []string
@@ -115,36 +119,40 @@ func TestEvalCSSHandler(t *testing.T) {
 		},
 	}
 
-	for k, v := range tests {
-		req, _ := http.NewRequest(v.method, "http://dummy.com:8080", strings.NewReader(""))
+	for k, test := range tests {
+		t.Run(fmt.Sprintf("TestEvalCSSHandler-%d", k), func(t *testing.T) {
+			t.Parallel()
 
-		for hk, hv := range v.header {
-			for _, hvi := range hv {
-				req.Header.Add(hk, hvi)
+			req, _ := http.NewRequestWithContext(t.Context(), test.method, "http://dummy.com:8080", strings.NewReader(""))
+
+			for hk, hv := range test.header {
+				for _, hvi := range hv {
+					req.Header.Add(hk, hvi)
+				}
 			}
-		}
 
-		rec := httptest.NewRecorder()
+			rec := httptest.NewRecorder()
 
-		mw := util.Must(New(
-			WithMethods(v.cssMethods),
-			WithHeaders(MinimumAllowHeaders()),
-			WithOrigins(v.cssOrigins)))(http.HandlerFunc(util.DummyHandler))
+			mw := helper.Must(cors.New(
+				cors.WithMethods(test.cssMethods),
+				cors.WithHeaders(cors.MinimumAllowHeaders()),
+				cors.WithOrigins(test.cssOrigins)))(http.HandlerFunc(helper.DummyHandler))
 
-		mw.ServeHTTP(rec, req)
+			mw.ServeHTTP(rec, req)
 
-		if rec.Code != v.wantCode {
-			t.Errorf("%v: css filter did not work as expected, wanted %v but got %v", k, v.wantCode, rec.Code)
-		}
-
-		if rec.Body.String() != v.wantContent {
-			t.Errorf("%v: wanted '%v' in body, but got '%v'", k, v.wantContent, rec.Body.String())
-		}
-
-		for wk, wv := range v.wantHeader {
-			if val, found := rec.Result().Header[wk]; !found || !slices.Contains(val, wv) {
-				t.Errorf("%v: wanted [%v:%v] but did not find it", k, wk, wv)
+			if rec.Code != test.wantCode {
+				t.Errorf("css filter did not work as expected, wanted %v but got %v", test.wantCode, rec.Code)
 			}
-		}
+
+			if rec.Body.String() != test.wantContent {
+				t.Errorf("wanted '%v' in body, but got '%v'", test.wantContent, rec.Body.String())
+			}
+
+			for wk, wv := range test.wantHeader {
+				if val, found := rec.Result().Header[wk]; !found || !slices.Contains(val, wv) {
+					t.Errorf("wanted [%v:%v] but did not find it", wk, wv)
+				}
+			}
+		})
 	}
 }

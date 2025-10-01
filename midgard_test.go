@@ -1,27 +1,30 @@
-// Copyright the midgard contributors.
+// SPDX-FileCopyrightText: 2025 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
-package midgard
+package midgard_test
 
 import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/AlphaOne1/midgard"
 	"github.com/AlphaOne1/midgard/defs"
 	"github.com/AlphaOne1/midgard/handler/correlation"
-	"github.com/AlphaOne1/midgard/handler/method_filter"
-	"github.com/AlphaOne1/midgard/util"
+	"github.com/AlphaOne1/midgard/handler/methodfilter"
+	"github.com/AlphaOne1/midgard/helper"
 )
 
 func TestStackMiddleware(t *testing.T) {
-	newMWHandler := StackMiddlewareHandler(
+	t.Parallel()
+
+	newMWHandler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{
-			util.Must(method_filter.New(
-				method_filter.WithMethods([]string{http.MethodGet}))),
-			util.Must(correlation.New()),
+			helper.Must(methodfilter.New(
+				methodfilter.WithMethods([]string{http.MethodGet}))),
+			helper.Must(correlation.New()),
 		},
-		http.HandlerFunc(util.DummyHandler),
+		http.HandlerFunc(helper.DummyHandler),
 	)
 
 	_ = newMWHandler
@@ -54,9 +57,11 @@ func TestStackMiddleware(t *testing.T) {
 }
 
 func TestEmptyMiddlewareHandler(t *testing.T) {
-	newMWHandler := StackMiddlewareHandler(
+	t.Parallel()
+
+	newMWHandler := midgard.StackMiddlewareHandler(
 		[]defs.Middleware{},
-		http.HandlerFunc(util.DummyHandler))
+		http.HandlerFunc(helper.DummyHandler))
 
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	res := httptest.NewRecorder()
@@ -81,7 +86,9 @@ func TestEmptyMiddlewareHandler(t *testing.T) {
 }
 
 func TestEmptyMiddleware(t *testing.T) {
-	got := StackMiddleware([]defs.Middleware{})
+	t.Parallel()
+
+	got := midgard.StackMiddleware([]defs.Middleware{})
 
 	if got != nil {
 		t.Errorf("expected nil on empty middleware stack")
