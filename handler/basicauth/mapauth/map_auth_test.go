@@ -4,6 +4,7 @@
 package mapauth_test
 
 import (
+	"errors"
 	"fmt"
 	"testing"
 
@@ -85,5 +86,35 @@ func TestMapAuthenticator(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestNoAuthorizations(t *testing.T) {
+	t.Parallel()
+
+	_, authErr := mapauth.New()
+
+	if authErr == nil {
+		t.Errorf("expected error on creation, but got none")
+	}
+
+	if !errors.Is(authErr, mapauth.ErrNoAuthorizations) {
+		t.Errorf("expected error to be ErrNoAuthorizations, but got: %v", authErr)
+	}
+}
+
+func TestUninitializedAuthenticator(t *testing.T) {
+	t.Parallel()
+
+	var auth *mapauth.MapAuthenticator
+
+	_, authErr := auth.Authenticate("top", "secret")
+
+	if authErr == nil {
+		t.Errorf("expected error on creation, but got none")
+	}
+
+	if !errors.Is(authErr, mapauth.ErrNotInitialized) {
+		t.Errorf("expected error to be ErrUninitialized, but got: %v", authErr)
 	}
 }

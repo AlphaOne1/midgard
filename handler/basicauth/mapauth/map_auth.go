@@ -24,6 +24,8 @@ func (a *MapAuthenticator) Authenticate(username, password string) (bool, error)
 		return false, ErrNotInitialized
 	}
 
+	// This state should never happen, as New will not allow
+	// returning a MapAuthenticator without authorizations.
 	if len(a.auths) == 0 {
 		return false, ErrNoAuthorizations
 	}
