@@ -100,15 +100,19 @@ func TestMaxDropsInterval(t *testing.T) {
 	}
 
 	for k, v := range tests {
-		h := helper.Must(locallimit.New(
-			locallimit.WithTargetRate(100),
-			locallimit.WithMaxDropsInterval(v.want)))
+		t.Run(fmt.Sprintf("TestMaxDropsInterval-%d", k), func(t *testing.T) {
+			t.Parallel()
 
-		wantAbsolute := int64(v.want.Seconds() * h.TargetRate)
+			h := helper.Must(locallimit.New(
+				locallimit.WithTargetRate(100),
+				locallimit.WithMaxDropsInterval(v.want)))
 
-		if h.MaxDrops != wantAbsolute {
-			t.Errorf("%v: got %v wanted %v", k, h.MaxDrops, wantAbsolute)
-		}
+			wantAbsolute := int64(v.want.Seconds() * h.TargetRate)
+
+			if h.MaxDrops != wantAbsolute {
+				t.Errorf("got %v wanted %v", h.MaxDrops, wantAbsolute)
+			}
+		})
 	}
 }
 
@@ -137,16 +141,20 @@ func TestWithSleepInterval(t *testing.T) {
 		},
 	}
 
-	for k, v := range tests {
-		h, hErr := locallimit.New(locallimit.WithSleepInterval(v.want))
+	for k, test := range tests {
+		t.Run(fmt.Sprintf("TestWithSleepInterval-%d", k), func(t *testing.T) {
+			t.Parallel()
 
-		if (hErr != nil) != v.wantErr {
-			t.Errorf("%v: got error %v, want error %v", k, hErr, v.wantErr)
-		}
+			h, hErr := locallimit.New(locallimit.WithSleepInterval(test.want))
 
-		if hErr == nil && h.SleepInterval != v.want {
-			t.Errorf("%v: got %v wanted %v", k, h.SleepInterval, v.want)
-		}
+			if (hErr != nil) != test.wantErr {
+				t.Errorf("got error %v, want error %v", hErr, test.wantErr)
+			}
+
+			if hErr == nil && h.SleepInterval != test.want {
+				t.Errorf("got %v wanted %v", h.SleepInterval, test.want)
+			}
+		})
 	}
 }
 
