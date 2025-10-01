@@ -81,6 +81,7 @@ func TestMaxDropsAbsolute(t *testing.T) {
 
 	for k, v := range tests {
 		h := helper.Must(locallimit.New(locallimit.WithMaxDropsAbsolute(v.want)))
+		t.Cleanup(h.Stop)
 
 		if h.MaxDrops != v.want {
 			t.Errorf("%v: got %v wanted %v", k, h.MaxDrops, v.want)
@@ -151,8 +152,12 @@ func TestWithSleepInterval(t *testing.T) {
 				t.Errorf("got error %v, want error %v", hErr, test.wantErr)
 			}
 
-			if hErr == nil && h.SleepInterval != test.want {
-				t.Errorf("got %v wanted %v", h.SleepInterval, test.want)
+			if hErr == nil {
+				t.Cleanup(h.Stop)
+
+				if h.SleepInterval != test.want {
+					t.Errorf("got %v wanted %v", h.SleepInterval, test.want)
+				}
 			}
 		})
 	}
