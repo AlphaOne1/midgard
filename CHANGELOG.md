@@ -1,6 +1,13 @@
-<!-- SPDX-FileCopyrightText: 2025 The midgard contributors.
+<!-- SPDX-FileCopyrightText: 2026 The midgard contributors.
      SPDX-License-Identifier: MPL-2.0
 -->
+
+Release 0.2.1
+=============
+
+- dependency updates
+- updated copyright year
+
 Release 0.2.0
 =============
 

@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2025 The midgard contributors.
+// SPDX-FileCopyrightText: 2026 The midgard contributors.
 // SPDX-License-Identifier: MPL-2.0
 
 // Package methodfilter provides a middleware for filtering HTTP requests by methods.
