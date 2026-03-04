@@ -17,7 +17,7 @@ func TestMapAuthenticator(t *testing.T) {
 	tests := []struct {
 		Auths      map[string]string
 		User       string
-		Pass       string
+		Pass       string //nolint:gosec
 		WantNewErr bool
 		Want       bool
 		WantError  bool
