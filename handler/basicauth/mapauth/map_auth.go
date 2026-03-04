@@ -4,6 +4,8 @@
 // Package mapauth implements the basic auth functionality using a user-pass-map.
 package mapauth
 
+import "maps"
+
 import "errors"
 
 // ErrNoAuthorizations is returned when no authorizations are configured.
@@ -46,9 +48,7 @@ func WithAuths(auths map[string]string) func(a *MapAuthenticator) error {
 			a.auths = make(map[string]string, len(auths))
 		}
 
-		for k, v := range auths {
-			a.auths[k] = v
-		}
+		maps.Copy(a.auths, auths)
 
 		return nil
 	}

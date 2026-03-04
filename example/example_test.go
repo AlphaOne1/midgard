@@ -23,7 +23,7 @@ func TestExampleMain(t *testing.T) {
 
 	req.Header.Add("Origin", "localhost")
 
-	res, resErr := http.DefaultClient.Do(req)
+	res, resErr := http.DefaultClient.Do(req) //nolint:gosec // all inputs are fixed, this is a test
 
 	if resErr != nil {
 		t.Errorf("got error for hello test page: %v", resErr)

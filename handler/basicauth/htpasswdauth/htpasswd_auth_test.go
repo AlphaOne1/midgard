@@ -17,7 +17,7 @@ func TestHtpasswdAuth(t *testing.T) {
 
 	tests := []struct {
 		Username string
-		Password string
+		Password string //nolint:gosec
 		Valid    bool
 	}{
 		{
