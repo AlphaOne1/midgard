@@ -15,11 +15,9 @@ linters:
 
     disable:
         - exhaustruct
-        - forbidigo
         - noinlineerr
         - nonamedreturns
         - wsl
-        - wsl_v5
 
     exclusions:
         warn-unused: true
@@ -35,9 +33,10 @@ linters:
                   - maintidx
                   - nestif
 
-            - path: examples/
+            - path: example/
               linters:
                   - err113
+                  - forbidigo
 
     settings:
         cyclop:
@@ -102,6 +101,12 @@ linters:
         whitespace:
             multi-if: true
             multi-func: true
+
+        wsl_v5:
+            disable:
+                - decl
+                - err
+                - leading-whitespace
 
 issues:
     max-issues-per-linter: 0

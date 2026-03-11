@@ -5,7 +5,6 @@ package basicauth_test
 
 import (
 	"errors"
-	"fmt"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
@@ -30,7 +29,7 @@ func TestHandlerNil(t *testing.T) {
 		t.Errorf("MWBase of nil must be nil, but got non-nil")
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	//goland:noinspection GoMaybeNil
@@ -97,7 +96,7 @@ func TestOptionWithLevel(t *testing.T) {
 	val, isValid := h.(*basicauth.Handler)
 
 	if !isValid {
-		fmt.Printf("wrong type")
+		t.Errorf("wrong type")
 	}
 
 	if val.LogLevel() != slog.LevelDebug {
