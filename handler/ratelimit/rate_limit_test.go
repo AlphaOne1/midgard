@@ -32,7 +32,7 @@ func TestRateLimit(t *testing.T) {
 	got := 0
 
 	for range 30 {
-		req := httptest.NewRequest(http.MethodGet, "/", nil)
+		req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 		rec := httptest.NewRecorder()
 
 		handler.ServeHTTP(rec, req)

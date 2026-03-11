@@ -15,6 +15,7 @@ func TestExampleMain(t *testing.T) {
 	go main()
 
 	time.Sleep(500 * time.Millisecond)
+
 	req, reqErr := http.NewRequestWithContext(t.Context(), http.MethodGet, "http://localhost:8080/", nil)
 
 	if reqErr != nil {
@@ -23,7 +24,7 @@ func TestExampleMain(t *testing.T) {
 
 	req.Header.Add("Origin", "localhost")
 
-	res, resErr := http.DefaultClient.Do(req) //nolint:gosec // all inputs are fixed, this is a test
+	res, resErr := http.DefaultClient.Do(req)
 
 	if resErr != nil {
 		t.Errorf("got error for hello test page: %v", resErr)

@@ -26,7 +26,7 @@ func TestAccessLogging(t *testing.T) {
 
 	handler := helper.Must(accesslog.New())(http.HandlerFunc(helper.DummyHandler))
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)
@@ -43,18 +43,23 @@ func TestAccessLogging(t *testing.T) {
 	if !messageMatch.Match(logBuf.Bytes()) {
 		t.Errorf("message not logged correctly: %v", logBuf.String())
 	}
+
 	if correlationMatch.Match(logBuf.Bytes()) {
 		t.Errorf("correlation_id logged but not set: %v", logBuf.String())
 	}
+
 	if !clientMatch.Match(logBuf.Bytes()) {
 		t.Errorf("client not logged correctly: %v", logBuf.String())
 	}
+
 	if !methodMatch.Match(logBuf.Bytes()) {
 		t.Errorf("method not logged correctly: %v", logBuf.String())
 	}
+
 	if !targetMatch.Match(logBuf.Bytes()) {
 		t.Errorf("target not logged correctly: %v", logBuf.String())
 	}
+
 	if userMatch.Match(logBuf.Bytes()) {
 		t.Errorf("user logged but not set: %v", logBuf.String())
 	}
@@ -70,8 +75,9 @@ func TestAccessLoggingCorrelationID(t *testing.T) {
 
 	handler := helper.Must(accesslog.New())(http.HandlerFunc(helper.DummyHandler))
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	req.Header.Add("X-Correlation-ID", "setOutside")
+
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)
@@ -95,8 +101,9 @@ func TestAccessLoggingUser(t *testing.T) {
 
 	handler := helper.Must(accesslog.New())(http.HandlerFunc(helper.DummyHandler))
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte("testuser:testpass")))
+
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)

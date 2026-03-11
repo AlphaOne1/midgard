@@ -19,7 +19,7 @@ func TestAddHeaders(t *testing.T) {
 		{"X-Test-Header", "testValue"},
 	})))(http.HandlerFunc(helper.DummyHandler))
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)

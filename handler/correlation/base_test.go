@@ -28,7 +28,7 @@ func TestHandlerNil(t *testing.T) {
 		t.Errorf("MWBase of nil must be nil, but got non-nil")
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	//goland:noinspection GoMaybeNil

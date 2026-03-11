@@ -183,8 +183,11 @@ func TestWithDropTimeout(t *testing.T) {
 				locallimit.WithDropTimeout(test.want)))
 
 			startTime := time.Now()
+
 			h.Limit()
+
 			duration := time.Since(startTime)
+
 			h.Stop()
 
 			if duration < time.Duration(float64(test.want)*0.95) ||

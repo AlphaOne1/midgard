@@ -34,6 +34,7 @@ func TestMustGood(t *testing.T) {
 func TestMustBad(t *testing.T) {
 	outbuf := bytes.Buffer{}
 	*(helper.TexitFunc) = func(_ int) {}
+
 	defer func() { *(helper.TexitFunc) = os.Exit }()
 
 	slog.SetDefault(slog.New(slog.NewTextHandler(&outbuf, &slog.HandlerOptions{})))
@@ -142,7 +143,7 @@ func TestGetOrCreateID(t *testing.T) {
 func TestDummyHandler(t *testing.T) {
 	t.Parallel()
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	rec := httptest.NewRecorder()
 
 	helper.DummyHandler(rec, req)

@@ -63,6 +63,7 @@ func main() {
 
 	go func() {
 		time.Sleep(1 * time.Second)
+
 		_ = server.Shutdown(context.Background())
 	}()
 

@@ -17,7 +17,7 @@ func TestMapAuthenticator(t *testing.T) {
 	tests := []struct {
 		Auths      map[string]string
 		User       string
-		Pass       string //nolint:gosec
+		Pass       string
 		WantNewErr bool
 		Want       bool
 		WantError  bool
@@ -74,6 +74,7 @@ func TestMapAuthenticator(t *testing.T) {
 				if !test.WantError {
 					t.Errorf("did not expect error, but got: %v", gotErr)
 				}
+
 				if gotAuth {
 					t.Errorf("got error, so auth should not work, but got: %v", gotAuth)
 				}
@@ -81,6 +82,7 @@ func TestMapAuthenticator(t *testing.T) {
 				if test.WantError {
 					t.Errorf("did expect error, but got none")
 				}
+
 				if gotAuth != test.Want {
 					t.Errorf("got auth %v but wanted %v", gotAuth, test.Want)
 				}

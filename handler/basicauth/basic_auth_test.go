@@ -33,7 +33,7 @@ func TestBasicAuth(t *testing.T) {
 
 	tests := []struct {
 		User      string
-		Pass      string //nolint:gosec
+		Pass      string
 		WantState int
 	}{
 		{

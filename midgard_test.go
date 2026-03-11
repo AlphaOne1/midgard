@@ -29,7 +29,7 @@ func TestStackMiddleware(t *testing.T) {
 
 	_ = newMWHandler
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	res := httptest.NewRecorder()
 
 	newMWHandler.ServeHTTP(res, req)
@@ -44,7 +44,7 @@ func TestStackMiddleware(t *testing.T) {
 
 	_ = req.Body.Close()
 
-	req = httptest.NewRequest(http.MethodPut, "/", nil)
+	req = httptest.NewRequestWithContext(t.Context(), http.MethodPut, "/", nil)
 	res = httptest.NewRecorder()
 
 	newMWHandler.ServeHTTP(res, req)
@@ -63,7 +63,7 @@ func TestEmptyMiddlewareHandler(t *testing.T) {
 		[]defs.Middleware{},
 		http.HandlerFunc(helper.DummyHandler))
 
-	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/", nil)
 	res := httptest.NewRecorder()
 
 	newMWHandler.ServeHTTP(res, req)
