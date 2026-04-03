@@ -71,6 +71,12 @@
         <img src="https://api.reuse.software/badge/github.com/AlphaOne1/midgard"
             alt="REUSE compliance">
     </a>
+    <a href="https://slsa.dev"
+       rel="external noopener noreferrer"
+       target="_blank">
+        <img src="https://slsa.dev/images/gh-badge-level3.svg"
+             alt="SLSA Level 3">
+    </a>
     <a href="https://app.fossa.com/projects/git%2Bgithub.com%2FAlphaOne1%2Fmidgard?ref=badge_shield&issueType=license"
        rel="external noopener noreferrer"
        target="_blank">
