@@ -86,6 +86,29 @@ midgard
 *midgard* is a collection of Golang http middlewares and helper functionality
 to use them more elegantly.
 
+
+Installation
+------------
+
+To install *midgard*, you can use the following command:
+
+```bash
+$ go get github.com/AlphaOne1/midgard
+```
+
+Builds are secured with SLSA Level 3 provenance via slsa-framework/slsa-github-generator.
+The downloaded source archive together with the provenance file `multiple.intoto.jsonl`
+can be verified using the [slsa-verifier](https://github.com/slsa-framework/slsa-verifier/)
+(replace the `<VERSION>` with the one you actually downloaded):
+
+```bash
+$ slsa-verifier verify-artifact midgard-src-v<VERSION>.tar.gz \
+    --provenance-path multiple.intoto.jsonl                   \
+    --source-uri github.com/AlphaOne1/midgard                 \
+    --source-tag v<VERSION>
+```
+
+
 Usage
 -----
 
