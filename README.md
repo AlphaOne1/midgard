@@ -5,6 +5,18 @@
 <!-- markdownlint-disable MD013 MD033 MD041 -->
 <p align="center">
     <img src="midgard_logo.svg" width="25%" alt="Logo"><br>
+    <a href="https://github.com/AlphaOne1/midgard/blob/HEAD/go.mod"
+       rel="external noopener noreferrer"
+       target="_blank">
+        <img src="https://img.shields.io/github/go-mod/go-version/AlphaOne1/midgard"
+             alt="Go Version">
+    </a>
+    <a href="https://github.com/AlphaOne1/midgard/releases"
+       rel="external noopener noreferrer"
+       target="_blank">
+        <img src="https://img.shields.io/github/v/release/AlphaOne1/midgard"
+             alt="Latest Release">
+    </a>
     <a href="https://github.com/AlphaOne1/midgard/actions/workflows/test.yml"
        rel="external noopener noreferrer"
        target="_blank">
