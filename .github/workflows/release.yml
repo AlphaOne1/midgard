@@ -52,7 +52,7 @@ jobs:
             shell: bash
             run: |
                 set -euo pipefail
-                gh release upload "$TAG_NAME" templig-src-*.tar.gz --clobber
+                gh release upload "$TAG_NAME" midgard-src-*.tar.gz --clobber
 
     ChecksumReleaseAssets:
         needs: Build
