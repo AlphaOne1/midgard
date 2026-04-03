@@ -58,3 +58,15 @@ stated.
 The BDFL may alternatively decide to move to a Steering Committee governance
 model, in which case this document must be replaced with a new description of
 roles and responsibilities.
+
+
+Access to Sensitive Resources
+-----------------------------
+
+The following project members have access to sensitive resources (GitHub
+Secrets, Repository Settings, Release Keys):
+
+* Alexander Adam (@AlphaOne1) - BDFL / Primary Maintainer
+
+Currently, no other contributors have administrative access to the
+build infrastructure or cryptographic keys.
