@@ -1,5 +1,9 @@
 # SPDX-FileCopyrightText: 2026 The midgard contributors.
 # SPDX-License-Identifier: MPL-2.0
+#
+# This workflow uses actions not certified by GitHub. They are provided
+# by a third-party and are governed by separate terms of service, privacy
+# policy, and support documentation.
 
 name: Scorecard supply-chain security
 on:
@@ -65,9 +69,9 @@ jobs:
           - name: "Upload artifact"
             uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
             with:
-              name: SARIF file
-              path: results.sarif
-              retention-days: 5
+                name: SARIF file
+                path: results.sarif
+                retention-days: 5
 
           # Upload the results to GitHub's code scanning dashboard (optional).
           # Commenting out will disable upload of results to your repo's Code Scanning dashboard
