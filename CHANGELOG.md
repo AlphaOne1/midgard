@@ -6,6 +6,7 @@ Release Next
 ============
 
 - dependency updates
+- harden GitHub actions against injections via {{...}}
 
 Release 0.2.1
 =============
