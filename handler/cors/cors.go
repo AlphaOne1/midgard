@@ -79,13 +79,18 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	relevantOrigin, roErr := relevantOrigin(origin, h.Origins)
 
-	// no relevant origin found in the request
+	// no (relevant) origin found in the request
 	switch {
 	case errors.Is(roErr, ErrNoOrigin):
 		h.Next().ServeHTTP(w, r)
 
 		return
 	case errors.Is(roErr, ErrOriginNotAllowed):
+		h.Log().Info("origin not allowed",
+			slog.String("origin", origin),
+			slog.String("path", r.URL.Path),
+			slog.String("method", r.Method))
+
 		helper.WriteState(w, h.Log(), http.StatusForbidden)
 
 		return
