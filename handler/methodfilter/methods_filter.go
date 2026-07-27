@@ -48,7 +48,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	if h.Methods[r.Method] {
 		h.Next().ServeHTTP(w, r)
+
+		return
 	}
+
+	h.Log().Info("method not allowed",
+		slog.String("path", r.URL.Path),
+		slog.String("method", r.Method))
 
 	helper.WriteState(w, h.Log(), http.StatusMethodNotAllowed)
 }
