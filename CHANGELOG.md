@@ -2,11 +2,15 @@
      SPDX-License-Identifier: MPL-2.0
 -->
 
-Release Next
+Release 0.3.0
 ============
 
 - dependency updates
 - harden GitHub actions against injections via {{...}}
+- reworked CORS middleware. The CORS now does _not_ filter requests for allowed
+  methods and headers. The methods filtering can be achieved with the methodfilter package.
+  Further, the `cors.MinimumAllowedHeaders` method is removed, as it is no longer necessary
+  to allow for commonly used headers, the enforcing clients/browsers have them integrated.
 
 Release 0.2.1
 =============

@@ -51,24 +51,9 @@ func (h *Handler) GetMWBase() *defs.MWBase {
 	return &h.MWBase
 }
 
-// MinimumAllowHeaders returns a minimal list of headers, that should not do
-// harm. It can be used to limit the allowed headers to a reasonable small set.
-func MinimumAllowHeaders() []string {
-	return []string{
-		"Accept",
-		"Accept-Encoding",
-		"Authorization",
-		"Content-Length",
-		"Content-Type",
-		"Origin",
-		"User-Agent",
-		"X-CSRF-Token",
-	}
-}
-
 // relevantOrigin gets the origin that the client matches with the allowed origins.
 // If there is no match or there are no origins set, an error is returned.
-func relevantOrigin(origin []string, allowed []string) (string, error) {
+func relevantOrigin(origin string, allowed []string) (string, error) {
 	if len(allowed) == 1 && allowed[0] == "*" {
 		return "*", nil
 	}
@@ -77,14 +62,8 @@ func relevantOrigin(origin []string, allowed []string) (string, error) {
 		return "", ErrNoOrigin
 	}
 
-	for _, orig := range origin {
-		if len(orig) == 0 {
-			continue
-		}
-
-		if slices.Contains(allowed, orig) {
-			return orig, nil
-		}
+	if slices.Contains(allowed, origin) {
+		return origin, nil
 	}
 
 	return "", ErrOriginNotAllowed
@@ -96,53 +75,62 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	origin := r.Header["Origin"]
+	origin := r.Header.Get("Origin")
 
 	relevantOrigin, roErr := relevantOrigin(origin, h.Origins)
 
 	// no relevant origin found in the request
-	if roErr != nil {
+	switch {
+	case errors.Is(roErr, ErrNoOrigin):
+		h.Next().ServeHTTP(w, r)
+
+		return
+	case errors.Is(roErr, ErrOriginNotAllowed):
 		helper.WriteState(w, h.Log(), http.StatusForbidden)
 
 		return
 	}
 
 	w.Header().Set("Access-Control-Allow-Origin", relevantOrigin)
+	w.Header().Add("Vary", "Origin")
+
+	if r.Method != http.MethodOptions {
+		h.Next().ServeHTTP(w, r)
+
+		return
+	}
 
 	// on OPTIONS request, just give the possible methods and headers
-	if r.Method == http.MethodOptions {
+
+	if h.MethodsReturn != "" {
 		w.Header().Set("Access-Control-Allow-Methods", h.MethodsReturn)
-		w.Header().Set("Access-Control-Allow-Headers", h.HeadersReturn)
+	} else {
+		methods := r.Header.Get("Access-Control-Request-Method")
 
-		w.WriteHeader(http.StatusOK)
-
-		return
-	}
-
-	// we have methods configured, but the request does not match any of them
-	if len(h.Methods) > 0 && !h.Methods[r.Method] {
-		helper.WriteState(w, h.Log(), http.StatusMethodNotAllowed)
-
-		return
-	}
-
-	// if there are headers configured, check the headers of the request and
-	// disallow in case there are non-configured ones
-	if len(h.Headers) > 0 {
-		for hdr := range r.Header {
-			if !h.Headers[strings.ToLower(hdr)] {
-				helper.WriteState(w, h.Log(), http.StatusForbidden)
-
-				return
-			}
+		if methods == "" {
+			methods = "*"
 		}
+
+		w.Header().Set("Access-Control-Allow-Methods", methods)
 	}
 
-	h.Next().ServeHTTP(w, r)
+	if h.HeadersReturn != "" {
+		w.Header().Set("Access-Control-Allow-Headers", h.HeadersReturn)
+	} else {
+		headers := r.Header.Get("Access-Control-Request-Headers")
+
+		if headers == "" {
+			headers = "*"
+		}
+
+		w.Header().Set("Access-Control-Allow-Headers", headers)
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
-// WithHeaders sets the allowed headers. If later a request contains headers that are not
-// contained in this list, it will be denied the service.
+// WithHeaders sets the allowed headers. If a later a request wants to use headers not
+// contained in this list, the client denies the request.
 func WithHeaders(headers []string) func(handler *Handler) error {
 	return func(handler *Handler) error {
 		headersMap := make(map[string]bool, len(headers))
@@ -158,8 +146,8 @@ func WithHeaders(headers []string) func(handler *Handler) error {
 	}
 }
 
-// WithMethods sets the allowed methods. If later a request uses a method that are not
-// contained in this list, it will be denied the service.
+// WithMethods sets the allowed methods. If a later request wants to use a method not
+// contained in this list, the client denies the request.
 func WithMethods(methods []string) func(handler *Handler) error {
 	return func(handler *Handler) error {
 		methodsMap := make(map[string]bool, len(methods))
