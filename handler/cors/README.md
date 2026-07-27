@@ -11,8 +11,9 @@ For this, the microservice provides information from which websites calls to the
 microservice can be sent. The client on the other side checks this information
 and prevents websites from calling the microservice that are not allowed to do
 so.
-A more in-depth description can be found
-[here](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+A more in-depth description can be found in the 
+[CORS wikipedia](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+article.
 
 This middleware intercepts the `OPTIONS` method to provide the CORS information
 to clients. It gets a list of allowed methods and headers.
@@ -24,7 +25,7 @@ Example
 finalHandler := midgard.StackMiddlewareHandler(
     []midgard.Middleware{
         helper.Must(cors.New(
-            cors.WithHeaders(cors.MinimumAllowHeaders()),
+            cors.WithHeaders("X-Correlation-Id"),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),
     },
@@ -36,5 +37,5 @@ If no headers are specified, all headers are allowed.
 Similar, if no methods are specified, all methods are allowed.
 If at least one of the allowed origins is `*` or nothing is specified, the
 allowed origins are set to just contain `*`.
-Thus, a CORS middleware that is not parametrized will allow all requests to
+Thus, a CORS middleware that is not parameterized will allow all requests to
 pass and not filter anything. It just intercepts the `OPTIONS` method.
