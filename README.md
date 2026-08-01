@@ -149,7 +149,6 @@ finalHandler := midgard.StackMiddlewareHandler(
         helper.Must(accesslog.New(
             accesslog.WithLogLevel(slog.LevelDebug))),
         helper.Must(cors.New(
-            cors.WithHeaders(cors.MinimumAllowedHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),
         helper.Must(methodfilter.New(
@@ -169,7 +168,6 @@ newMiddleware:= midgard.StackMiddleware(
         helper.Must(accesslog.New(
             accesslog.WithLogLevel(slog.LevelDebug))),
         helper.Must(cors.New(
-            cors.WithHeaders(cors.MinimumAllowedHeaders()),
             cors.WithMethods([]string{http.MethodGet}),
             cors.WithOrigins([]string{"*"}))),
         helper.Must(methodfilter.New(
@@ -184,7 +182,6 @@ finalHandler := helper.Must(correlation.New())(
                     helper.Must(accesslog.New(
                         accesslog.WithLogLevel(slog.LevelDebug)))(
                         helper.Must(cors.New(
-                            cors.WithHeaders(cors.MinimumAllowedHeaders()),
                             cors.WithMethods([]string{http.MethodGet}),
                             cors.WithOrigins([]string{"*"})))(
                             helper.Must(methodfilter.New(
