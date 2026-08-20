@@ -10,8 +10,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
-
-	"github.com/google/uuid"
+	"uuid"
 
 	"github.com/AlphaOne1/midgard/defs"
 )
@@ -75,13 +74,7 @@ func GetOrCreateID(id string) string {
 		return id
 	}
 
-	newID := "n/a"
-
-	if newUUID, err := uuid.NewRandom(); err == nil {
-		newID = newUUID.String()
-	}
-
-	return newID
+	return uuid.New().String()
 }
 
 // WriteState sets the specified HTTP response code and writes the code-specific text as body.
