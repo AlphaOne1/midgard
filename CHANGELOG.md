@@ -3,10 +3,11 @@
 -->
 
 Release 0.3.0
-============
+=============
 
-- dependency updates
-- harden GitHub actions against injections via {{...}}
+- updated the minimum required Go version to 1.27
+- dependency updates and used now included uuid package instead of an external one
+- harden GitHub Actions against injections via {{...}}
 - reworked CORS middleware. The CORS now does _not_ filter requests for allowed
   methods and headers. The methods filtering can be achieved with the methodfilter package.
   Further, the `cors.MinimumAllowHeaders` method is removed, as it is no longer necessary
