@@ -2,6 +2,12 @@
      SPDX-License-Identifier: MPL-2.0
 -->
 
+Release Next
+============
+
+- changed to self-maintained GoReportCard
+- dependency updates
+
 Release 0.3.0
 =============
 
